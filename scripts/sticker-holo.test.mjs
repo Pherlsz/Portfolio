@@ -49,7 +49,7 @@ test('simey v/vmax stack: color-dodge rainbow, soft glare, tilt, no gutters or w
   assert.match(cssSrc, /perspective\(800px\)/);
   assert.match(cssSrc, /rotateY\(/);
   assert.match(cssSrc, /rotateX\(/);
-  assert.match(cssSrc, /--holo-tilt-max: 12deg/);
+  assert.match(cssSrc, /--holo-tilt-max: 16deg/);
   assert.match(cssSrc, /mask-composite: exclude/);
   assert.match(stickersSrc, /className="holo-foil"/);
   assert.match(stickersSrc, /className="holo-sheen"/);
