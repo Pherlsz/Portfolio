@@ -1,17 +1,31 @@
-import { useState } from 'react';
-import { MotionConfig } from 'motion/react';
+import { lazy, Suspense, useState } from 'react';
 import { DEFAULT_PORTFOLIO_DATA } from './data/portfolioData';
 import type { ChatMode } from './utils/chatGuardrails';
-import { AboutSection } from './components/AboutSection';
-import { AiFriendlyInspectorModal } from './components/AiFriendlyInspectorModal';
-import { AssistantPanel } from './components/AssistantPanel';
-import { ContactSection } from './components/ContactSection';
-import { CredentialsSection } from './components/CredentialsSection';
 import { ExperienceSection } from './components/ExperienceSection';
 import { Hero } from './components/Hero';
-import { ProjectSection } from './components/ProjectSection';
 import { SiteFooter } from './components/SiteFooter';
 import { SiteHeader } from './components/SiteHeader';
+
+const ProjectSection = lazy(() =>
+  import('./components/ProjectSection').then((module) => ({ default: module.ProjectSection }))
+);
+const CredentialsSection = lazy(() =>
+  import('./components/CredentialsSection').then((module) => ({ default: module.CredentialsSection }))
+);
+const AboutSection = lazy(() =>
+  import('./components/AboutSection').then((module) => ({ default: module.AboutSection }))
+);
+const ContactSection = lazy(() =>
+  import('./components/ContactSection').then((module) => ({ default: module.ContactSection }))
+);
+const AssistantPanel = lazy(() =>
+  import('./components/AssistantPanel').then((module) => ({ default: module.AssistantPanel }))
+);
+const AiFriendlyInspectorModal = lazy(() =>
+  import('./components/AiFriendlyInspectorModal').then((module) => ({
+    default: module.AiFriendlyInspectorModal
+  }))
+);
 
 export default function App() {
   const [assistantOpen, setAssistantOpen] = useState(false);
@@ -19,7 +33,7 @@ export default function App() {
   const [inspectorOpen, setInspectorOpen] = useState(false);
 
   return (
-    <MotionConfig reducedMotion="user">
+    <>
       <nav aria-label="Atalhos" className="skip-nav">
         <a
           href="#conteudo"
@@ -50,25 +64,49 @@ export default function App() {
           }}
         />
         <ExperienceSection />
-        <ProjectSection />
-        <CredentialsSection />
-        <AboutSection />
-        <ContactSection />
+        <div id="projeto" className="scroll-mt-20">
+          <Suspense fallback={<div className="min-h-[28rem]" />}>
+            <ProjectSection />
+          </Suspense>
+        </div>
+        <div id="formacao" className="scroll-mt-20">
+          <Suspense fallback={<div className="min-h-[32rem]" />}>
+            <CredentialsSection />
+          </Suspense>
+        </div>
+        <div id="sobre" className="scroll-mt-20">
+          <Suspense fallback={<div className="min-h-[28rem]" />}>
+            <AboutSection />
+          </Suspense>
+        </div>
+        <div id="contato" className="scroll-mt-20">
+          <Suspense fallback={<div className="min-h-[24rem]" />}>
+            <ContactSection />
+          </Suspense>
+        </div>
       </main>
 
       <SiteFooter onOpenInspector={() => setInspectorOpen(true)} />
 
-      <AssistantPanel
-        open={assistantOpen}
-        mode={assistantMode}
-        onOpenChange={setAssistantOpen}
-        onModeChange={setAssistantMode}
-      />
-      <AiFriendlyInspectorModal
-        open={inspectorOpen}
-        onClose={() => setInspectorOpen(false)}
-        portfolioData={DEFAULT_PORTFOLIO_DATA}
-      />
-    </MotionConfig>
+      {assistantOpen ? (
+        <Suspense fallback={null}>
+          <AssistantPanel
+            open={assistantOpen}
+            mode={assistantMode}
+            onOpenChange={setAssistantOpen}
+            onModeChange={setAssistantMode}
+          />
+        </Suspense>
+      ) : null}
+      {inspectorOpen ? (
+        <Suspense fallback={null}>
+          <AiFriendlyInspectorModal
+            open={inspectorOpen}
+            onClose={() => setInspectorOpen(false)}
+            portfolioData={DEFAULT_PORTFOLIO_DATA}
+          />
+        </Suspense>
+      ) : null}
+    </>
   );
 }

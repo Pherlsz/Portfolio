@@ -41,24 +41,41 @@ function useTheme() {
   return { theme, toggleTheme };
 }
 
+const SECTION_IDS = ['inicio', ...NAV.map((item) => item.id)];
+
 function useActiveSection() {
   const [active, setActive] = useState<string | null>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActive(entry.target.id);
-        }
-      },
-      { rootMargin: '-45% 0px -50% 0px' }
-    );
-    // O hero também é observado para limpar o destaque quando o visitante volta ao topo.
-    for (const id of ['inicio', ...NAV.map((item) => item.id)]) {
-      const section = document.getElementById(id);
-      if (section) observer.observe(section);
+    const sync = () => {
+      const marker = window.innerHeight * 0.28;
+      let current: string | null = null;
+      for (const id of SECTION_IDS) {
+        const section = document.getElementById(id);
+        if (section && section.getBoundingClientRect().top <= marker) current = id;
+      }
+      const next = current && current !== 'inicio' ? current : null;
+      setActive((prev) => (prev === next ? prev : next));
+    };
+
+    sync();
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    const root = document.getElementById('conteudo');
+    let mutations: MutationObserver | undefined;
+    if (root) {
+      mutations = new MutationObserver(() => {
+        sync();
+        if (SECTION_IDS.every((id) => document.getElementById(id))) mutations?.disconnect();
+      });
+      mutations.observe(root, { childList: true, subtree: true });
     }
-    return () => observer.disconnect();
+
+    return () => {
+      window.removeEventListener('scroll', sync);
+      window.removeEventListener('resize', sync);
+      mutations?.disconnect();
+    };
   }, []);
 
   return active;

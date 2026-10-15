@@ -15,9 +15,8 @@ export function AboutSection() {
 
   return (
     <section
-      id="sobre"
       aria-labelledby="sobre-titulo"
-      className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 sm:px-8 sm:py-28"
+      className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28"
     >
       <SectionHeading id="sobre-titulo" eyebrow="Sobre mim" title="Bastidores" />
 

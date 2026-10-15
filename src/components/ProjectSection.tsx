@@ -28,9 +28,8 @@ export function ProjectSection() {
 
   return (
     <section
-      id="projeto"
       aria-labelledby="projeto-titulo"
-      className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 sm:px-8 sm:py-28"
+      className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28"
     >
       <SectionHeading id="projeto-titulo" eyebrow="Trabalho" title="Projetos" />
 
@@ -51,9 +50,10 @@ export function ProjectSection() {
             <img
               src={featured.image}
               alt=""
-              width={1600}
-              height={900}
+              width={960}
+              height={540}
               loading="lazy"
+              decoding="async"
               className="aspect-[16/10] h-full w-full object-cover object-left-top"
             />
             <div className="flex flex-col justify-between gap-5 p-5 sm:p-6">

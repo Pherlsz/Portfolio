@@ -99,9 +99,8 @@ export function ContactSection() {
 
   return (
     <section
-      id="contato"
       aria-labelledby="contato-titulo"
-      className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 sm:px-8 sm:py-24"
+      className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24"
     >
       <p className="eyebrow">Vamos conversar?</p>
       <div className="mt-3 grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start">

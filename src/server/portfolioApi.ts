@@ -433,6 +433,10 @@ export async function handlePortfolioRequest(request: Request, env: PortfolioBin
     return json(413, { error: 'Pedido grande demais.' });
   }
 
+  if (pathname === '/.well-known' || pathname.startsWith('/.well-known/')) {
+    return text(404, 'Not found', 'text/plain; charset=utf-8');
+  }
+
   const staticResponse = machineRoutes(url);
   if (staticResponse && request.method === 'GET') return staticResponse;
 

@@ -255,7 +255,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       repoUrl: 'https://github.com/Pherlsz/Gymkhana-Database',
       access: 'public',
       stack: ['React', 'TypeScript', 'Ant Design', 'Go'],
-      image: '/projects/gymkhana-database-assistente.jpg'
+      image: '/projects/gymkhana-database-assistente.webp'
     }
   ],
   project: {
@@ -349,7 +349,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       issuer: 'Microsoft',
       year: '2021',
       href: 'https://www.credly.com/users/pherls/badges',
-      image: '/badges/azure-fundamentals.png',
+      image: '/badges/azure-fundamentals.webp',
       badge: { code: 'AZ-900', caption: 'Fundamentals', shape: 'hexagon', color: 'var(--poster)' }
     },
     {

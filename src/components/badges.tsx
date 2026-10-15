@@ -82,6 +82,8 @@ export function CertBadge({ cert }: { cert: Certification }) {
           alt=""
           width={48}
           height={48}
+          loading="lazy"
+          decoding="async"
           className="size-12 shrink-0 object-contain"
         />
       ) : (

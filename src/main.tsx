@@ -1,8 +1,13 @@
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
-import {CvDocument} from './components/CvDocument.tsx';
 import './index.css';
 
-createRoot(document.getElementById('root')!).render(
-  window.location.pathname === '/cv' ? <CvDocument /> : <App />
-);
+const root = document.getElementById('root')!;
+
+if (window.location.pathname === '/cv' || window.location.pathname === '/cv/') {
+  import('./components/CvDocument.tsx').then(({CvDocument}) => {
+    createRoot(root).render(<CvDocument />);
+  });
+} else {
+  createRoot(root).render(<App />);
+}

@@ -1,7 +1,9 @@
+import { lazy, Suspense } from 'react';
 import { ArrowDown, Download, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
-import { StickerLid } from './stickers';
 import { CopyEmailButton, Marked } from './ui';
+
+const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
 export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
@@ -78,7 +80,15 @@ export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
         </button>
       </div>
 
-      <StickerLid />
+      <Suspense
+        fallback={
+          <div className="no-print">
+            <div className="notebook relative z-10 aspect-[16/10] w-full" />
+          </div>
+        }
+      >
+        <StickerLid />
+      </Suspense>
     </section>
   );
 }

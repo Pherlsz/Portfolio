@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
-import { animate, motion, useMotionValue } from 'motion/react';
+import { animate, MotionConfig, motion, useMotionValue } from 'motion/react';
 
 export type StickerId =
   | 'morcega'
@@ -26,8 +26,8 @@ const STICKERS: Record<StickerId, StickerDef> = {
     label: 'Sticker da Morcega, a gata mais velha',
     caption: 'Morcega',
     src: '/stickers/morcega.webp',
-    width: 464,
-    height: 512,
+    width: 290,
+    height: 320,
     animation: 'animate-sleep',
     react: () => 'Mrrr… zZz'
   },
@@ -35,8 +35,8 @@ const STICKERS: Record<StickerId, StickerDef> = {
     label: 'Sticker da Banguela, a gata de uma presa só',
     caption: 'Banguela',
     src: '/stickers/banguela.webp',
-    width: 512,
-    height: 464,
+    width: 320,
+    height: 290,
     animation: 'animate-munch',
     react: () => 'Nhac, nhac'
   },
@@ -44,8 +44,8 @@ const STICKERS: Record<StickerId, StickerDef> = {
     label: 'Sticker do Tomada, o gato caçula',
     caption: 'Tomada',
     src: '/stickers/tomada.webp',
-    width: 512,
-    height: 472,
+    width: 320,
+    height: 295,
     animation: 'animate-buzz',
     react: () => '220V!'
   },
@@ -53,8 +53,8 @@ const STICKERS: Record<StickerId, StickerDef> = {
     label: 'Sticker de um dado D20 de RPG. Clique para rolar.',
     caption: 'D20',
     src: '/stickers/d20.webp',
-    width: 428,
-    height: 512,
+    width: 268,
+    height: 320,
     animation: 'animate-roll',
     react: () => {
       const roll = 1 + Math.floor(Math.random() * 20);
@@ -147,12 +147,14 @@ function StickerArt({
   id,
   reaction,
   face,
-  showCaption = true
+  showCaption = true,
+  eager = false
 }: {
   id: StickerId;
   reaction: Reaction | null;
   face?: number;
   showCaption?: boolean;
+  eager?: boolean;
 }) {
   const def = STICKERS[id];
   return (
@@ -169,6 +171,8 @@ function StickerArt({
           height={def.height}
           alt=""
           draggable={false}
+          decoding="async"
+          loading={eager ? 'eager' : 'lazy'}
           className="sticker-art block h-auto w-full select-none"
         />
         {id === 'd20' && (
@@ -307,7 +311,7 @@ function LidSticker({
         width: `${slot.w}%`
       }}
     >
-      <StickerArt id={slot.id} reaction={reaction} face={face} />
+      <StickerArt id={slot.id} reaction={reaction} face={face} eager />
     </motion.button>
   );
 }
@@ -333,6 +337,7 @@ export function StickerLid() {
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="no-print">
       <div className="notebook relative z-10 aspect-[16/10] w-full">
         <div ref={lidRef} className="lid absolute inset-0">
@@ -381,5 +386,6 @@ export function StickerLid() {
         {announcement}
       </p>
     </div>
+    </MotionConfig>
   );
 }
