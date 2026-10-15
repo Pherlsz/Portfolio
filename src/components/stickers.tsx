@@ -7,8 +7,11 @@ import {
   type RefObject
 } from 'react';
 import { animate, MotionConfig, motion, useMotionValue } from 'motion/react';
+import { HoloSparkleCanvas } from './HoloSparkleCanvas';
+import { useHoloPointer } from '../utils/holoPointer';
 import {
   HOLO_ELIGIBLE_LID_STICKER_IDS,
+  holoMaskUrl,
   isStickerHoloActive,
   useHoloRoulette
 } from '../utils/stickerHolo';
@@ -180,23 +183,26 @@ function StickerArt({
         </span>
       )}
       <span key={reaction?.key} className={`sticker-face-host relative block ${reaction ? def.animation : ''}`}>
-        <img
-          src={def.src}
-          width={def.width}
-          height={def.height}
-          alt=""
-          draggable={false}
-          decoding="async"
-          loading={eager ? 'eager' : 'lazy'}
-          className="sticker-art relative z-0 block h-auto w-full select-none"
-        />
-        {holoFoil && (
-          <>
-            <span className="sticker-holo-layer sticker-holo-foil" aria-hidden="true" />
-            <span className="sticker-holo-layer sticker-holo-sparkle" aria-hidden="true" />
-            <span className="sticker-holo-layer sticker-holo-shine" aria-hidden="true" />
-          </>
-        )}
+        <span className={holoFoil ? 'sticker-holo-stage' : 'block'}>
+          {holoFoil && <span className="holo-foil" aria-hidden="true" />}
+          <img
+            src={def.src}
+            width={def.width}
+            height={def.height}
+            alt=""
+            draggable={false}
+            decoding="async"
+            loading={eager ? 'eager' : 'lazy'}
+            className="sticker-art relative z-[1] block h-auto w-full select-none"
+          />
+          {holoFoil && (
+            <>
+              <span className="holo-sheen" aria-hidden="true" />
+              <span className="holo-edge" aria-hidden="true" />
+              <HoloSparkleCanvas />
+            </>
+          )}
+        </span>
         {id === 'd20' && (
           <span className="d20-face" aria-hidden="true">
             {face ?? 20}
@@ -244,6 +250,7 @@ function LidSticker({
   onReact: (message: string) => void;
 }) {
   const def = STICKERS[slot.id];
+  const maskUrl = holoActive ? holoMaskUrl(slot.id) : undefined;
   const ref = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -327,6 +334,7 @@ function LidSticker({
       aria-describedby="tampa-ajuda"
       data-sticker-id={slot.id}
       data-holo={holoActive ? 'true' : undefined}
+      data-holo-state={holoActive ? 'idle' : undefined}
       className={`group pointer-events-auto absolute cursor-grab touch-none active:cursor-grabbing${holoActive ? ' sticker-holo' : ''}`}
       style={{
         x,
@@ -335,9 +343,7 @@ function LidSticker({
         left: `${slot.x}%`,
         top: `${slot.y}%`,
         width: `${slot.w}%`,
-        ...(holoActive
-          ? ({ '--sticker-holo-mask': `url("${def.src}")` } as CSSProperties)
-          : undefined)
+        ...(maskUrl ? ({ '--holo-mask': `url("${maskUrl}")` } as CSSProperties) : undefined)
       }}
     >
       <StickerArt id={slot.id} reaction={reaction} face={face} eager holoFoil={holoActive} />
@@ -347,8 +353,9 @@ function LidSticker({
 
 export function StickerLid() {
   const lidRef = useRef<HTMLDivElement>(null);
-  // Holo: 1/100/tab all three cats together, or DEV ?holo=1|all — see rollHolo() in stickerHolo.ts
+  // Holo v2: 1/100/tab all three cats, or DEV ?holo=1|all (no storage write) — stickerHolo.ts
   const holo = useHoloRoulette();
+  useHoloPointer(lidRef, holo.mode === 'all');
   const [order, setOrder] = useState<StickerId[]>(() => LID_LAYOUT.map((slot) => slot.id));
   const [arrangement, setArrangement] = useState<Arrangement>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -375,6 +382,7 @@ export function StickerLid() {
           <ul
             aria-label="Stickers colados na tampa do notebook"
             data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
+            data-holo-state={holo.mode === 'none' ? undefined : 'idle'}
           >
             {LID_LAYOUT.map((slot) => (
               <li
