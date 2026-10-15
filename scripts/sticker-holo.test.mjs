@@ -56,21 +56,22 @@ test('diamond lattice stack is behind ink, not soft-light foil', () => {
   assert.doesNotMatch(foilBlock, /soft-light/);
 });
 
-test('clean die-cut masks exist for the three cats only', () => {
+test('clean die-cut rasters exist; cats keep dedicated holo masks', () => {
+  for (const id of ['morcega', 'banguela', 'tomada', 'cafe', 'd20', 'dossie', 'halter', 'lid-seal']) {
+    assert.equal(existsSync(new URL(`../public/stickers/${id}.webp`, import.meta.url)), true);
+  }
   for (const id of ['morcega', 'banguela', 'tomada']) {
     assert.equal(existsSync(new URL(`../public/holo-masks/${id}-cut.png`, import.meta.url)), true);
   }
   assert.match(holoSrc, /\/holo-masks\/morcega-cut\.png/);
+  const svgs = readdirSync(new URL('../public/stickers', import.meta.url)).filter((name) => name.endsWith('.svg'));
+  assert.deepEqual(svgs.sort(), ['nextjs.svg', 'react.svg', 'typescript.svg']);
 });
 
-test('lid-seal is not an active sticker, asset, mask, or script', () => {
-  for (const src of repoFiles) {
-    assert.doesNotMatch(src, /lid-seal|lidSeal|lid_seal/i);
-  }
-  assert.equal(existsSync(new URL('../public/stickers/lid-seal.webp', import.meta.url)), false);
+test('lid-seal is a cleaned raster only — not on the lid, not holo, no generator script', () => {
+  assert.doesNotMatch(stickersSrc, /['"]lid-seal['"]/);
+  assert.doesNotMatch(holoSrc, /lid-seal/);
   assert.equal(existsSync(new URL('../scripts/lid-seal.mjs', import.meta.url)), false);
-  const stickers = readdirSync(new URL('../public/stickers', import.meta.url));
-  assert.equal(stickers.some((name) => /lid-seal/i.test(name)), false);
   if (existsSync(new URL('../public/holo-masks', import.meta.url))) {
     const masks = readdirSync(new URL('../public/holo-masks', import.meta.url));
     assert.equal(masks.some((name) => /lid-seal/i.test(name)), false);
