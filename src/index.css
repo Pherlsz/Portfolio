@@ -32,6 +32,24 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@property --mx {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.5;
+}
+
+@property --my {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.5;
+}
+
+@property --hyp {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.25;
+}
+
 @theme inline {
   --color-neutral-0: var(--neutral-0);
   --color-neutral-50: var(--neutral-50);
@@ -72,6 +90,18 @@
   --font-display: "Archivo Variable", "Archivo", system-ui, sans-serif;
   --font-sans: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
   --font-mono: "Atkinson Hyperlegible Mono Variable", ui-monospace, monospace;
+}
+
+@property --mx {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.5;
+}
+
+@property --my {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.5;
 }
 
 @layer base {
@@ -451,9 +481,252 @@
     container-type: inline-size;
   }
 
+  /* Simey abYWJdX: rare holo v + vmax shine/glare. No gutters, no hard white stripe. */
+  @keyframes holo-idle-orbit {
+    0% {
+      --mx: 0.32;
+      --my: 0.28;
+      --hyp: 0.28;
+    }
+    50% {
+      --mx: 0.68;
+      --my: 0.62;
+      --hyp: 0.32;
+    }
+    100% {
+      --mx: 0.32;
+      --my: 0.28;
+      --hyp: 0.28;
+    }
+  }
+
+  [data-holo='true'] {
+    --mx: 0.5;
+    --my: 0.5;
+    --hyp: 0.25;
+    --posx: calc(var(--mx) * 100%);
+    --posy: calc(var(--my) * 100%);
+    --holo-tilt-max: 0deg;
+    --holo-ink: 0.9;
+    --holo-idle-duration: 9s;
+    --holo-space: 5%;
+    --holo-angle: 133deg;
+    --holo-grain: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCI+CjxmaWx0ZXIgaWQ9Im4iPgo8ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjciIG51bU9jdGF2ZXM9IjEwIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIj48L2ZlVHVyYnVsZW5jZT4KPC9maWx0ZXI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjMDAwIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjAuMyI+PC9yZWN0Pgo8L3N2Zz4=");
+    --holo-imgsize: 500px;
+    --holo-rainbow: repeating-linear-gradient(
+      0deg,
+      rgb(255, 119, 115) calc(var(--holo-space) * 1),
+      rgb(255, 237, 95) calc(var(--holo-space) * 2),
+      rgb(168, 255, 95) calc(var(--holo-space) * 3),
+      rgb(131, 255, 247) calc(var(--holo-space) * 4),
+      rgb(120, 148, 255) calc(var(--holo-space) * 5),
+      rgb(216, 117, 255) calc(var(--holo-space) * 6),
+      rgb(255, 119, 115) calc(var(--holo-space) * 7)
+    );
+  }
+
+  [data-holo='true'][data-holo-state='idle'] {
+    animation: holo-idle-orbit var(--holo-idle-duration) ease-in-out infinite;
+    --holo-tilt-max: 0deg;
+    --holo-ink: 0.9;
+  }
+
+  [data-holo='true'][data-holo-state='tilt'],
+  [data-holo='true']:hover {
+    animation: none;
+    --holo-tilt-max: 16deg;
+    --holo-ink: 0.86;
+  }
+
+  [data-holo='true'] .sticker-face-host {
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+    filter:
+      drop-shadow(0 0 1px hsl(calc(190 + var(--mx) * 140) 90% 70% / 0.75))
+      drop-shadow(0 0 4px hsl(calc(280 + var(--my) * 80) 85% 65% / 0.45))
+      drop-shadow(0 0 8px hsl(calc(40 + var(--hyp) * 80) 90% 62% / 0.22))
+      drop-shadow(0 8px 14px rgb(0 0 0 / 0.28));
+    transition: filter 0.35s ease;
+  }
+
+  [data-holo='true'][data-holo-state='tilt'] .sticker-face-host,
+  [data-holo='true']:hover .sticker-face-host {
+    filter:
+      drop-shadow(0 0 1.5px hsl(calc(190 + var(--mx) * 140) 95% 72% / 0.95))
+      drop-shadow(0 0 6px hsl(calc(280 + var(--my) * 80) 90% 66% / 0.65))
+      drop-shadow(0 0 12px hsl(calc(40 + var(--hyp) * 80) 95% 62% / 0.35))
+      drop-shadow(0 8px 14px rgb(0 0 0 / 0.3));
+  }
+
+  [data-holo='true'] .sticker-holo-stage {
+    position: relative;
+    display: block;
+    isolation: isolate;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transform: perspective(800px)
+      rotateY(calc((var(--mx) - 0.5) * 2 * var(--holo-tilt-max)))
+      rotateX(calc((0.5 - var(--my)) * 2 * var(--holo-tilt-max)));
+    -webkit-mask-image: var(--holo-mask);
+    mask-image: var(--holo-mask);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-mode: alpha;
+    mask-mode: alpha;
+  }
+
+  [data-holo='true'] .holo-foil,
+  [data-holo='true'] .holo-sheen,
+  [data-holo='true'] .holo-edge,
+  [data-holo='true'] .holo-sparkle {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* Dark metallic underlayer so color-dodge has luminance to lift. Continuous, no hatch. */
+  [data-holo='true'] .holo-foil {
+    z-index: 0;
+    background-image:
+      var(--holo-grain),
+      linear-gradient(
+        145deg,
+        #5c6578 0%,
+        #242b38 42%,
+        #6e7788 68%,
+        #151920 100%
+      );
+    background-size: var(--holo-imgsize), 140% 140%;
+    background-position: center, var(--posx) var(--posy);
+    background-blend-mode: overlay, normal;
+    filter: brightness(0.8) contrast(1.1);
+  }
+
+  [data-holo='true'] .sticker-art {
+    position: relative;
+    z-index: 1;
+    opacity: var(--holo-ink);
+  }
+
+  /* Rare holo v shine: grain + rainbow, color-dodge. Glare is a soft prismatic radial, not a white stripe. */
+  [data-holo='true'] .holo-sheen {
+    z-index: 2;
+    isolation: isolate;
+    background-image:
+      var(--holo-grain),
+      var(--holo-rainbow),
+      radial-gradient(
+        farthest-corner circle at var(--posx) var(--posy),
+        rgb(6 218 255 / 0.16) 0%,
+        rgb(38 235 127 / 0.1) 22%,
+        rgb(155 78 228 / 0.06) 48%,
+        transparent 72%
+      );
+    background-blend-mode: screen, hue, soft-light;
+    background-size: var(--holo-imgsize), 200% 700%, 200% 200%;
+    background-position: center, 0% var(--posy), var(--posx) var(--posy);
+    mix-blend-mode: color-dodge;
+    filter: brightness(calc(0.34 + var(--hyp) * 0.24)) contrast(1.65) saturate(1.2);
+    opacity: 0.52;
+    transition: opacity 0.35s ease, filter 0.35s ease;
+  }
+
+  [data-holo='true'][data-holo-state='tilt'] .holo-sheen,
+  [data-holo='true']:hover .holo-sheen {
+    opacity: 0.78;
+    filter: brightness(calc(0.48 + var(--hyp) * 0.3)) contrast(1.9) saturate(1.35);
+  }
+
+  [data-holo='true'] .holo-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--holo-grain), var(--holo-rainbow);
+    background-size: var(--holo-imgsize), 200% 400%;
+    background-position: center, calc(var(--posx) * -1) calc(var(--posy) * -1);
+    background-blend-mode: screen, hue;
+    mix-blend-mode: soft-light;
+    filter: brightness(0.7) contrast(1.25) saturate(1.05);
+    pointer-events: none;
+  }
+
+  [data-holo='true'] .holo-sparkle {
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    mix-blend-mode: screen;
+    opacity: 0.28;
+    transition: opacity 0.35s ease;
+  }
+
+  [data-holo='true'][data-holo-state='tilt'] .holo-sparkle,
+  [data-holo='true']:hover .holo-sparkle {
+    opacity: 0.7;
+  }
+
+  /* Die-cut prismatic rim — different from the aluminum sticker edge. */
+  [data-holo='true'] .holo-edge {
+    z-index: 3;
+    background-image: repeating-linear-gradient(
+      var(--holo-angle),
+      rgb(255, 119, 115),
+      rgb(255, 237, 95),
+      rgb(168, 255, 95),
+      rgb(131, 255, 247),
+      rgb(120, 148, 255),
+      rgb(216, 117, 255),
+      rgb(255, 119, 115)
+    );
+    background-size: 280% 280%;
+    background-position: var(--posx) var(--posy);
+    -webkit-mask-image: var(--holo-mask), var(--holo-mask);
+    mask-image: var(--holo-mask), var(--holo-mask);
+    -webkit-mask-size: contain, 88% 88%;
+    mask-size: contain, 88% 88%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center, center;
+    mask-position: center, center;
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    filter: brightness(1.05) saturate(1.15);
+    mix-blend-mode: screen;
+    opacity: 0.42;
+    transition: opacity 0.35s ease;
+  }
+
+  [data-holo='true'][data-holo-state='tilt'] .holo-edge,
+  [data-holo='true']:hover .holo-edge {
+    opacity: 0.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-holo='true'],
+    [data-holo='true'][data-holo-state='idle'] {
+      animation: none;
+      --mx: 0.35;
+      --my: 0.3;
+      --hyp: 0.3;
+    }
+
+    [data-holo='true'] .sticker-holo-stage {
+      transform: none;
+    }
+
+    [data-holo='true'] .holo-sparkle {
+      display: none;
+    }
+  }
+
   .d20-face {
     pointer-events: none;
     position: absolute;
+    z-index: 2;
     left: 50%;
     top: 43%;
     translate: -50% -50%;
@@ -571,11 +844,6 @@
   75% { transform: rotate(8deg); }
 }
 
-@keyframes sticker-lift {
-  0%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-14px); }
-}
-
 @keyframes sticker-pop {
   0%, 100% { transform: scale(1); }
   40% { transform: scale(1.15); }
@@ -587,7 +855,6 @@
   .animate-munch { animation: sticker-munch 0.5s ease-in-out 2; }
   .animate-roll { animation: sticker-roll 0.7s cubic-bezier(0.3, 0.7, 0.3, 1); }
   .animate-wiggle { animation: sticker-wiggle 0.4s ease-in-out 2; }
-  .animate-lift { animation: sticker-lift 0.45s ease-in-out 2; }
   .animate-pop { animation: sticker-pop 0.4s ease-out; }
 }
 

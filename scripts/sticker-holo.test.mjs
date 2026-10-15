@@ -1,0 +1,101 @@
+import assert from 'node:assert/strict';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { test } from 'node:test';
+
+const holoSrc = readFileSync(new URL('../src/utils/stickerHolo.ts', import.meta.url), 'utf8');
+const stickersSrc = readFileSync(new URL('../src/components/stickers.tsx', import.meta.url), 'utf8');
+const cssSrc = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+const pointerSrc = readFileSync(new URL('../src/utils/holoPointer.ts', import.meta.url), 'utf8');
+const sparkleSrc = readFileSync(new URL('../src/components/HoloSparkleCanvas.tsx', import.meta.url), 'utf8');
+
+function rollHolo(random, allOdds = 1 / 100, singleOdds = 0) {
+  if (random() < allOdds) return { mode: 'all', id: null };
+  if (singleOdds > 0 && random() < singleOdds) {
+    return { mode: 'single', id: 'morcega' };
+  }
+  return { mode: 'none', id: null };
+}
+
+test('v2 schema, all-three odds, single permanently off', () => {
+  assert.match(holoSrc, /HOLO_SCHEMA_VERSION = 2/);
+  assert.match(holoSrc, /ALL_ODDS = 1 \/ 100/);
+  assert.match(holoSrc, /SINGLE_ODDS = 0/);
+  assert.match(holoSrc, /record\.v !== HOLO_SCHEMA_VERSION/);
+  assert.match(holoSrc, /HOLO_ELIGIBLE_LID_STICKER_IDS = \['morcega', 'banguela', 'tomada'\]/);
+});
+
+test('rollHolo: rng below ALL_ODDS is all; otherwise none; SINGLE_ODDS 0 never single', () => {
+  assert.equal(rollHolo(() => 0.009).mode, 'all');
+  assert.equal(rollHolo(() => 0.01).mode, 'none');
+  assert.equal(rollHolo(() => 0.5).mode, 'none');
+  for (let i = 0; i < 20; i++) {
+    assert.notEqual(rollHolo(() => 0.5 + i / 100).mode, 'single');
+  }
+});
+
+test('DEV query overrides do not write sessionStorage', () => {
+  assert.match(holoSrc, /if \(dev\) return dev;/);
+  assert.doesNotMatch(
+    holoSrc,
+    /if \(dev\) \{\s*writeStickerHoloToSession\(dev\)/
+  );
+});
+
+test('simey v/vmax stack: color-dodge rainbow, soft glare, tilt, no gutters or white stripe', () => {
+  assert.match(cssSrc, /--holo-rainbow:/);
+  assert.match(cssSrc, /--holo-grain:/);
+  assert.match(cssSrc, /mix-blend-mode: color-dodge/);
+  assert.match(cssSrc, /mix-blend-mode: soft-light/);
+  assert.match(cssSrc, /perspective\(800px\)/);
+  assert.match(cssSrc, /rotateY\(/);
+  assert.match(cssSrc, /rotateX\(/);
+  assert.match(cssSrc, /--holo-tilt-max: 16deg/);
+  assert.match(cssSrc, /mask-composite: exclude/);
+  assert.match(stickersSrc, /className="holo-foil"/);
+  assert.match(stickersSrc, /className="holo-sheen"/);
+  assert.match(stickersSrc, /useStickerHoloPointer/);
+  assert.match(pointerSrc, /dataset\.holoState = 'tilt'/);
+  assert.match(pointerSrc, /pointerdown/);
+  assert.match(sparkleSrc, /getContext\('2d'/);
+  assert.match(sparkleSrc, /host\.getAttribute\('data-holo-state'\)/);
+  assert.doesNotMatch(sparkleSrc, /getContext\(\s*['"]webgl/i);
+  assert.doesNotMatch(cssSrc, /holo-gutter/);
+  assert.doesNotMatch(cssSrc, /#0e152e/);
+  const sheenBlock = cssSrc.slice(cssSrc.indexOf('.holo-sheen {'), cssSrc.indexOf('.holo-sheen::after'));
+  assert.doesNotMatch(sheenBlock, /hsl\(0 0% 100%/);
+  assert.doesNotMatch(sheenBlock, /rgb\(255,\s*255,\s*255/);
+});
+
+test('lid rasters exist; unused sticker webps are not shipped', () => {
+  for (const id of ['morcega', 'banguela', 'tomada', 'd20']) {
+    assert.equal(existsSync(new URL(`../public/stickers/${id}.webp`, import.meta.url)), true);
+  }
+  for (const id of ['cafe', 'dossie', 'halter']) {
+    assert.equal(existsSync(new URL(`../public/stickers/${id}.webp`, import.meta.url)), false);
+  }
+  for (const id of ['morcega', 'banguela', 'tomada']) {
+    assert.equal(existsSync(new URL(`../public/holo-masks/${id}-cut.png`, import.meta.url)), true);
+  }
+  assert.match(holoSrc, /\/holo-masks\/morcega-cut\.png/);
+  const svgs = readdirSync(new URL('../public/stickers', import.meta.url)).filter((name) => name.endsWith('.svg'));
+  assert.deepEqual(svgs.sort(), ['nextjs.svg', 'react.svg', 'typescript.svg']);
+});
+
+test('d20 face overlay sits above sticker art and parses the roll', () => {
+  assert.match(stickersSrc, /id === 'd20' && \(/);
+  assert.match(stickersSrc, /className="d20-face"/);
+  assert.match(stickersSrc, /if \(id === 'd20'\) setFace\(parseD20Face\(text\)\)/);
+  const faceBlock = cssSrc.slice(cssSrc.indexOf('.d20-face {'), cssSrc.indexOf('.notebook-margin'));
+  assert.match(faceBlock, /z-index: 2/);
+  assert.match(faceBlock, /28cqw/);
+  assert.match(faceBlock, /--yellow-500/);
+});
+
+test('unused notebook-seal sticker is not in the repo', () => {
+  const name = ['lid', 'seal'].join('-');
+  assert.doesNotMatch(stickersSrc, new RegExp(name));
+  assert.doesNotMatch(holoSrc, new RegExp(name));
+  assert.equal(existsSync(new URL(`../public/stickers/${name}.webp`, import.meta.url)), false);
+  assert.equal(existsSync(new URL(`../design/raw/${name}.jpg`, import.meta.url)), false);
+  assert.equal(existsSync(new URL(`../scripts/${name}.mjs`, import.meta.url)), false);
+});
