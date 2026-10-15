@@ -69,7 +69,7 @@ export function CopyEmailButton({
           {email}
         </span>
         <span className="eyebrow mt-3 flex items-center gap-2">
-          {copied ? 'Copiado!' : 'clique para copiar'}
+          {copied ? 'Copiado!' : 'Copiar e-mail'}
           {copied ? <Check className="size-3.5" aria-hidden="true" /> : <Copy className="size-3.5" aria-hidden="true" />}
         </span>
         <span className="sr-only" aria-live="polite">

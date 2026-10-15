@@ -329,6 +329,7 @@ export function StickerLid() {
     }
     const targets = Object.fromEntries(LID_LAYOUT.map((slot, i) => [slot.id, slots[i]])) as Record<StickerId, Slot>;
     setArrangement({ key: Date.now(), targets });
+    setAnnouncement('Stickers embaralhados. Use Tab e as setas para mover cada um.');
   };
 
   return (
@@ -365,7 +366,10 @@ export function StickerLid() {
           </button>
           <button
             type="button"
-            onClick={() => setArrangement({ key: Date.now(), targets: null })}
+            onClick={() => {
+              setArrangement({ key: Date.now(), targets: null });
+              setAnnouncement('Stickers no lugar original.');
+            }}
             className="btn btn-ghost min-h-9 px-4 text-sm"
           >
             Arrumar

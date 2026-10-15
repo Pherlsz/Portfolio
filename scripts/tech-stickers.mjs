@@ -1,5 +1,5 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
-import { siGo, siNextdotjs, siReact, siTypescript } from 'simple-icons';
+import { siNextdotjs, siReact, siTypescript } from 'simple-icons';
 
 mkdirSync('public/stickers', { recursive: true });
 
@@ -18,8 +18,7 @@ function svg(icon) {
 for (const [name, icon] of [
   ['typescript', siTypescript],
   ['react', siReact],
-  ['nextjs', siNextdotjs],
-  ['go', siGo]
+  ['nextjs', siNextdotjs]
 ]) {
   writeFileSync(`public/stickers/${name}.svg`, svg(icon));
   console.log(name, icon.hex);

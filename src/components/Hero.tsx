@@ -52,10 +52,22 @@ export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
-          <a href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" className="icon-btn">
+          <a
+            href={profile.linkedin}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
+            className="icon-btn"
+          >
             <Linkedin className="size-4" aria-hidden="true" />
           </a>
-          <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub" className="icon-btn">
+          <a
+            href={profile.github}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Perfil no GitHub de Pedro Henrique Lopes"
+            className="icon-btn"
+          >
             <Github className="size-4" aria-hidden="true" />
           </a>
           <CopyEmailButton email={profile.email} className="btn btn-ghost px-4 font-mono text-sm font-normal" />

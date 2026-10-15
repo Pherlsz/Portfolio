@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Download, Menu, Moon, Sun, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Download, Menu, MessageSquare, Moon, Sun, X } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 
 const NAV = [
@@ -64,12 +64,13 @@ function useActiveSection() {
   return active;
 }
 
-export function SiteHeader() {
+export function SiteHeader({ onOpenAssistant }: { onOpenAssistant: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const { theme, toggleTheme } = useTheme();
   const active = useActiveSection();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -77,6 +78,17 @@ export function SiteHeader() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setMenuOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
 
   const navLinks = (onNavigate?: () => void) =>
     NAV.map((item) => (
@@ -108,6 +120,16 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2 md:ml-3">
+          <button
+            type="button"
+            onClick={onOpenAssistant}
+            aria-haspopup="dialog"
+            aria-controls="assistente"
+            className="btn btn-ghost hidden min-h-10 px-4 text-sm sm:inline-flex"
+          >
+            <MessageSquare className="size-4" aria-hidden="true" />
+            Perguntar
+          </button>
           <a href={profile.cvUrl} download className="btn btn-primary hidden min-h-10 px-4 text-sm sm:inline-flex">
             <Download className="size-4" aria-hidden="true" />
             Baixar CV
@@ -125,6 +147,7 @@ export function SiteHeader() {
             )}
           </button>
           <button
+            ref={menuButtonRef}
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
@@ -140,6 +163,17 @@ export function SiteHeader() {
       {menuOpen && (
         <nav id="menu-mobile" aria-label="Seções" className="border-t border-line px-5 pb-5 pt-3 md:hidden">
           <ul className="grid gap-1">{navLinks(() => setMenuOpen(false))}</ul>
+          <button
+            type="button"
+            onClick={() => {
+              setMenuOpen(false);
+              onOpenAssistant();
+            }}
+            className="btn btn-ghost mt-4 w-full justify-center"
+          >
+            <MessageSquare className="size-4" aria-hidden="true" />
+            Perguntar
+          </button>
           <a href={profile.cvUrl} download className="btn btn-primary mt-4 w-full justify-center">
             <Download className="size-4" aria-hidden="true" />
             Baixar CV (PDF)

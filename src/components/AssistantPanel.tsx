@@ -30,24 +30,6 @@ const SUGGESTED_QUESTIONS = [
   'Qual a stack principal?'
 ];
 
-const ROLE_PRESETS = [
-  {
-    label: 'Frontend (React e TypeScript)',
-    prompt:
-      'Vaga de Frontend Engineer: React, TypeScript, Next.js, design system, acessibilidade e performance web. Modelo híbrido.'
-  },
-  {
-    label: 'Full-stack (React e Python ou .NET)',
-    prompt:
-      'Vaga full-stack: React e TypeScript no frontend, Python ou C#/.NET no backend, APIs REST e testes automatizados.'
-  },
-  {
-    label: 'IA aplicada',
-    prompt:
-      'Vaga de engenharia com IA aplicada: integração de LLMs com function calling, produtos com IA e qualidade em produção.'
-  }
-];
-
 const WELCOME: ChatMessage = {
   id: 'welcome',
   role: 'model',
@@ -274,6 +256,8 @@ export function AssistantPanel({
           type="button"
           onClick={() => onOpenChange(true)}
           aria-haspopup="dialog"
+          aria-expanded={false}
+          aria-controls="assistente"
           className="no-print btn btn-primary fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-30 shadow-lg shadow-neutral-950/20"
         >
           <Sparkles className="size-4" aria-hidden="true" />
@@ -284,6 +268,7 @@ export function AssistantPanel({
 
       <dialog
         ref={dialogRef}
+        id="assistente"
         aria-labelledby="assistente-titulo"
         onClose={() => onOpenChange(false)}
         onClick={(event) => {
@@ -401,25 +386,8 @@ export function AssistantPanel({
             <p className="text-[0.9375rem] text-ink-soft">
               {activeJob
                 ? 'Pergunte sobre a vaga em análise ou cole outra descrição para substituir.'
-                : 'A resposta mostra a aderência, as lacunas e perguntas para a entrevista.'}
+                : 'Cole o anúncio da vaga. A análise usa esse texto, não um modelo pronto.'}
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {ROLE_PRESETS.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => {
-                    setJobDescription(preset.prompt);
-                    send(preset.prompt, 'jobfit');
-                  }}
-                  disabled={isLoading}
-                  className="inline-flex min-h-9 items-center gap-1 rounded-full border border-line px-3 text-sm hover:border-ink disabled:opacity-50"
-                >
-                  {preset.label}
-                  <ArrowUpRight className="size-3.5" aria-hidden="true" />
-                </button>
-              ))}
-            </div>
             {activeJob && (
               <div className="mt-3 flex items-center gap-2">
                 <label htmlFor="assistente-vaga-pergunta" className="sr-only">

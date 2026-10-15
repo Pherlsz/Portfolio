@@ -528,24 +528,41 @@ export function generateJsonLdSchema(data: PortfolioData): object {
   };
 }
 
-export function generateLlmsTxt(data: PortfolioData): string {
+export const SITE_ORIGIN = 'https://pherls.dev';
+
+function mdItem(label: string, href: string, note?: string): string {
+  return note ? `- [${label}](${href}): ${note}` : `- [${label}](${href})`;
+}
+
+export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): string {
   const { profile, project, featuredProjects } = data;
   const lines = [
     `# ${profile.name} — ${profile.jobTitle}`,
     '',
     `> ${profile.headline} ${plainText(profile.summary)}`,
     '',
+    '## Páginas',
+    mdItem('Portfólio', `${origin}/`, 'Página principal'),
+    mdItem('Currículo HTML', `${origin}/cv`, 'Versão para impressão'),
+    mdItem('Currículo PDF', `${origin}${profile.cvUrl}`, 'Download direto'),
+    mdItem('ai.json', `${origin}/ai.json`, 'Perfil estruturado para agentes'),
+    mdItem('Mapa do site', `${origin}/sitemap.xml`),
+    '',
     '## Contato',
-    `- E-mail: ${profile.email}`,
-    `- LinkedIn: ${profile.linkedin}`,
-    `- GitHub: ${profile.github}`,
+    mdItem('E-mail', `mailto:${profile.email}`),
+    mdItem('LinkedIn', profile.linkedin),
+    mdItem('GitHub', profile.github),
     `- Local: ${profile.location}`,
     `- Status: ${profile.status}`,
     `- Senioridade: ${profile.seniority}`,
     `- Formato: ${profile.workMode}`,
     `- Pretensão salarial: ${profile.salary}`,
-    `- Formulário no site: #contato`,
-    `- Agentes de IA: ${CONTACT_API.method} ${CONTACT_API.path} com JSON { "name", "email", "message", "source": "agent" }. ${CONTACT_API.description} Campos: name (${CONTACT_API.body.name}); email (${CONTACT_API.body.email}); message (${CONTACT_API.body.message}). Resposta 200: { "ok": true }.`,
+    mdItem('Formulário no site', `${origin}/#contato`),
+    mdItem(
+      `${CONTACT_API.method} ${CONTACT_API.path}`,
+      `${origin}${CONTACT_API.path}`,
+      `${CONTACT_API.description} JSON { "name", "email", "message", "source": "agent" }. Campos: name (${CONTACT_API.body.name}); email (${CONTACT_API.body.email}); message (${CONTACT_API.body.message}). Resposta 200: { "ok": true }.`
+    ),
     '',
     '## Experiência',
     ...data.experiences.flatMap((exp) => {
@@ -563,16 +580,16 @@ export function generateLlmsTxt(data: PortfolioData): string {
     ...featuredProjects.flatMap((item) => [
       `### ${item.name}`,
       item.tagline,
-      ...(item.repoUrl ? [`- Repositório: ${item.repoUrl}`] : []),
-      `- App: ${item.href}`,
+      ...(item.repoUrl ? [mdItem('Repositório', item.repoUrl)] : []),
+      mdItem('App', item.href),
       `- Acesso: ${item.access === 'restricted' ? 'restrito (login)' : 'público'}`,
       `- Stack: ${item.stack.join(', ')}`,
       ''
     ]),
     `## Outro projeto: ${project.name} (${project.language}, ${project.version})`,
     project.tagline,
-    `- Repositório: ${project.repoUrl}`,
-    `- Releases: ${project.releases.count}, ${project.releases.period}`,
+    mdItem('Repositório', project.repoUrl),
+    mdItem('Releases', project.releasesUrl, `${project.releases.count}, ${project.releases.period}`),
     ...project.cards.map((card) => `- ${card.title}: ${card.text}`),
     `- Pacotes: ${project.modules.map((m) => `${m.name} (${m.description})`).join('; ')}`,
     '',
@@ -583,7 +600,9 @@ export function generateLlmsTxt(data: PortfolioData): string {
     ...data.education.map((e) => `- ${e.course}, ${e.school} (${e.period})`),
     '',
     '## Certificações',
-    ...data.certifications.map((c) => `- ${c.name} — ${c.issuer} (${c.year})`),
+    ...data.certifications.map((c) =>
+      c.href ? mdItem(`${c.name} — ${c.issuer} (${c.year})`, c.href) : `- ${c.name} — ${c.issuer} (${c.year})`
+    ),
     `- Outros cursos: ${data.otherCourses.join(', ')}`,
     '',
     '## Idiomas',

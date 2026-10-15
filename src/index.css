@@ -283,21 +283,27 @@
     resize: vertical;
   }
 
-  .skip-link {
+  .skip-nav {
     position: fixed;
+    z-index: 60;
     left: 1rem;
     top: 1rem;
-    z-index: 60;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     transform: translateY(-200%);
+  }
+
+  .skip-nav:focus-within {
+    transform: none;
+  }
+
+  .skip-link {
     border-radius: 9999px;
     background-color: var(--ink);
     color: var(--paper);
     padding: 0.5rem 1rem;
     font-weight: 700;
-  }
-
-  .skip-link:focus-visible {
-    transform: none;
   }
 
   /* Unibody prata: uma peça só. A cor não segue o tema. */

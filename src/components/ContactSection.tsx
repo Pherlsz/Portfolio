@@ -36,7 +36,11 @@ function ContactForm({ email }: { email: string }) {
   };
 
   return (
-    <form onSubmit={onSubmit} className="rounded-[1.75rem] border border-line bg-surface p-5 sm:p-6">
+    <form
+      onSubmit={onSubmit}
+      aria-busy={status === 'sending'}
+      className="rounded-[1.75rem] border border-line bg-surface p-5 sm:p-6"
+    >
       <p className="font-bold">Ou escreva sua mensagem</p>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <label className="block">
@@ -113,13 +117,25 @@ export function ContactSection() {
             <CopyEmailButton email={profile.email} hint />
             <ul className="flex flex-wrap gap-2">
               <li>
-                <a href={profile.linkedin} target="_blank" rel="noreferrer" className="btn btn-primary">
+                <a
+                  href={profile.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
+                  className="btn btn-primary"
+                >
                   <Linkedin className="size-4" aria-hidden="true" />
                   LinkedIn
                 </a>
               </li>
               <li>
-                <a href={profile.github} target="_blank" rel="noreferrer" className="btn btn-ghost">
+                <a
+                  href={profile.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Perfil no GitHub de Pedro Henrique Lopes"
+                  className="btn btn-ghost"
+                >
                   <Github className="size-4" aria-hidden="true" />
                   GitHub
                 </a>

@@ -20,12 +20,29 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <a href="#conteudo" className="skip-link">
-        Pular para o conteúdo
-      </a>
-      <SiteHeader />
+      <nav aria-label="Atalhos" className="skip-nav">
+        <a
+          href="#conteudo"
+          className="skip-link"
+          onClick={(event) => {
+            event.preventDefault();
+            document.getElementById('conteudo')?.focus();
+          }}
+        >
+          Pular para o conteúdo
+        </a>
+        <button type="button" className="skip-link" onClick={() => setAssistantOpen(true)}>
+          Abrir assistente
+        </button>
+      </nav>
+      <SiteHeader
+        onOpenAssistant={() => {
+          setAssistantMode('chat');
+          setAssistantOpen(true);
+        }}
+      />
 
-      <main id="conteudo" className="divide-y divide-line">
+      <main id="conteudo" tabIndex={-1} className="divide-y divide-line">
         <Hero
           onOpenJobFit={() => {
             setAssistantMode('jobfit');

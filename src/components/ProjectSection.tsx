@@ -41,6 +41,11 @@ export function ProjectSection() {
             href={featuredProjectUrl(featured)}
             target="_blank"
             rel="noreferrer"
+            aria-label={
+              featured.repoUrl
+                ? `Ver código-fonte de ${featured.name} no GitHub`
+                : `Abrir ${featured.name}`
+            }
             className="group mt-4 grid overflow-hidden rounded-[1.75rem] border border-line bg-surface lg:grid-cols-2"
           >
             <img
@@ -89,9 +94,15 @@ export function ProjectSection() {
             <p className="mt-2 text-[0.9375rem] text-ink-soft">{project.tagline}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <a href={project.repoUrl} target="_blank" rel="noreferrer" className="btn btn-primary min-h-10 px-4">
+            <a
+              href={project.repoUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Ver código-fonte de ${project.name} no GitHub`}
+              className="btn btn-primary min-h-10 px-4"
+            >
               <Github className="size-4" aria-hidden="true" />
-              GitHub
+              Código no GitHub
             </a>
           </div>
         </div>

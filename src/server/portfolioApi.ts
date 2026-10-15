@@ -47,9 +47,6 @@ export type PortfolioBindings = {
   INBOX?: { put(key: string, value: string): Promise<void> };
   CHAT_LIMIT?: { limit(opts: { key: string }): Promise<{ success: boolean }> };
   CONTACT_LIMIT?: { limit(opts: { key: string }): Promise<{ success: boolean }> };
-  appendInbox?: (entry: InboxEntry) => Promise<void>;
-  allowChat?: (ip: string) => boolean;
-  allowContact?: (ip: string) => boolean;
 };
 
 const CORS = {
@@ -61,14 +58,21 @@ const CORS = {
 function json(status: number, body: unknown, extra: HeadersInit = {}): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...extra }
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'X-Content-Type-Options': 'nosniff',
+      ...extra
+    }
   });
 }
 
 function text(status: number, body: string, contentType: string): Response {
   return new Response(body, {
     status,
-    headers: { 'Content-Type': contentType }
+    headers: {
+      'Content-Type': contentType,
+      'X-Content-Type-Options': 'nosniff'
+    }
   });
 }
 
@@ -82,14 +86,11 @@ function clientIp(request: Request): string {
 
 async function allowed(
   limiter: PortfolioBindings['CHAT_LIMIT'] | undefined,
-  key: string,
-  fallback?: (ip: string) => boolean
+  key: string
 ): Promise<boolean> {
-  if (limiter) {
-    const { success } = await limiter.limit({ key });
-    return success;
-  }
-  return fallback?.(key) ?? true;
+  if (!limiter) return true;
+  const { success } = await limiter.limit({ key });
+  return success;
 }
 
 function inferContextualActions(userQuery: string, replyText: string): ChatAction[] {
@@ -242,7 +243,7 @@ function machineRoutes(url: URL): Response | null {
   const { profile } = data;
 
   if (pathname === '/llms.txt') {
-    return text(200, generateLlmsTxt(data), 'text/plain; charset=utf-8');
+    return text(200, generateLlmsTxt(data, origin), 'text/plain; charset=utf-8');
   }
 
   if (pathname === '/ai.json') {
@@ -288,7 +289,7 @@ function machineRoutes(url: URL): Response | null {
 }
 
 async function handleChat(request: Request, env: PortfolioBindings): Promise<Response> {
-  if (!(await allowed(env.CHAT_LIMIT, clientIp(request), env.allowChat))) {
+  if (!(await allowed(env.CHAT_LIMIT, clientIp(request)))) {
     return json(429, {
       reply: 'Muitas perguntas em pouco tempo. Tente de novo em alguns minutos ou fale direto com o Pedro por e-mail.',
       actions: [{ label: 'Baixar CV', type: 'export_cv', value: 'pdf' }]
@@ -319,10 +320,18 @@ async function handleChat(request: Request, env: PortfolioBindings): Promise<Res
     if (isFollowUp) {
       const jd = validateUserChatInput(job!, 'jobfit');
       const question = validateUserChatInput(message, 'chat');
-      if (!jd.valid || !question.valid) {
+      if (!jd.valid) {
         return json(200, {
           blockedByZod: true,
-          reply: `**${!jd.valid ? jd.error : question.error}**\n\nCole a vaga de novo ou faça uma pergunta sobre a vaga em análise.`,
+          reply: `**${jd.error}**\n\nCole a vaga de novo ou faça uma pergunta sobre a vaga em análise.`,
+          actions: inferContextualActions('', ''),
+          followUps: []
+        });
+      }
+      if (!question.valid) {
+        return json(200, {
+          blockedByZod: true,
+          reply: `**${question.error}**\n\nCole a vaga de novo ou faça uma pergunta sobre a vaga em análise.`,
           actions: inferContextualActions('', ''),
           followUps: []
         });
@@ -370,7 +379,7 @@ async function handleChat(request: Request, env: PortfolioBindings): Promise<Res
 }
 
 async function handleContact(request: Request, env: PortfolioBindings): Promise<Response> {
-  if (!(await allowed(env.CONTACT_LIMIT, clientIp(request), env.allowContact))) {
+  if (!(await allowed(env.CONTACT_LIMIT, clientIp(request)))) {
     return json(429, { ok: false, error: 'Muitas mensagens em pouco tempo. Tente de novo em alguns minutos.' }, CORS);
   }
 
@@ -395,13 +404,8 @@ async function handleContact(request: Request, env: PortfolioBindings): Promise<
   };
 
   try {
-    if (env.INBOX) {
-      await env.INBOX.put(`msg:${entry.at}:${crypto.randomUUID()}`, JSON.stringify(entry));
-    } else if (env.appendInbox) {
-      await env.appendInbox(entry);
-    } else {
-      throw new Error('inbox indisponível');
-    }
+    if (!env.INBOX) throw new Error('inbox indisponível');
+    await env.INBOX.put(`msg:${entry.at}:${crypto.randomUUID()}`, JSON.stringify(entry));
   } catch (error) {
     console.warn('Falha ao gravar contato.', error instanceof Error ? error.message : error);
     return json(500, { ok: false, error: 'Não foi possível guardar a mensagem.' }, CORS);

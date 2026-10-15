@@ -28,7 +28,7 @@ function ExperienceItem({ experience }: { experience: Experience }) {
         open={open}
         onToggle={(event) => setOpen(event.currentTarget.open)}
       >
-        <summary className="flex cursor-pointer list-none items-start justify-between gap-4 rounded-xl [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-start justify-between gap-4 rounded-xl outline-offset-4 [&::-webkit-details-marker]:hidden">
           <div>
             <h3 className="display text-2xl sm:text-3xl">{experience.company}</h3>
             <ul className="mt-3 space-y-1">
