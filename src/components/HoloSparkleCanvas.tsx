@@ -1,18 +1,18 @@
 import { useEffect, useRef } from 'react';
 import { prefersReducedMotion } from '../utils/stickerHolo';
 
-const GLINT_COUNT = 96;
+const GLINT_COUNT = 56;
 
 function seedGlints() {
   return Array.from({ length: GLINT_COUNT }, (_, i) => ({
-    x: ((i * 0.137 + 0.11) % 1),
-    y: ((i * 0.271 + 0.07) % 1),
-    r: 0.55 + (i % 5) * 0.16,
-    phase: i * 0.37
+    x: (i * 0.173 + 0.09) % 1,
+    y: (i * 0.311 + 0.05) % 1,
+    r: 0.7 + (i % 4) * 0.22,
+    phase: i * 0.41
   }));
 }
 
-/** Light Canvas 2D sparkle (T9). Pauses offscreen / hidden / reduced-motion. */
+/** Sparse Canvas 2D sparkle. rAF only while on-screen, visible, and tilting. */
 export function HoloSparkleCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -23,12 +23,15 @@ export function HoloSparkleCanvas() {
     if (!host) return;
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
+    if (prefersReducedMotion()) return;
 
-    const reduced = prefersReducedMotion();
     const glints = seedGlints();
     let raf = 0;
     let visible = document.visibilityState === 'visible';
     let onscreen = true;
+
+    const tilting = () =>
+      host.closest('[data-sticker-holo]')?.getAttribute('data-holo-state') === 'tilt';
 
     const resize = () => {
       const box = canvas.getBoundingClientRect();
@@ -49,46 +52,53 @@ export function HoloSparkleCanvas() {
       const cs = getComputedStyle(host);
       const mx = Number.parseFloat(cs.getPropertyValue('--mx')) || 0.5;
       const my = Number.parseFloat(cs.getPropertyValue('--my')) || 0.5;
-      const cell = w / 28;
+      const size = Math.max(w, h);
 
       for (const glint of glints) {
         const dist = Math.hypot(glint.x - mx, glint.y - my);
-        const falloff = Math.max(0, 1 - dist * 1.65);
-        const twinkle = reduced ? 0.55 : 0.5 + 0.5 * Math.sin(time * 0.0016 + glint.phase);
-        const alpha = (0.18 + falloff * 0.72) * twinkle;
-        if (alpha < 0.08) continue;
-        ctx.fillStyle = `rgba(255, 246, 220, ${alpha * 0.85})`;
+        const falloff = Math.max(0, 1 - dist * 2.1);
+        const twinkle = 0.45 + 0.55 * Math.sin(time * 0.0014 + glint.phase);
+        const alpha = (0.08 + falloff * 0.42) * twinkle;
+        if (alpha < 0.1) continue;
+        ctx.fillStyle = `rgba(255, 250, 240, ${alpha})`;
         ctx.beginPath();
-        ctx.arc(glint.x * w, glint.y * h, glint.r * (cell / 14), 0, Math.PI * 2);
+        ctx.arc(glint.x * w, glint.y * h, glint.r * (size / 420), 0, Math.PI * 2);
         ctx.fill();
       }
     };
 
     const loop = (time: number) => {
       raf = 0;
-      if (!visible || !onscreen) return;
+      if (!visible || !onscreen || !tilting()) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
       draw(time);
-      if (!reduced) raf = requestAnimationFrame(loop);
+      raf = requestAnimationFrame(loop);
     };
-
-    draw(0);
-    if (!reduced) raf = requestAnimationFrame(loop);
 
     const io = new IntersectionObserver((entries) => {
       onscreen = entries.some((entry) => entry.isIntersecting);
-      if (onscreen && visible && !reduced && !raf) raf = requestAnimationFrame(loop);
+      if (onscreen && visible && tilting() && !raf) raf = requestAnimationFrame(loop);
     });
     io.observe(host);
 
     const onVisibility = () => {
       visible = document.visibilityState === 'visible';
-      if (visible && onscreen && !reduced && !raf) raf = requestAnimationFrame(loop);
+      if (visible && onscreen && tilting() && !raf) raf = requestAnimationFrame(loop);
     };
     document.addEventListener('visibilitychange', onVisibility);
+
+    const mo = new MutationObserver(() => {
+      if (tilting() && visible && onscreen && !raf) raf = requestAnimationFrame(loop);
+    });
+    const root = host.closest('[data-sticker-holo]');
+    if (root) mo.observe(root, { attributes: true, attributeFilter: ['data-holo-state'] });
 
     return () => {
       if (raf) cancelAnimationFrame(raf);
       io.disconnect();
+      mo.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);

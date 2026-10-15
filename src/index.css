@@ -463,15 +463,15 @@
     container-type: inline-size;
   }
 
-  /* ProDesigner Diamond lattice sticker mockup. Foil behind ink; no soft-light foil. */
+  /* Recipe #1: continuous prismatic film behind ink. No gutters, no linear stripe. */
   @keyframes holo-idle-orbit {
     0% {
       --mx: 0.32;
       --my: 0.28;
     }
     50% {
-      --mx: 0.7;
-      --my: 0.64;
+      --mx: 0.68;
+      --my: 0.62;
     }
     100% {
       --mx: 0.32;
@@ -482,17 +482,8 @@
   [data-sticker-holo] {
     --mx: 0.5;
     --my: 0.5;
-    --holo-tilt-max: 8deg;
-    --holo-cell: 14px;
-    --holo-gutter: 2px;
-    --holo-gutter-color: rgb(8 8 14 / 0.85);
-    --holo-angle: 45deg;
-    --holo-hue-shift: calc((var(--mx) + var(--my)) * 180deg);
-    --holo-ink: 0.6;
-    --holo-foil-opacity: 0.9;
-    --holo-sparkle: 0.66;
-    --holo-glow: 0.74;
-    --holo-edge-width: 1.5px;
+    --holo-tilt-max: 7deg;
+    --holo-ink: 0.66;
     --holo-idle-duration: 9s;
   }
 
@@ -521,9 +512,13 @@
     display: block;
     isolation: isolate;
     transform-style: preserve-3d;
-    transform: perspective(600px)
+    transform: perspective(800px)
       rotateY(calc((var(--mx) - 0.5) * 2 * var(--holo-tilt-max)))
       rotateX(calc((0.5 - var(--my)) * 2 * var(--holo-tilt-max)));
+    filter:
+      drop-shadow(0 0 1.5px rgb(255 255 255 / 0.55))
+      drop-shadow(0 0 3px rgb(230 235 240 / 0.35))
+      drop-shadow(0 8px 14px rgb(0 0 0 / 0.28));
   }
 
   [data-holo='true'] .holo-foil,
@@ -537,69 +532,48 @@
 
   [data-holo='true'] .holo-foil {
     z-index: 0;
-    background:
+    background-image:
       repeating-linear-gradient(
-        var(--holo-angle),
-        transparent 0 var(--holo-cell),
-        var(--holo-gutter-color) 0 calc(var(--holo-cell) + var(--holo-gutter))
+        115deg,
+        hsl(0 92% 58%) 0%,
+        hsl(48 90% 56%) 2%,
+        hsl(110 86% 52%) 4%,
+        hsl(175 90% 55%) 6%,
+        hsl(250 88% 60%) 8%,
+        hsl(312 90% 58%) 10%,
+        hsl(0 92% 58%) 12%
       ),
-      repeating-linear-gradient(
-        calc(var(--holo-angle) * -1),
-        transparent 0 var(--holo-cell),
-        var(--holo-gutter-color) 0 calc(var(--holo-cell) + var(--holo-gutter))
+      radial-gradient(
+        90% 70% at calc(var(--mx) * 100%) calc(var(--my) * 100%),
+        hsl(195 80% 68% / 0.42),
+        transparent 58%
       ),
-      linear-gradient(135deg, #1a1a22, #3a3a48);
+      radial-gradient(
+        75% 90% at calc((1 - var(--mx)) * 100%) calc((1 - var(--my)) * 100%),
+        hsl(320 72% 64% / 0.36),
+        transparent 52%
+      );
+    background-size:
+      240% 240%,
+      160% 160%,
+      180% 180%;
+    background-position:
+      calc(var(--mx) * 100%) calc(var(--my) * 100%),
+      calc(var(--mx) * 80%) calc(var(--my) * 80%),
+      calc(var(--my) * 70%) calc(var(--mx) * 70%);
+    background-blend-mode: hue, screen, normal;
+    filter: saturate(1.4) contrast(1.15) brightness(0.85);
   }
 
-  [data-holo='true'] .holo-foil::before {
+  [data-holo='true'] .holo-foil::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: conic-gradient(
-      from calc(var(--mx) * 240deg),
-      hsl(8 95% 60%),
-      hsl(48 95% 58%),
-      hsl(165 95% 55%),
-      hsl(198 95% 60%),
-      hsl(272 95% 62%),
-      hsl(318 95% 60%),
-      hsl(8 95% 60%)
-    );
-    background-size: 160% 160%;
-    background-position: calc(var(--mx) * 80%) calc(var(--my) * 80%);
-    mix-blend-mode: plus-lighter;
-    opacity: var(--holo-foil-opacity);
-    filter: hue-rotate(var(--holo-hue-shift)) contrast(1.22) brightness(0.92);
-    -webkit-mask-image:
-      repeating-linear-gradient(
-        var(--holo-angle),
-        #000 0 var(--holo-cell),
-        transparent 0 calc(var(--holo-cell) + var(--holo-gutter))
-      ),
-      repeating-linear-gradient(
-        calc(var(--holo-angle) * -1),
-        #000 0 var(--holo-cell),
-        transparent 0 calc(var(--holo-cell) + var(--holo-gutter))
-      );
-    mask-image:
-      repeating-linear-gradient(
-        var(--holo-angle),
-        #000 0 var(--holo-cell),
-        transparent 0 calc(var(--holo-cell) + var(--holo-gutter))
-      ),
-      repeating-linear-gradient(
-        calc(var(--holo-angle) * -1),
-        #000 0 var(--holo-cell),
-        transparent 0 calc(var(--holo-cell) + var(--holo-gutter))
-      );
-    -webkit-mask-composite: source-in;
-    mask-composite: intersect;
-  }
-
-  @supports not (mix-blend-mode: plus-lighter) {
-    [data-holo='true'] .holo-foil::before {
-      mix-blend-mode: screen;
-    }
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 140px 140px;
+    mix-blend-mode: screen;
+    opacity: 0.16;
+    pointer-events: none;
   }
 
   [data-holo='true'] .sticker-art {
@@ -610,67 +584,25 @@
 
   [data-holo='true'] .holo-sheen {
     z-index: 2;
-    background:
-      radial-gradient(
-        38% 38% at calc(var(--mx) * 100%) calc(var(--my) * 100%),
-        rgb(255 248 230 / 0.9),
-        transparent 70%
-      ),
-      linear-gradient(
-        118deg,
-        transparent 38%,
-        rgb(255 255 255 / 0.55) 50%,
-        transparent 62%
-      );
-    mix-blend-mode: color-dodge;
-    opacity: calc(var(--holo-sparkle) * 0.6);
-    filter: contrast(1.3) brightness(0.9);
-  }
-
-  @supports not (mix-blend-mode: color-dodge) {
-    [data-holo='true'] .holo-sheen {
-      mix-blend-mode: plus-lighter;
-    }
+    background: radial-gradient(
+      circle at calc(var(--mx) * 100%) calc(var(--my) * 100%),
+      hsl(0 0% 100% / 0.12),
+      transparent 45%
+    );
+    mix-blend-mode: screen;
   }
 
   [data-holo='true'] .holo-sparkle {
     z-index: 2;
     width: 100%;
     height: 100%;
-    mix-blend-mode: plus-lighter;
-    opacity: calc(var(--holo-sparkle) * 0.55);
-  }
-
-  @supports not (mix-blend-mode: plus-lighter) {
-    [data-holo='true'] .holo-sparkle {
-      mix-blend-mode: screen;
-    }
+    mix-blend-mode: screen;
+    opacity: 0.35;
   }
 
   [data-holo='true'] .holo-edge {
     z-index: 3;
-    background: conic-gradient(
-      from calc(var(--mx) * 360deg - 50deg),
-      transparent 0 38%,
-      rgb(255 255 255 / 0.95) 50%,
-      transparent 62% 100%
-    );
-    mix-blend-mode: screen;
-    opacity: 0.82;
-    filter:
-      drop-shadow(var(--holo-edge-width) 0 0 rgb(255 255 255 / 0.55))
-      drop-shadow(calc(var(--holo-edge-width) * -1) 0 0 rgb(255 255 255 / 0.35))
-      drop-shadow(0 var(--holo-edge-width) 0 rgb(255 255 255 / 0.45))
-      drop-shadow(0 calc(var(--holo-edge-width) * -1) 0 rgb(255 255 255 / 0.3));
-  }
-
-  [data-holo='true'] .holo-edge::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.28);
-    mix-blend-mode: soft-light;
-    opacity: 0.12;
+    box-shadow: inset 0 0 0 2.5px rgb(245 248 252 / 0.42);
   }
 
   [data-holo='true'] .d20-face {
@@ -689,8 +621,12 @@
       transform: none;
     }
 
-    [data-holo='true'] .holo-sheen {
-      opacity: 0.22;
+    [data-holo='true'] .holo-foil {
+      background-position: 32% 40%, 28% 36%, 60% 55%;
+    }
+
+    [data-holo='true'] .holo-sparkle {
+      display: none;
     }
   }
 

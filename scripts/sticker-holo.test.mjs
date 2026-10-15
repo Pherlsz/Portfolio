@@ -42,18 +42,22 @@ test('DEV query overrides do not write sessionStorage', () => {
   );
 });
 
-test('diamond lattice stack is behind ink, not soft-light foil', () => {
-  assert.match(cssSrc, /--holo-angle: 45deg/);
-  assert.match(cssSrc, /--holo-ink: 0\.6/);
-  assert.match(cssSrc, /mix-blend-mode: plus-lighter/);
-  assert.match(cssSrc, /mix-blend-mode: color-dodge/);
+test('recipe #1: prismatic film behind ink, no gutters or linear stripe', () => {
+  assert.match(cssSrc, /--holo-ink: 0\.66/);
+  assert.match(cssSrc, /repeating-linear-gradient\(\s*115deg/);
+  assert.match(cssSrc, /perspective\(800px\)/);
+  assert.match(cssSrc, /feTurbulence/);
+  assert.match(cssSrc, /hsl\(0 0% 100% \/ 0\.12\)/);
   assert.match(stickersSrc, /className="holo-foil"/);
   assert.match(stickersSrc, /className="holo-sheen"/);
-  assert.match(stickersSrc, /className="holo-edge"/);
   assert.match(sparkleSrc, /getContext\('2d'/);
   assert.doesNotMatch(sparkleSrc, /getContext\(\s*['"]webgl/i);
-  const foilBlock = cssSrc.slice(cssSrc.indexOf('.holo-foil {'), cssSrc.indexOf('.holo-foil::before'));
-  assert.doesNotMatch(foilBlock, /soft-light/);
+  assert.doesNotMatch(cssSrc, /holo-gutter/);
+  const foilBlock = cssSrc.slice(cssSrc.indexOf('.holo-foil {'), cssSrc.indexOf('.holo-foil::after'));
+  assert.doesNotMatch(foilBlock, /soft-light|color-dodge|mix-blend-mode/);
+  const sheenBlock = cssSrc.slice(cssSrc.indexOf('.holo-sheen {'), cssSrc.indexOf('.holo-sparkle {'));
+  assert.doesNotMatch(sheenBlock, /linear-gradient/);
+  assert.doesNotMatch(sheenBlock, /color-dodge|soft-light/);
 });
 
 test('clean die-cut rasters exist; cats keep dedicated holo masks', () => {
