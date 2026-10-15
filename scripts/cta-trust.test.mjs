@@ -42,6 +42,18 @@ test('indexable contato shell includes trustCopy', () => {
   assert.match(shell, /id="contato"/);
 });
 
+test('contact section uses one email pattern and a single copy control', () => {
+  const contact = readFileSync(new URL('../src/components/ContactSection.tsx', import.meta.url), 'utf8');
+  const ui = readFileSync(new URL('../src/components/ui.tsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(contact, /Falar por e-mail/);
+  assert.match(contact, /mailto:\$\{profile\.email\}/);
+  assert.match(contact, /CopyEmailButton/);
+  assert.match(contact, /label="Copiar e-mail"/);
+  assert.match(contact, /variant="primary"/);
+  assert.match(contact, /JobFitCta/);
+  assert.match(ui, /inline-flex items-center gap-1\.5 whitespace-nowrap/);
+});
+
 test('sticky header does not use solid primary CV button', () => {
   assert.doesNotMatch(headerSource, /btn-primary/);
   assert.match(headerSource, /variant="tertiary"/);
