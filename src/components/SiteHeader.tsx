@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download, Menu, MessageSquare, Moon, Sun, X } from 'lucide-react';
+import { Menu, MessageSquare, Moon, Sun, X } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
+import { CTA } from './CTA';
 
 const NAV = [
   { id: 'experiencia', label: 'Experiência' },
@@ -43,24 +44,46 @@ function useTheme() {
 
 const SECTION_IDS = ['inicio', ...NAV.map((item) => item.id)];
 
+function headerOffsetPx(): number {
+  const header = document.querySelector('header');
+  return (header?.getBoundingClientRect().height ?? 64) + 1;
+}
+
 function useActiveSection() {
   const [active, setActive] = useState<string | null>(null);
+  const raf = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const sync = () => {
-      const marker = window.innerHeight * 0.28;
+      const marker = headerOffsetPx();
+      const doc = document.documentElement;
+      const atBottom = window.innerHeight + window.scrollY >= doc.scrollHeight - 2;
       let current: string | null = null;
-      for (const id of SECTION_IDS) {
-        const section = document.getElementById(id);
-        if (section && section.getBoundingClientRect().top <= marker) current = id;
+
+      if (atBottom) {
+        current = SECTION_IDS[SECTION_IDS.length - 1];
+      } else {
+        for (const id of SECTION_IDS) {
+          const section = document.getElementById(id);
+          if (section && section.getBoundingClientRect().top <= marker) current = id;
+        }
       }
+
       const next = current && current !== 'inicio' ? current : null;
       setActive((prev) => (prev === next ? prev : next));
     };
 
+    const onScrollOrResize = () => {
+      if (raf.current !== undefined) return;
+      raf.current = window.requestAnimationFrame(() => {
+        raf.current = undefined;
+        sync();
+      });
+    };
+
     sync();
-    window.addEventListener('scroll', sync, { passive: true });
-    window.addEventListener('resize', sync);
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize);
     const root = document.getElementById('conteudo');
     let mutations: MutationObserver | undefined;
     if (root) {
@@ -72,9 +95,10 @@ function useActiveSection() {
     }
 
     return () => {
-      window.removeEventListener('scroll', sync);
-      window.removeEventListener('resize', sync);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
       mutations?.disconnect();
+      if (raf.current !== undefined) window.cancelAnimationFrame(raf.current);
     };
   }, []);
 
@@ -147,10 +171,15 @@ export function SiteHeader({ onOpenAssistant }: { onOpenAssistant: () => void })
             <MessageSquare className="size-4" aria-hidden="true" />
             Perguntar
           </button>
-          <a href={profile.cvUrl} download className="btn btn-primary hidden min-h-10 px-4 text-sm sm:inline-flex">
-            <Download className="size-4" aria-hidden="true" />
-            Baixar CV
-          </a>
+          <CTA
+            variant="tertiary"
+            href={profile.cvUrl}
+            download
+            className="hidden min-h-10 px-2 text-sm sm:inline-flex"
+            aria-label="Baixar CV (PDF)"
+          >
+            CV (PDF)
+          </CTA>
           <button
             type="button"
             onClick={toggleTheme}
@@ -191,10 +220,15 @@ export function SiteHeader({ onOpenAssistant }: { onOpenAssistant: () => void })
             <MessageSquare className="size-4" aria-hidden="true" />
             Perguntar
           </button>
-          <a href={profile.cvUrl} download className="btn btn-primary mt-4 w-full justify-center">
-            <Download className="size-4" aria-hidden="true" />
-            Baixar CV (PDF)
-          </a>
+          <CTA
+            variant="tertiary"
+            href={profile.cvUrl}
+            download
+            className="mt-4 w-full justify-center text-sm"
+            aria-label="Baixar CV (PDF)"
+          >
+            CV (PDF)
+          </CTA>
         </nav>
       )}
     </header>

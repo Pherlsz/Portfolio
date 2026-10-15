@@ -81,7 +81,12 @@ export default function App() {
         </div>
         <div id="contato" className="scroll-mt-20">
           <Suspense fallback={<div className="min-h-[24rem]" />}>
-            <ContactSection />
+            <ContactSection
+              onOpenJobFit={() => {
+                setAssistantMode('jobfit');
+                setAssistantOpen(true);
+              }}
+            />
           </Suspense>
         </div>
       </main>

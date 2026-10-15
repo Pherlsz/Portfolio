@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowUpRight, Briefcase, Check, Copy, MessageSquare, RotateCcw, Send, Sparkles, X } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
+import { CTA } from './CTA';
 import {
   JOB_DESCRIPTION_LIMIT,
   QUESTION_LIMIT,
@@ -252,18 +253,18 @@ export function AssistantPanel({
   return (
     <>
       {!open && (
-        <button
-          type="button"
+        <CTA
+          variant="secondary"
           onClick={() => onOpenChange(true)}
           aria-haspopup="dialog"
           aria-expanded={false}
           aria-controls="assistente"
-          className="no-print btn btn-primary fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-30 shadow-lg shadow-neutral-950/20"
+          className="no-print fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-30 shadow-lg shadow-neutral-950/20"
+          icon={<Sparkles className="size-4" aria-hidden="true" />}
         >
-          <Sparkles className="size-4" aria-hidden="true" />
           <span className="sm:hidden">Perguntar</span>
           <span className="hidden sm:inline">Pergunte sobre o Pedro</span>
-        </button>
+        </CTA>
       )}
 
       <dialog
@@ -433,14 +434,15 @@ export function AssistantPanel({
               placeholder="Cole aqui os requisitos da vaga…"
               className="mt-2 block max-h-[calc(8lh+2rem)] min-h-[calc(4lh+2rem)] w-full resize-y overflow-y-auto rounded-2xl border border-control bg-paper p-4 text-[0.9375rem] leading-relaxed placeholder:text-muted"
             />
-            <button
+            <CTA
               type="submit"
+              variant="secondary"
               disabled={!jobDescription.trim() || isLoading}
-              className="btn btn-primary mt-3 w-full justify-center disabled:opacity-50"
+              className="mt-3 w-full"
+              icon={<Sparkles className="size-4" aria-hidden="true" />}
             >
-              <Sparkles className="size-4" aria-hidden="true" />
               Analisar fit
-            </button>
+            </CTA>
           </form>
         ) : (
           <div className="shrink-0 border-t border-line p-4">

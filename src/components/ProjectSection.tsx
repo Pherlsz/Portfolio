@@ -1,5 +1,6 @@
 import { ArrowUpRight, Github } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA, featuredProjectUrl } from '../data/portfolioData';
+import { CTA } from './CTA';
 import { SectionHeading } from './ui';
 
 function GymkhanaCorePoster() {
@@ -94,16 +95,17 @@ export function ProjectSection() {
             <p className="mt-2 text-[0.9375rem] text-ink-soft">{project.tagline}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <a
+            <CTA
+              variant="secondary"
               href={project.repoUrl}
               target="_blank"
               rel="noreferrer"
               aria-label={`Ver código-fonte de ${project.name} no GitHub`}
-              className="btn btn-primary min-h-10 px-4"
+              className="min-h-10 px-4"
+              icon={<Github className="size-4" aria-hidden="true" />}
             >
-              <Github className="size-4" aria-hidden="true" />
               Código no GitHub
-            </a>
+            </CTA>
           </div>
         </div>
       </article>

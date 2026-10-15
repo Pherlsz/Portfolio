@@ -103,6 +103,8 @@ export interface PortfolioData {
     headline: string;
     /** Trechos entre ==sinais== aparecem com marca-texto. */
     summary: string;
+    /** Copy de confiança / senioridade (Hero e Contato). */
+    trustCopy: string;
     status: string;
     location: string;
     seniority: string;
@@ -134,7 +136,9 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     jobTitle: 'Software Engineer · Frontend',
     headline: 'Transformo fluxos complexos em interfaces rápidas, acessíveis e fáceis de manter.',
     summary:
-      'Mais de 4 anos em produção com React, Next.js e TypeScript: um design system com ==30+ componentes WCAG 2.1 AA==, listas com ==5.000+ registros== sem travar e IA integrada a fluxos reais de negócio.',
+      'Cerca de 5 anos em produção com React, Next.js e TypeScript: um design system com ==30+ componentes WCAG 2.1 AA==, listas com ==5.000+ registros== sem travar e IA integrada a fluxos reais de negócio.',
+    trustCopy:
+      'São cerca de 5 anos construindo front-end em produção, de estágio a júnior, usando IA no dia a dia para entregar mais e melhor. Estou aberto a vagas pleno quando houver fit.',
     status: 'Aberto a oportunidades',
     location: 'Rio Grande do Sul, Brasil',
     seniority: 'Júnior/Pleno',

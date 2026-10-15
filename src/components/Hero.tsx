@@ -1,7 +1,9 @@
 import { lazy, Suspense } from 'react';
-import { ArrowDown, Download, Github, Linkedin } from 'lucide-react';
+import { Download, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
-import { CopyEmailButton, Marked } from './ui';
+import { CTA } from './CTA';
+import { JobFitCta } from './JobFitCta';
+import { Marked } from './ui';
 
 const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
@@ -41,16 +43,26 @@ export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
         <p className="mt-4 max-w-xl text-ink-soft">
           <Marked text={profile.summary} />
         </p>
+        <p className="mt-4 max-w-xl text-ink-soft">{profile.trustCopy}</p>
 
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <a href={profile.cvUrl} download className="btn btn-primary">
-            <Download className="size-4" aria-hidden="true" />
+        <div className="mt-8 flex w-full max-w-xl flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
+          <CTA
+            variant="primary"
+            href={profile.cvUrl}
+            download
+            className="w-full sm:w-auto"
+            icon={<Download className="size-4" aria-hidden="true" />}
+          >
             Baixar CV (PDF)
-          </a>
-          <a href="#experiencia" className="btn btn-ghost">
-            Ver experiência
-            <ArrowDown className="size-4" aria-hidden="true" />
-          </a>
+          </CTA>
+          <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
+          <CTA
+            variant="tertiary"
+            href={`mailto:${profile.email}`}
+            className="w-full sm:w-auto justify-center sm:justify-start"
+          >
+            Falar por e-mail
+          </CTA>
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
@@ -72,12 +84,7 @@ export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
           >
             <Github className="size-4" aria-hidden="true" />
           </a>
-          <CopyEmailButton email={profile.email} className="btn btn-ghost px-4 font-mono text-sm font-normal" />
         </div>
-
-        <button type="button" onClick={onOpenJobFit} className="link mt-6 text-[0.9375rem] font-semibold">
-          Recrutando? Compare a sua vaga com o meu perfil
-        </button>
       </div>
 
       <Suspense
