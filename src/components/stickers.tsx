@@ -1,5 +1,17 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type RefObject
+} from 'react';
 import { animate, MotionConfig, motion, useMotionValue } from 'motion/react';
+import {
+  HOLO_ELIGIBLE_LID_STICKER_IDS,
+  isStickerHoloActive,
+  useHoloRoulette
+} from '../utils/stickerHolo';
 
 export type StickerId =
   | 'morcega'
@@ -148,13 +160,16 @@ function StickerArt({
   reaction,
   face,
   showCaption = true,
-  eager = false
+  eager = false,
+  holoFoil = false
 }: {
   id: StickerId;
   reaction: Reaction | null;
   face?: number;
   showCaption?: boolean;
   eager?: boolean;
+  /** Lid-only holographic foil layers (masked to sticker art). */
+  holoFoil?: boolean;
 }) {
   const def = STICKERS[id];
   return (
@@ -173,8 +188,14 @@ function StickerArt({
           draggable={false}
           decoding="async"
           loading={eager ? 'eager' : 'lazy'}
-          className="sticker-art block h-auto w-full select-none"
+          className="sticker-art relative z-0 block h-auto w-full select-none"
         />
+        {holoFoil && (
+          <>
+            <span className="sticker-holo-layer sticker-holo-foil" aria-hidden="true" />
+            <span className="sticker-holo-layer sticker-holo-shine" aria-hidden="true" />
+          </>
+        )}
         {id === 'd20' && (
           <span className="d20-face" aria-hidden="true">
             {face ?? 20}
@@ -210,12 +231,14 @@ function LidSticker({
   slot,
   lidRef,
   arrangement,
+  holoActive,
   onFront,
   onReact
 }: {
   slot: Slot;
   lidRef: RefObject<HTMLDivElement | null>;
   arrangement: Arrangement;
+  holoActive: boolean;
   onFront: () => void;
   onReact: (message: string) => void;
 }) {
@@ -301,23 +324,30 @@ function LidSticker({
       onKeyDown={nudge}
       aria-label={def.label}
       aria-describedby="tampa-ajuda"
-      className="group pointer-events-auto absolute cursor-grab touch-none active:cursor-grabbing"
+      data-sticker-id={slot.id}
+      data-holo={holoActive ? 'true' : undefined}
+      className={`group pointer-events-auto absolute cursor-grab touch-none active:cursor-grabbing${holoActive ? ' sticker-holo' : ''}`}
       style={{
         x,
         y,
         rotate,
         left: `${slot.x}%`,
         top: `${slot.y}%`,
-        width: `${slot.w}%`
+        width: `${slot.w}%`,
+        ...(holoActive
+          ? ({ '--sticker-holo-mask': `url("${def.src}")` } as CSSProperties)
+          : undefined)
       }}
     >
-      <StickerArt id={slot.id} reaction={reaction} face={face} eager />
+      <StickerArt id={slot.id} reaction={reaction} face={face} eager holoFoil={holoActive} />
     </motion.button>
   );
 }
 
 export function StickerLid() {
   const lidRef = useRef<HTMLDivElement>(null);
+  // Holo: 1/100/tab all three cats together, or DEV ?holo=1|all — see rollHolo() in stickerHolo.ts
+  const holo = useHoloRoulette();
   const [order, setOrder] = useState<StickerId[]>(() => LID_LAYOUT.map((slot) => slot.id));
   const [arrangement, setArrangement] = useState<Arrangement>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -341,7 +371,10 @@ export function StickerLid() {
     <div className="no-print">
       <div className="notebook relative z-10 aspect-[16/10] w-full">
         <div ref={lidRef} className="lid absolute inset-0">
-          <ul aria-label="Stickers colados na tampa do notebook">
+          <ul
+            aria-label="Stickers colados na tampa do notebook"
+            data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
+          >
             {LID_LAYOUT.map((slot) => (
               <li
                 key={slot.id}
@@ -352,6 +385,7 @@ export function StickerLid() {
                   slot={slot}
                   lidRef={lidRef}
                   arrangement={arrangement}
+                  holoActive={isStickerHoloActive(holo, slot.id, HOLO_ELIGIBLE_LID_STICKER_IDS)}
                   onFront={() => bringToFront(slot.id)}
                   onReact={setAnnouncement}
                 />

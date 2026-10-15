@@ -451,6 +451,141 @@
     container-type: inline-size;
   }
 
+  @keyframes sticker-holo-shift {
+    from {
+      background-position: 12% 38%;
+    }
+    to {
+      background-position: 88% 62%;
+    }
+  }
+
+  @keyframes sticker-holo-shine {
+    0% {
+      background-position: 130% 0;
+    }
+    100% {
+      background-position: -30% 0;
+    }
+  }
+
+  @keyframes sticker-holo-glitter {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 18px 14px;
+    }
+  }
+
+  [data-holo='true'] .sticker-face-host {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  [data-holo='true'] .sticker-holo-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    -webkit-mask-image: var(--sticker-holo-mask);
+    mask-image: var(--sticker-holo-mask);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-mode: alpha;
+    mask-mode: alpha;
+  }
+
+  [data-holo='true'] .sticker-holo-foil {
+    background-image:
+      repeating-linear-gradient(
+        133deg,
+        hsl(320 42% 90% / 0.7) 0 6%,
+        hsl(265 38% 88% / 0.55) 6% 12%,
+        hsl(205 40% 89% / 0.6) 12% 18%,
+        hsl(155 35% 88% / 0.5) 18% 24%,
+        hsl(48 42% 90% / 0.55) 24% 30%,
+        hsl(320 42% 90% / 0.7) 30% 36%
+      ),
+      repeating-linear-gradient(
+        -58deg,
+        transparent 0 5px,
+        rgb(255 255 255 / 0.07) 5px 6px,
+        transparent 6px 11px
+      );
+    background-size:
+      360% 360%,
+      14px 14px;
+    background-position:
+      20% 45%,
+      0 0;
+    mix-blend-mode: color-dodge;
+    opacity: 0.34;
+    filter: brightness(1.02) contrast(1.06) saturate(0.92);
+    animation:
+      sticker-holo-shift 16s ease-in-out infinite alternate,
+      sticker-holo-glitter 9s linear infinite;
+  }
+
+  @supports not (mix-blend-mode: color-dodge) {
+    [data-holo='true'] .sticker-holo-foil {
+      mix-blend-mode: overlay;
+      opacity: 0.38;
+    }
+  }
+
+  [data-holo='true'] .sticker-holo-shine {
+    background: linear-gradient(
+      118deg,
+      transparent 18%,
+      rgb(255 255 255 / 0.12) 38%,
+      rgb(255 255 255 / 0.28) 50%,
+      rgb(255 255 255 / 0.12) 62%,
+      transparent 82%
+    );
+    background-size: 220% 100%;
+    background-repeat: no-repeat;
+    mix-blend-mode: soft-light;
+    opacity: 0.85;
+    animation: sticker-holo-shine 8s ease-in-out infinite;
+  }
+
+  @supports not (mix-blend-mode: soft-light) {
+    [data-holo='true'] .sticker-holo-shine {
+      mix-blend-mode: screen;
+      opacity: 0.35;
+    }
+  }
+
+  [data-holo='true'] .d20-face {
+    z-index: 2;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-holo='true'] .sticker-holo-foil,
+    [data-holo='true'] .sticker-holo-shine {
+      animation: none;
+    }
+
+    [data-holo='true'] .sticker-holo-foil {
+      background-position:
+        38% 48%,
+        4px 3px;
+      filter: brightness(1.02) contrast(1.06) saturate(0.92);
+      opacity: 0.36;
+    }
+
+    [data-holo='true'] .sticker-holo-shine {
+      background-position: 48% 0;
+      opacity: 0.55;
+    }
+  }
+
   .d20-face {
     pointer-events: none;
     position: absolute;
