@@ -469,66 +469,98 @@ export const CONTACT_API = {
   }
 } as const;
 
+export const SITE_ORIGIN = 'https://pherls.dev';
+export const PROFILE_IMAGE_PATH = '/og.png';
+/** Revisão pública do perfil. Atualize quando os fatos do currículo mudarem. */
+export const PROFILE_UPDATED = '2026-10-15';
+
 export function generateJsonLdSchema(data: PortfolioData): object {
   const { profile, project, featuredProjects } = data;
+  const pageUrl = `${SITE_ORIGIN}/`;
+  const personId = `${SITE_ORIGIN}/#person`;
+  const description = `${profile.headline} ${plainText(profile.summary)}`;
+  const hasPart = [
+    ...featuredProjects.map((item) =>
+      item.repoUrl
+        ? {
+            '@type': 'SoftwareSourceCode',
+            name: item.name,
+            description: item.tagline,
+            codeRepository: item.repoUrl,
+            url: item.href
+          }
+        : {
+            '@type': 'WebApplication',
+            name: item.name,
+            description: item.tagline,
+            url: item.href
+          }
+    ),
+    {
+      '@type': 'SoftwareSourceCode',
+      name: project.name,
+      description: project.tagline,
+      codeRepository: project.repoUrl,
+      programmingLanguage: project.language,
+      version: project.version
+    }
+  ];
+
   return {
     '@context': 'https://schema.org',
-    '@type': 'ProfilePage',
-    mainEntity: {
-      '@type': 'Person',
-      name: profile.name,
-      alternateName: profile.shortName,
-      email: `mailto:${profile.email}`,
-      jobTitle: profile.jobTitle,
-      description: `${profile.headline} ${plainText(profile.summary)}`,
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: 'Porto Alegre',
-        addressRegion: 'RS',
-        addressCountry: 'BR'
-      },
-      sameAs: [profile.linkedin, profile.github],
-      alumniOf: data.education.map((e) => ({ '@type': 'EducationalOrganization', name: e.school })),
-      knowsAbout: data.skills.flatMap(skillNames),
-      knowsLanguage: data.languages.map((l) => l.code),
-      hasCredential: data.certifications.map((cert) => ({
-        '@type': 'EducationalOccupationalCredential',
-        name: cert.name,
-        recognizedBy: { '@type': 'Organization', name: cert.issuer },
-        dateCreated: cert.year,
-        ...(cert.href ? { url: cert.href } : {})
-      }))
-    },
-    hasPart: [
-      ...featuredProjects.map((item) =>
-        item.repoUrl
-          ? {
-              '@type': 'SoftwareSourceCode',
-              name: item.name,
-              description: item.tagline,
-              codeRepository: item.repoUrl,
-              url: item.href
-            }
-          : {
-              '@type': 'WebApplication',
-              name: item.name,
-              description: item.tagline,
-              url: item.href
-            }
-      ),
+    '@graph': [
       {
-        '@type': 'SoftwareSourceCode',
-        name: project.name,
-        description: project.tagline,
-        codeRepository: project.repoUrl,
-        programmingLanguage: project.language,
-        version: project.version
+        '@type': 'ProfilePage',
+        '@id': `${SITE_ORIGIN}/#profilepage`,
+        url: pageUrl,
+        dateModified: PROFILE_UPDATED,
+        mainEntity: {
+          '@type': 'Person',
+          '@id': personId,
+          name: profile.name,
+          alternateName: profile.shortName,
+          url: pageUrl,
+          image: {
+            '@type': 'ImageObject',
+            url: `${SITE_ORIGIN}${PROFILE_IMAGE_PATH}`,
+            width: 1200,
+            height: 630
+          },
+          email: `mailto:${profile.email}`,
+          jobTitle: profile.jobTitle,
+          description,
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Porto Alegre',
+            addressRegion: 'RS',
+            addressCountry: 'BR'
+          },
+          sameAs: [profile.linkedin, profile.github],
+          alumniOf: data.education.map((e) => ({ '@type': 'EducationalOrganization', name: e.school })),
+          knowsAbout: data.skills.flatMap(skillNames),
+          knowsLanguage: data.languages.map((l) => l.code),
+          hasCredential: data.certifications.map((cert) => ({
+            '@type': 'EducationalOccupationalCredential',
+            name: cert.name,
+            recognizedBy: { '@type': 'Organization', name: cert.issuer },
+            dateCreated: cert.year,
+            ...(cert.href ? { url: cert.href } : {})
+          }))
+        },
+        hasPart
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_ORIGIN}/#website`,
+        url: pageUrl,
+        name: `${profile.name} · ${profile.role}`,
+        description,
+        inLanguage: 'pt-BR',
+        publisher: { '@id': personId }
       }
     ]
   };
 }
-
-export const SITE_ORIGIN = 'https://pherls.dev';
 
 function mdItem(label: string, href: string, note?: string): string {
   return note ? `- [${label}](${href}): ${note}` : `- [${label}](${href})`;
@@ -546,6 +578,9 @@ export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): stri
     mdItem('Currículo HTML', `${origin}/cv`, 'Versão para impressão'),
     mdItem('Currículo PDF', `${origin}${profile.cvUrl}`, 'Download direto'),
     mdItem('ai.json', `${origin}/ai.json`, 'Perfil estruturado para agentes'),
+    mdItem('pedro.md', `${origin}/pedro.md`, 'Perfil em Markdown'),
+    mdItem('AGENTS.md', `${origin}/AGENTS.md`, 'Como agentes devem ler este site e enviar contato'),
+    mdItem('resume.json', `${origin}/resume.json`, 'Currículo em JSON'),
     mdItem('Mapa do site', `${origin}/sitemap.xml`),
     '',
     '## Contato',

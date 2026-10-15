@@ -150,7 +150,7 @@ export function AiFriendlyInspectorModal({
           <>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-[0.9375rem] text-ink-soft">
-                Schema.org Person embutido no &lt;head&gt; no build e exposto em /ai.json.
+                Schema.org ProfilePage, Person e WebSite embutidos no &lt;head&gt; no build e expostos em /ai.json.
               </p>
               {copyButton(jsonLd, 'Copiar JSON-LD')}
             </div>
