@@ -5,30 +5,41 @@ function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value));
 }
 
+function applyPointer(el: HTMLElement, clientX: number, clientY: number, rect: DOMRect): void {
+  const mx = clamp01((clientX - rect.left) / Math.max(rect.width, 1));
+  const my = clamp01((clientY - rect.top) / Math.max(rect.height, 1));
+  const hyp = Math.min(1, Math.hypot(mx - 0.5, my - 0.5) * 2);
+  el.style.setProperty('--mx', mx.toFixed(3));
+  el.style.setProperty('--my', my.toFixed(3));
+  el.style.setProperty('--hyp', hyp.toFixed(3));
+  el.dataset.holoState = 'tilt';
+}
+
+function setIdle(el: HTMLElement): void {
+  el.dataset.holoState = 'idle';
+  el.style.removeProperty('--mx');
+  el.style.removeProperty('--my');
+  el.style.removeProperty('--hyp');
+}
+
 /**
- * One passive pointermove on the lid. Writes --mx/--my on the holo container
- * (inherited by hosts). No getBoundingClientRect inside the rAF.
+ * Pointer-relative --mx/--my/--hyp on each holographic sticker.
+ * Hover and mouse-drag both enter `tilt` (3D + strong foil). Touch skips tilt.
  */
-export function useHoloPointer(lidRef: RefObject<HTMLElement | null>, enabled: boolean): void {
+export function useStickerHoloPointer(ref: RefObject<HTMLElement | null>, enabled: boolean): void {
   useEffect(() => {
     if (!enabled) return;
     if (prefersReducedMotion()) return;
-    const root = lidRef.current;
-    if (!root) return;
+    const el = ref.current;
+    if (!el) return;
 
-    const container = root.querySelector<HTMLElement>('[data-sticker-holo]');
-    const target = container ?? root;
-    let rect = target.getBoundingClientRect();
+    let rect = el.getBoundingClientRect();
     let frame = 0;
+    let dragging = false;
+    let active = false;
 
     const cacheRect = () => {
-      rect = target.getBoundingClientRect();
-    };
-
-    const setIdle = () => {
-      target.dataset.holoState = 'idle';
-      target.style.removeProperty('--mx');
-      target.style.removeProperty('--my');
+      rect = el.getBoundingClientRect();
     };
 
     const onMove = (event: PointerEvent) => {
@@ -37,35 +48,68 @@ export function useHoloPointer(lidRef: RefObject<HTMLElement | null>, enabled: b
       const { clientX, clientY } = event;
       frame = requestAnimationFrame(() => {
         frame = 0;
-        const mx = clamp01((clientX - rect.left) / Math.max(rect.width, 1));
-        const my = clamp01((clientY - rect.top) / Math.max(rect.height, 1));
-        target.style.setProperty('--mx', mx.toFixed(3));
-        target.style.setProperty('--my', my.toFixed(3));
-        target.dataset.holoState = 'tilt';
+        if (dragging) cacheRect();
+        applyPointer(el, clientX, clientY, rect);
       });
     };
 
+    const onEnter = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') return;
+      cacheRect();
+      active = true;
+      applyPointer(el, event.clientX, event.clientY, rect);
+    };
+
     const onLeave = () => {
+      if (dragging) return;
+      active = false;
       if (frame) {
         cancelAnimationFrame(frame);
         frame = 0;
       }
-      setIdle();
+      setIdle(el);
     };
 
-    setIdle();
-    target.addEventListener('pointerenter', cacheRect);
-    target.addEventListener('pointermove', onMove, { passive: true });
-    target.addEventListener('pointerleave', onLeave);
+    const onDown = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') return;
+      dragging = true;
+      cacheRect();
+      applyPointer(el, event.clientX, event.clientY, rect);
+    };
+
+    const onUp = (event: PointerEvent) => {
+      dragging = false;
+      cacheRect();
+      const over =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+      if (!over) {
+        active = false;
+        setIdle(el);
+      }
+    };
+
+    setIdle(el);
+    el.addEventListener('pointerenter', onEnter);
+    el.addEventListener('pointermove', onMove, { passive: true });
+    el.addEventListener('pointerleave', onLeave);
+    el.addEventListener('pointerdown', onDown);
+    el.addEventListener('pointerup', onUp);
+    el.addEventListener('pointercancel', onUp);
     window.addEventListener('resize', cacheRect);
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
-      target.removeEventListener('pointerenter', cacheRect);
-      target.removeEventListener('pointermove', onMove);
-      target.removeEventListener('pointerleave', onLeave);
+      el.removeEventListener('pointerenter', onEnter);
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerleave', onLeave);
+      el.removeEventListener('pointerdown', onDown);
+      el.removeEventListener('pointerup', onUp);
+      el.removeEventListener('pointercancel', onUp);
       window.removeEventListener('resize', cacheRect);
-      setIdle();
+      setIdle(el);
     };
-  }, [enabled, lidRef]);
+  }, [enabled, ref]);
 }

@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { animate, MotionConfig, motion, useMotionValue } from 'motion/react';
 import { HoloSparkleCanvas } from './HoloSparkleCanvas';
-import { useHoloPointer } from '../utils/holoPointer';
+import { useStickerHoloPointer } from '../utils/holoPointer';
 import {
   HOLO_ELIGIBLE_LID_STICKER_IDS,
   holoMaskUrl,
@@ -257,6 +257,7 @@ function LidSticker({
   const rotate = useMotionValue(slot.rotate);
   const dragged = useRef(false);
   const { reaction, react, face } = useStickerReaction(slot.id);
+  useStickerHoloPointer(ref, holoActive);
 
   const room = () => {
     const lid = lidRef.current?.getBoundingClientRect();
@@ -355,7 +356,6 @@ export function StickerLid() {
   const lidRef = useRef<HTMLDivElement>(null);
   // Holo v2: 1/100/tab all three cats, or DEV ?holo=1|all (no storage write) — stickerHolo.ts
   const holo = useHoloRoulette();
-  useHoloPointer(lidRef, holo.mode === 'all');
   const [order, setOrder] = useState<StickerId[]>(() => LID_LAYOUT.map((slot) => slot.id));
   const [arrangement, setArrangement] = useState<Arrangement>(null);
   const [announcement, setAnnouncement] = useState('');

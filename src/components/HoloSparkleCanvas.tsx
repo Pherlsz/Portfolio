@@ -30,8 +30,7 @@ export function HoloSparkleCanvas() {
     let visible = document.visibilityState === 'visible';
     let onscreen = true;
 
-    const tilting = () =>
-      host.closest('[data-sticker-holo]')?.getAttribute('data-holo-state') === 'tilt';
+    const tilting = () => host.getAttribute('data-holo-state') === 'tilt';
 
     const resize = () => {
       const box = canvas.getBoundingClientRect();
@@ -92,8 +91,7 @@ export function HoloSparkleCanvas() {
     const mo = new MutationObserver(() => {
       if (tilting() && visible && onscreen && !raf) raf = requestAnimationFrame(loop);
     });
-    const root = host.closest('[data-sticker-holo]');
-    if (root) mo.observe(root, { attributes: true, attributeFilter: ['data-holo-state'] });
+    mo.observe(host, { attributes: true, attributeFilter: ['data-holo-state'] });
 
     return () => {
       if (raf) cancelAnimationFrame(raf);

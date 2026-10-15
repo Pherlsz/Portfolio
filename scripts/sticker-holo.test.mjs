@@ -42,22 +42,28 @@ test('DEV query overrides do not write sessionStorage', () => {
   );
 });
 
-test('recipe #1: prismatic film behind ink, no gutters or linear stripe', () => {
-  assert.match(cssSrc, /--holo-ink: 0\.66/);
-  assert.match(cssSrc, /repeating-linear-gradient\(\s*115deg/);
+test('simey v/vmax stack: color-dodge rainbow, soft glare, tilt, no gutters or white stripe', () => {
+  assert.match(cssSrc, /--holo-grain:/);
+  assert.match(cssSrc, /mix-blend-mode: color-dodge/);
+  assert.match(cssSrc, /mix-blend-mode: soft-light/);
   assert.match(cssSrc, /perspective\(800px\)/);
-  assert.match(cssSrc, /feTurbulence/);
-  assert.match(cssSrc, /hsl\(0 0% 100% \/ 0\.12\)/);
+  assert.match(cssSrc, /rotateY\(/);
+  assert.match(cssSrc, /rotateX\(/);
+  assert.match(cssSrc, /--holo-tilt-max: 16deg/);
+  assert.match(cssSrc, /mask-composite: exclude/);
   assert.match(stickersSrc, /className="holo-foil"/);
   assert.match(stickersSrc, /className="holo-sheen"/);
+  assert.match(stickersSrc, /useStickerHoloPointer/);
+  assert.match(pointerSrc, /dataset\.holoState = 'tilt'/);
+  assert.match(pointerSrc, /pointerdown/);
   assert.match(sparkleSrc, /getContext\('2d'/);
+  assert.match(sparkleSrc, /host\.getAttribute\('data-holo-state'\)/);
   assert.doesNotMatch(sparkleSrc, /getContext\(\s*['"]webgl/i);
   assert.doesNotMatch(cssSrc, /holo-gutter/);
-  const foilBlock = cssSrc.slice(cssSrc.indexOf('.holo-foil {'), cssSrc.indexOf('.holo-foil::after'));
-  assert.doesNotMatch(foilBlock, /soft-light|color-dodge|mix-blend-mode/);
-  const sheenBlock = cssSrc.slice(cssSrc.indexOf('.holo-sheen {'), cssSrc.indexOf('.holo-sparkle {'));
-  assert.doesNotMatch(sheenBlock, /linear-gradient/);
-  assert.doesNotMatch(sheenBlock, /color-dodge|soft-light/);
+  assert.doesNotMatch(cssSrc, /#0e152e/);
+  const sheenBlock = cssSrc.slice(cssSrc.indexOf('.holo-sheen {'), cssSrc.indexOf('.holo-sheen::after'));
+  assert.doesNotMatch(sheenBlock, /hsl\(0 0% 100%/);
+  assert.doesNotMatch(sheenBlock, /rgb\(255,\s*255,\s*255/);
 });
 
 test('clean die-cut rasters exist; cats keep dedicated holo masks', () => {
