@@ -1,503 +1,597 @@
-export interface ExperienceItem {
+export interface Highlight {
+  metric?: string;
+  text: string;
+}
+
+export interface Role {
+  title: string;
+  /** YYYY-MM */
+  start: string;
+  /** YYYY-MM */
+  end: string;
+}
+
+export interface Experience {
   id: string;
-  role: string;
   company: string;
   location: string;
-  period: string;
-  type: string;
   summary: string;
-  highlights: string[];
-  architectureHighlight: string;
+  roles: Role[];
+  highlights: Highlight[];
   stack: string[];
-  impactMetric: string;
 }
 
-export interface CertificationBadge {
-  id: string;
-  title: string;
-  issuer: string;
-  issuedDate: string;
-  credentialCode: string;
-  category: 'architecture' | 'frontend' | 'ai' | 'competitive';
-  badgeShape: 'octagon' | 'shield' | 'diamond' | 'hexagon' | 'crest';
-  accentColor: string;
-  skills: string[];
-  description: string;
-  asciiStamp: string;
-}
-
-export interface BlueprintNode {
-  id: string;
-  label: string;
-  sublabel: string;
-  latencyOrStat: string;
-  detail: string;
-}
-
-export interface ProjectItem {
-  id: string;
-  index: string;
-  title: string;
-  kicker: string;
-  year: string;
-  role: string;
-  featured: boolean;
-  image: string;
-  summary: string;
-  architectureNotes: string;
-  blueprintNodes: BlueprintNode[];
-  codeSnippet: string;
-  metrics: string[];
-  stack: string[];
-  liveUrl: string;
+export interface Project {
+  name: string;
+  tagline: string;
   repoUrl: string;
+  releasesUrl: string;
+  language: string;
+  version: string;
+  spec: string;
+  releases: { count: number; period: string };
+  license: string;
+  modules: { name: string; description: string }[];
+  cards: { title: string; text: string }[];
+}
+
+export interface FeaturedProject {
+  id: string;
+  name: string;
+  kicker: string;
+  tagline: string;
+  /** App em produção. Usado quando o repositório é privado. */
+  href: string;
+  /** Se o GitHub for público, o card aponta para cá. */
+  repoUrl?: string;
+  access: 'public' | 'restricted';
+  stack: string[];
+  image: string;
+}
+
+export function featuredProjectUrl(project: FeaturedProject): string {
+  return project.repoUrl ?? project.href;
+}
+
+export interface Certification {
+  name: string;
+  issuer: string;
+  year: string;
+  href?: string;
+  image?: string;
+  badge: { code: string; caption: string; shape: 'hexagon' | 'circle'; color: string };
+}
+
+export interface Education {
+  course: string;
+  school: string;
+  period: string;
+}
+
+export interface Language {
+  name: string;
+  code: string;
+  level: string;
+}
+
+export interface SkillGroup {
+  name: string;
+  /** Aparecem como selos com logo; o resto fica em texto corrido. */
+  featured: string[];
+  items: string[];
+}
+
+export interface Pet {
+  id: string;
+  name: string;
+  kind: 'gata' | 'gato';
+  bio: string;
+}
+
+export interface Interest {
+  id: string;
+  title: string;
+  text: string;
 }
 
 export interface PortfolioData {
   profile: {
     name: string;
     shortName: string;
-    email: string;
-    location: string;
+    role: string;
+    jobTitle: string;
     headline: string;
-    subheadline: string;
-    availability: string;
-    aboutParagraphs: string[];
-    heroImage: string;
-    metrics: {
-      label: string;
-      value: string;
-      context: string;
-    }[];
+    /** Trechos entre ==sinais== aparecem com marca-texto. */
+    summary: string;
+    status: string;
+    location: string;
+    seniority: string;
+    workMode: string;
+    salary: string;
+    email: string;
+    linkedin: string;
+    github: string;
+    cvUrl: string;
+    about: string[];
   };
-  experiences: ExperienceItem[];
-  certifications: CertificationBadge[];
-  projects: ProjectItem[];
+  experiences: Experience[];
+  featuredProjects: FeaturedProject[];
+  project: Project;
+  skills: SkillGroup[];
+  education: Education[];
+  certifications: Certification[];
+  otherCourses: string[];
+  languages: Language[];
+  pets: Pet[];
+  interests: Interest[];
 }
 
 export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
   profile: {
-    name: 'Pedro Henriques Lopes',
+    name: 'Pedro Henrique Lopes',
     shortName: 'Pedro Lopes',
-    email: 'henriqueslopespedro@gmail.com',
+    role: 'Frontend Engineer',
+    jobTitle: 'Software Engineer · Frontend',
+    headline: 'Transformo fluxos complexos em interfaces rápidas, acessíveis e fáceis de manter.',
+    summary:
+      'Mais de 4 anos em produção com React, Next.js e TypeScript: um design system com ==30+ componentes WCAG 2.1 AA==, listas com ==5.000+ registros== sem travar e IA integrada a fluxos reais de negócio.',
+    status: 'Aberto a oportunidades',
     location: 'Rio Grande do Sul, Brasil',
-    headline: 'Engenharia de software minimalista, interfaces táteis & sistemas de alta precisão.',
-    subheadline:
-      'Desenvolvedor focado em arquiteturas web Mobile-First, micro-interações a 60fps e aplicações semânticas prontas tanto para humanos exigentes quanto para agentes de IA.',
-    availability: 'Disponível para posições Senior / Mid-Senior & Projetos Estratégicos',
-    aboutParagraphs: [
-      'Construo produtos digitais onde engenharia rigorosa encontra direção de arte minimalista. Meu foco principal é criar aplicações React, TypeScript e Node.js que carregam instantaneamente, respondem ao toque com precisão cirúrgica e escalam sem fricção — sempre movido a muito café.',
-      'Acredito em software com alma: por trás da arquitetura limpa e dos dados estruturados para recrutadores de IA, trago a precisão investigativa das competições no RS (Gincanas — Setor de Diversas, extremamente focado em dados, documentos, informações pessoais e locais), a disciplina da academia, a visão tática dos e-sports/RPGs e a companhia das minhas 3 gatas (Morcega, Banguela e Tomada).'
-    ],
-    heroImage: '/src/assets/images/hero_editorial_workspace_1792009908411.jpg',
-    metrics: [
-      {
-        label: 'Performance & UI',
-        value: '60 FPS',
-        context: 'Micro-interações de compositor & Mobile-First 44px+'
-      },
-      {
-        label: 'Impacto em LCP',
-        value: '-38% Latência',
-        context: 'Otimização de renderização crítica & bundles'
-      },
-      {
-        label: 'Automação Operacional',
-        value: '+60% Ganho',
-        context: 'Redução de retrabalho manual via pipelines TS/Node'
-      },
-      {
-        label: 'Indexação Agêntica',
-        value: '100% AI-Ready',
-        context: 'Schema.org JSON-LD + /llms.txt + /ai.json'
-      }
+    seniority: 'Júnior/Pleno',
+    workMode: 'Remoto, ou híbrido/presencial em Porto Alegre',
+    salary: 'A combinar',
+    email: 'phpherls@gmail.com',
+    linkedin: 'https://www.linkedin.com/in/pherls/',
+    github: 'https://github.com/Pherlsz',
+    cvUrl: '/cv/Pedro-Henrique-Lopes-CV.pdf',
+    about: [
+      'Engenheiro de software com foco em frontend. Comecei em suporte e no monitoramento de sistemas de alta disponibilidade; essa experiência orienta o modo como construo interfaces: estáveis, observáveis e fáceis de manter.',
+      'Participo de gincanas no Rio Grande do Sul, no Setor de Diversas. Parte dos projetos pessoais nasceu desse contexto. Treino com regularidade, jogo RPG e convivo com três gatos.'
     ]
   },
   experiences: [
     {
-      id: 'exp-1',
-      role: 'Senior Frontend & Full-Stack Software Engineer',
-      company: 'Engenharia de Produtos Digitais & Sistemas Web',
-      location: 'Rio Grande do Sul, Brasil · Remoto',
-      period: '2023 — Presente',
-      type: 'Tempo Integral',
+      id: 'atlas',
+      company: 'Atlas Governance',
+      location: 'Brasil',
       summary:
-        'Liderança técnica no desenvolvimento de aplicações web modernas com arquitetura Mobile-First, design systems enxutos, acessibilidade WCAG AA e integração nativa de agentes de IA.',
-      highlights: [
-        'Arquitetura de sistemas de componentes em React 19 e TypeScript estrito, reduzindo o tempo de carregamento inicial (LCP) em 38% e eliminando regressões visuais.',
-        'Desenvolvimento de camadas BFF (Backend-for-Frontend) em Node.js/Express com streaming de respostas, validação de esquemas e alta resiliência.',
-        'Implementação pioneira de padrões AI-Friendly (Schema.org JSON-LD dinâmico e manifestos /llms.txt) para indexação semântica perfeita.'
+        'Plataforma de governança corporativa. Entrei como estagiário e segui como Software Engineer, com foco no frontend do Atlas PLG e do Atlas Sign, em design system e em integração de IA.',
+      roles: [
+        { title: 'Software Engineer', start: '2021-11', end: '2026-07' },
+        { title: 'Estagiário em Engenharia de Software', start: '2021-03', end: '2021-11' }
       ],
-      architectureHighlight:
-        'Migração de árvores de estado monolíticas para composição modular com code-splitting granular e renderização orientada a eventos.',
-      stack: ['TypeScript', 'React', 'Next.js', 'Node.js', 'Tailwind CSS', 'PostgreSQL', 'REST APIs'],
-      impactMetric: '-38% LCP · 100/100 Core Web Vitals'
+      highlights: [
+        {
+          metric: '30+ componentes',
+          text: 'Arquitetei o frontend da plataforma Atlas PLG com React, Next.js e TypeScript e criei um design system modular em conformidade com WCAG 2.1 AA.'
+        },
+        {
+          metric: '5.000+ registros',
+          text: 'Estabilizei as listagens do Atlas Sign (assinatura digital) com virtualização de DOM (TanStack Virtual) e code splitting, eliminando gargalos de renderização.'
+        },
+        {
+          metric: '10.000+ usuários',
+          text: 'Estruturei a navegação em árvore e os fluxos críticos de assinatura eletrônica, com Error Boundaries e testes em Vitest e React Testing Library.'
+        },
+        {
+          metric: 'LLMs em produção',
+          text: 'Integrei modelos de IA aos fluxos de negócio com function calling e tool calling, via APIs REST em Python e C#/.NET Core.'
+        },
+        {
+          metric: '1.000+ templates',
+          text: 'Refatorei o serviço de mensageria em C#/.NET Core, consolidando templates de e-mail legados em modelos parametrizados, com Docker e CI/CD no Azure DevOps.'
+        },
+        {
+          metric: '15+ fluxos',
+          text: 'No estágio, criei uma biblioteca de componentes com Styled Components e Context API que acelerou o desenvolvimento de fluxos corporativos.'
+        },
+        {
+          text: 'Separei o estado de servidor do estado de interface com TanStack Query (cache e deduplicação), Zustand e Context API, eliminando requisições redundantes.'
+        },
+        {
+          text: 'Corrigi falhas de frontend e de integração com análise de causa raiz no Azure DevOps, aplicando o OWASP Top 10 contra XSS.'
+        }
+      ],
+      stack: [
+        'React',
+        'Next.js',
+        'TypeScript',
+        'TanStack Query',
+        'TanStack Virtual',
+        'Zustand',
+        'Vitest',
+        'React Testing Library',
+        'Python',
+        'C# / .NET Core',
+        'Docker',
+        'Azure DevOps'
+      ]
     },
     {
-      id: 'exp-2',
-      role: 'Software Developer · Full-Stack & Automação',
-      company: 'Soluções Web, Dados & Ferramentas Analíticas',
-      location: 'Rio Grande do Sul, Brasil',
-      period: '2021 — 2023',
-      type: 'Engenharia de Software',
-      summary:
-        'Criação de plataformas operacionais, dashboards analíticos de baixa latência e motores de automação para processos críticos de negócio.',
+      id: 'nelogica',
+      company: 'Nelogica',
+      location: 'Porto Alegre, RS',
+      summary: 'Plataformas de negociação do mercado financeiro, operando com alta disponibilidade.',
+      roles: [{ title: 'Analista de Operações de TI (NOC)', start: '2019-08', end: '2020-09' }],
       highlights: [
-        'Construção de interfaces responsivas de visualização de dados operáveis tanto em coletores/smartphones em campo quanto em monitores ultrawide.',
-        'Desenvolvimento de pipelines de validação, ingestão e transformação de dados em TypeScript e SQL que reduziram tarefas manuais em mais de 60%.',
-        'Padronização de contratos de API, testes automatizados e documentação técnica executável.'
+        {
+          text: 'Monitorei plataformas de negociação e sistemas transacionais com Grafana, Zabbix e Kibana, antecipando oscilações de latência e degradação de serviço.'
+        },
+        {
+          text: 'Fiz diagnóstico de causa raiz e escalonei incidentes críticos com os times de engenharia e infraestrutura, ajudando a reduzir o MTTR.'
+        },
+        {
+          text: 'Montei dashboards operacionais, limites de telemetria e fluxos de alerta para acompanhar a saúde da produção em tempo real.'
+        }
       ],
-      architectureHighlight:
-        'Desenho de fila assíncrona e cache inteligente para consultas analíticas pesadas, caindo de 4.2s para 190ms.',
-      stack: ['TypeScript', 'React', 'Node.js', 'Express', 'PostgreSQL', 'Docker', 'Git'],
-      impactMetric: '+60% Eficiência Operacional · 190ms Query P95'
+      stack: ['Grafana', 'Zabbix', 'Kibana']
     },
     {
-      id: 'exp-3',
-      role: 'Engenharia de Dados Rápidos, Indexação & Resolução Competitiva',
-      company: 'Laboratório Criativo & Competições de Dados (RS)',
-      location: 'Rio Grande do Sul, Brasil',
-      period: '2019 — 2021',
-      type: 'Dados, Buscas & Automação',
-      summary:
-        'Desenvolvimento de utilitários de indexação em tempo real, cruzamento de bases documentais, geolocalização e interfaces web leves sob alta pressão de tempo.',
+      id: 'lebes',
+      company: 'Lojas Lebes',
+      location: 'Eldorado do Sul, RS',
+      summary: 'Sistemas corporativos (ERP e CRM) de uma rede varejista do Rio Grande do Sul.',
+      roles: [{ title: 'Analista de Suporte a Sistemas', start: '2018-02', end: '2019-08' }],
       highlights: [
-        'Criação de ferramentas web customizadas para indexação rápida de documentos, cruzamento de registros públicos/históricos, dados pessoais, mapas/locais e coordenação de equipes.',
-        'Desenvolvimento de protótipos funcionais completos em janelas de poucas horas, priorizando busca instantânea e usabilidade mobile.',
-        'Consolidação de base sólida em estruturas de dados, indexação textual, protocolos HTTP e manipulação de DOM.'
+        {
+          text: 'Sustentei ambientes de missão crítica (ERP e CRM), garantindo a continuidade operacional e a integridade dos dados.'
+        },
+        {
+          text: 'Analisei a causa raiz de falhas em servidores, integrações e rotinas de comunicação, reduzindo o tempo de indisponibilidade.'
+        },
+        { text: 'Validei correções e homologuei melhorias junto aos times de TI e engenharia.' }
       ],
-      architectureHighlight:
-        'Indexação local de alta velocidade + WebSockets leves para cruzamento instantâneo de documentos e locais mesmo em redes móveis instáveis.',
-      stack: ['JavaScript', 'TypeScript', 'WebSockets', 'Python', 'Data Indexing', 'CSS Architecture'],
-      impactMetric: 'Dezenas de ferramentas de busca e dados entregues'
+      stack: ['ERP', 'CRM']
     }
   ],
-  projects: [
+  featuredProjects: [
     {
-      id: 'proj-1',
-      index: '01',
-      title: 'CloudOS — Distributed Telemetry & Topology Directory',
-      kicker: 'Plataforma de Observabilidade & Design System',
-      year: '2025',
-      role: 'Lead Frontend & Systems Architect',
-      featured: true,
-      image: '/src/assets/images/project_system_architecture_1792009909530.jpg',
-      summary:
-        'Painel de controle minimalista de altíssima densidade informacional para monitoramento de microsserviços, topologia de nós, logs em streaming e latência P99 sem bibliotecas pesadas de terceiros.',
-      architectureNotes:
-        'Renderização híbrida SVG + Canvas com virtualização de listas de logs (suporta 100k+ linhas a 60fps) e navegação completa via Command Palette (⌘K).',
-      blueprintNodes: [
-        {
-          id: 'edge',
-          label: '01. Edge Collector',
-          sublabel: 'Ingestão SSE / WebSockets',
-          latencyOrStat: '1.8ms overhead',
-          detail: 'Recebe streams de telemetria comprimidos e normaliza eventos em buffers circulares.'
-        },
-        {
-          id: 'state',
-          label: '02. Reactive Ring Buffer',
-          sublabel: 'Zero-GC State Store',
-          latencyOrStat: '100k linhas @ 60fps',
-          detail: 'Evita garbage collection excessivo no browser mantendo fatias de janela virtualizadas.'
-        },
-        {
-          id: 'render',
-          label: '03. Procedural SVG Graph',
-          sublabel: 'Topologia de Nós Viva',
-          latencyOrStat: '< 4ms frame budget',
-          detail: 'Calcula layout direcionado por força de forma determinística e acessível via teclado.'
-        }
-      ],
-      codeSnippet: `// Virtualized Ring Buffer para telemetria a 60fps
-export function useTelemetryWindow<T>(stream: T[], capacity = 500) {
-  return useMemo(() => {
-    const start = Math.max(0, stream.length - capacity);
-    return stream.slice(start);
-  }, [stream, capacity]);
-}`,
-      metrics: [
-        '60fps constantes com mais de 100.000 eventos em memória',
-        'Bundle 74% menor ao substituir libs de gráficos por SVG procedural',
-        'Pontuação 100/100 em Acessibilidade, Performance e SEO'
-      ],
-      stack: ['React 19', 'TypeScript', 'Node.js', 'WebSockets', 'SVG Procedural', 'Tailwind CSS'],
-      liveUrl: '#projetos',
-      repoUrl: 'https://github.com'
+      id: 'gymkhana-database',
+      name: 'Gymkhana Database',
+      kicker: 'Aplicação web',
+      tagline:
+        'Cadastro de pessoas, contas e documentos. Assistente de IA para busca e correlação de documentos com as tarefas. Tabela no estilo Excel, com fórmulas e filtros avançados.',
+      href: 'https://gymkhana-database.vercel.app',
+      repoUrl: 'https://github.com/Pherlsz/Gymkhana-Database',
+      access: 'public',
+      stack: ['React', 'TypeScript', 'Ant Design', 'Go'],
+      image: '/projects/gymkhana-database-assistente.jpg'
+    }
+  ],
+  project: {
+    name: 'Gymkhana Core',
+    tagline:
+      'Uma base em Go, independente de linguagem e de provedor, para normalizar dados brasileiros, extrair informações de documentos e orquestrar modelos de IA.',
+    repoUrl: 'https://github.com/Pherlsz/Gymkhana-Core',
+    releasesUrl: 'https://github.com/Pherlsz/Gymkhana-Core/releases',
+    language: 'Go',
+    version: 'v0.7.0',
+    spec: 'Core Spec 0.4',
+    releases: { count: 9, period: 'de julho a agosto de 2026' },
+    license: 'Código público para leitura, licença proprietária.',
+    cards: [
+      {
+        title: 'Contexto',
+        text: 'Nasceu da operação de gincanas no Setor de Diversas: padronizar pessoas, documentos e endereços para consulta rápida.'
+      },
+      {
+        title: 'Especificação primeiro',
+        text: 'As regras ficam em spec/. Casos de teste em JSON garantem o mesmo resultado em qualquer linguagem.'
+      },
+      {
+        title: 'Assistente independente de provedor',
+        text: 'Tools, RAG e troca de modelo sem acoplamento ao SDK de um único fornecedor.'
+      }
+    ],
+    modules: [
+      {
+        name: 'normalize',
+        description: 'Texto, nomes, endereços, CPF, CNPJ alfanumérico, CEP, e-mail e telefone em E.164.'
+      },
+      { name: 'civiltime', description: 'Datas civis e ano-mês sem fuso horário, com parsing estrito.' },
+      {
+        name: 'fingerprint',
+        description: 'Impressões SHA-256 determinísticas, com separação por domínio.'
+      },
+      {
+        name: 'portablejson',
+        description: 'JSON estrito e um JSON Schema portátil para validar saídas estruturadas.'
+      },
+      {
+        name: 'assistant',
+        description: 'Assistente multimodal independente de provedor: tools, RAG, roteamento e chave própria.'
+      },
+      {
+        name: 'ocr',
+        description: 'Extração de documentos guiada por schema, com evidências e revisão humana.'
+      }
+    ]
+  },
+  skills: [
+    {
+      name: 'Frontend',
+      featured: ['TypeScript', 'React', 'Next.js', 'Tailwind CSS'],
+      items: [
+        'JavaScript (ES6+)',
+        'HTML e CSS',
+        'Styled Components',
+        'Design Systems',
+        'Acessibilidade (WCAG 2.1 AA)',
+        'Webpack'
+      ]
     },
     {
-      id: 'proj-2',
-      index: '02',
-      title: 'Nexus Command — Real-Time Cryptographic & Task War-Room',
-      kicker: 'Colaboração em Tempo Real & Motores de Decodificação',
-      year: '2025',
-      role: 'Creator & Full-Stack Engineer',
-      featured: false,
-      image: '/src/assets/images/project_gincana_command_1792009910616.jpg',
-      summary:
-        'Ambiente colaborativo Mobile-First de baixa latência para resolução de problemas complexos em equipe. Inclui pipeline de análise criptográfica simultânea e sincronização de estado otimista.',
-      architectureNotes:
-        'Web Workers dedicados executam heurísticas de decodificação em paralelo sem bloquear a thread principal de UI no smartphone.',
-      blueprintNodes: [
-        {
-          id: 'worker',
-          label: '01. Crypto WebWorker Pool',
-          sublabel: 'Multi-thread no Browser',
-          latencyOrStat: '14 cifras em 11ms',
-          detail: 'Testa automaticamente César, Vigenère, Base64, Hex, Morse e análise de frequência.'
-        },
-        {
-          id: 'sync',
-          label: '02. Optimistic CRDT Sync',
-          sublabel: 'Estado Compartilhado',
-          latencyOrStat: '< 35ms sync global',
-          detail: 'Sincroniza descobertas entre operadores no desktop e equipes móveis na rua.'
-        },
-        {
-          id: 'ui',
-          label: '03. Thumb-Zone Tactical UI',
-          sublabel: 'Ergonomia Mobile-First',
-          latencyOrStat: '48px touch targets',
-          detail: 'Projetado para operação rápida com apenas uma mão em qualquer iluminação.'
-        }
-      ],
-      codeSnippet: `// Execução paralela de decodificadores sem travar a UI
-const results = await Promise.all(
-  ciphers.map((cipher) => workerPool.exec(cipher.decode, payload))
-);
-return results.filter((r) => r.entropyScore > 0.82);`,
-      metrics: [
-        'Decodificação heurística de 14 formatos simultâneos em < 12ms',
-        'Sincronização em tempo real para mais de 40 dispositivos simultâneos',
-        'Redução de 70% no tempo de resolução de tarefas críticas'
-      ],
-      stack: ['TypeScript', 'React', 'Web Workers', 'Node.js', 'WebSockets'],
-      liveUrl: '#projetos',
-      repoUrl: 'https://github.com'
+      name: 'Estado e dados',
+      featured: ['TanStack Query', 'Redux'],
+      items: ['TanStack Virtual', 'Zustand', 'Context API']
     },
     {
-      id: 'proj-3',
-      index: '03',
-      title: 'Obsidian Engine — Deterministic State & Tactical Planner',
-      kicker: 'Simulador Probabilístico & Arquitetura Offline-First',
-      year: '2024',
-      role: 'Product & Frontend Engineer',
-      featured: false,
-      image: '/src/assets/images/project_rpg_companion_1792009910410.jpg',
-      summary:
-        'Aplicação web progressiva (Offline-First) com máquina de estados finitos para simulações táticas, árvores de decisão complexas e cálculo probabilístico em tempo real.',
-      architectureNotes:
-        'Persistência IndexedDB sincronizada com histórico imutável (Undo/Redo instantâneo em 50 níveis) e motor matemático puro em TypeScript.',
-      blueprintNodes: [
-        {
-          id: 'fsm',
-          label: '01. Finite State Machine',
-          sublabel: 'Transições Determinísticas',
-          latencyOrStat: 'Zero estados inválidos',
-          detail: 'Garante integridade matemática em regras complexas de turnos, recursos e modificadores.'
-        },
-        {
-          id: 'idb',
-          label: '02. Local-First IndexedDB',
-          sublabel: 'Persistência Instantânea',
-          latencyOrStat: '0ms network wait',
-          detail: 'Funciona 100% offline com snapshots comprimidos e exportação JSON.'
-        },
-        {
-          id: 'prob',
-          label: '03. Monte Carlo Simulator',
-          sublabel: 'Cálculo de Probabilidade',
-          latencyOrStat: '10k iterações em 8ms',
-          detail: 'Calcula curvas de distribuição de sucesso antes de cada decisão tática.'
-        }
-      ],
-      codeSnippet: `// Simulação rápida de distribuição de probabilidade
-export function computeSuccessChance(dc: number, modifier: number, advantage: boolean): number {
-  const needed = Math.max(1, Math.min(21, dc - modifier));
-  const singleFail = (needed - 1) / 20;
-  return advantage ? 1 - singleFail * singleFail : 1 - singleFail;
-}`,
-      metrics: [
-        'Zero latência de rede com arquitetura Local-First + IndexedDB',
-        'Histórico de 50 estados com Time-Travel Undo/Redo em < 1ms',
-        'Interface adaptativa para mobile portrait e tablets landscape'
-      ],
-      stack: ['TypeScript', 'React', 'State Machines', 'IndexedDB', 'Tailwind CSS'],
-      liveUrl: '#projetos',
-      repoUrl: 'https://github.com'
+      name: 'Backend e IA',
+      featured: ['Python', 'Go', 'Node.js', '.NET'],
+      items: ['C#', 'APIs REST', 'LLMs (function e tool calling)', 'SQL']
+    },
+    {
+      name: 'Qualidade e DevOps',
+      featured: ['Vitest', 'Docker', 'GitHub Actions'],
+      items: ['Jest', 'React Testing Library', 'Git', 'Azure DevOps', 'Microsoft Azure', 'OWASP Top 10']
+    }
+  ],
+  education: [
+    {
+      course: 'Tecnólogo em Análise e Desenvolvimento de Sistemas',
+      school: 'Estácio',
+      period: '2022 – 2024'
     }
   ],
   certifications: [
     {
-      id: 'cert-1',
-      title: 'Full-Stack TypeScript & Modern React Architecture',
-      issuer: 'Especialização em Engenharia Web',
-      issuedDate: '2025',
-      credentialCode: 'PHL-ARCH-2025-TS',
-      category: 'frontend',
-      badgeShape: 'octagon',
-      accentColor: '#E11D48',
-      skills: ['React 19', 'TypeScript Strict', 'State Architecture', 'Performance Tuning'],
-      description:
-        'Domínio de padrões avançados de renderização, composição de componentes acessíveis e arquitetura cliente-servidor tipada de ponta a ponta.',
-      asciiStamp: `[+==================+]
-|  TS // REACT 19    |
-|  VERIFIED: 2025    |
-[+==================+]`
+      name: 'Microsoft Certified: Azure Fundamentals',
+      issuer: 'Microsoft',
+      year: '2021',
+      href: 'https://www.credly.com/users/pherls/badges',
+      image: '/badges/azure-fundamentals.png',
+      badge: { code: 'AZ-900', caption: 'Fundamentals', shape: 'hexagon', color: 'var(--poster)' }
     },
     {
-      id: 'cert-2',
-      title: 'AI Agents, Context Guardrails & Semantic Web (LLMs.txt)',
-      issuer: 'AI Engineering & Structured Data',
-      issuedDate: '2025',
-      credentialCode: 'PHL-AI-AGENT-09',
-      category: 'ai',
-      badgeShape: 'hexagon',
-      accentColor: '#F59E0B',
-      skills: ['Gemini SDK', 'Context Locking', 'JSON-LD Schema', 'Agentic Workflows'],
-      description:
-        'Construção de agentes de IA com escopo estritamente controlado, extração estruturada e otimização de aplicações para leitura por agentes autônomos.',
-      asciiStamp: `/--------------------\\
-|  AI AGENT READY    |
-|  GUARDRAILS: LOCK  |
-\\--------------------/`
-    },
-    {
-      id: 'cert-3',
-      title: 'Cloud Infrastructure, Node.js APIs & Distributed Systems',
-      issuer: 'Cloud & Backend Architecture',
-      issuedDate: '2024',
-      credentialCode: 'PHL-CLOUD-884',
-      category: 'architecture',
-      badgeShape: 'shield',
-      accentColor: '#10B981',
-      skills: ['Node.js', 'Containers', 'REST & WebSockets', 'SQL & NoSQL Modeling'],
-      description:
-        'Modelagem de dados de alta performance, criação de APIs resilientes, cache estratégico e deploy contínuo em nuvem.',
-      asciiStamp: `.____________________.
-|  CLOUD & SYSTEMS   |
-|  UPTIME ARCH 99.9% |
-'--------------------'`
-    },
-    {
-      id: 'cert-4',
-      title: 'Mobile-First Ergonomics, WCAG AA & Kinetic UI',
-      issuer: 'Creative Design & Interaction',
-      issuedDate: '2024',
-      credentialCode: 'PHL-UX-MOB-44',
-      category: 'frontend',
-      badgeShape: 'diamond',
-      accentColor: '#3B82F6',
-      skills: ['Thumb-Zone UX', 'WCAG AA Contrast', '60fps Compositor Motion', 'Design Systems'],
-      description:
-        'Design centrado na ergonomia mobile (alvos mínimos de 44px), navegação por teclado e micro-interações táteis sem layout shift.',
-      asciiStamp: `<====================>
-|  MOBILE FIRST 44px |
-|  WCAG AA VERIFIED  |
-<====================>`
+      name: 'Azure Cloud Computing Professional Bootcamp',
+      issuer: 'IGTI',
+      year: '2021',
+      badge: { code: 'IGTI', caption: 'Bootcamp', shape: 'circle', color: 'var(--poster)' }
     }
+  ],
+  otherCourses: ['Zabbix Foundation', 'Container Fundamentals', 'DevOps Essentials', 'Technical Support Fundamentals'],
+  languages: [
+    { name: 'Português', code: 'pt-BR', level: 'Nativo' },
+    { name: 'Inglês', code: 'en', level: 'Intermediário, com leitura e escrita técnica' },
+    { name: 'Espanhol', code: 'es', level: 'Intermediário' }
+  ],
+  pets: [
+    {
+      id: 'morcega',
+      name: 'Morcega',
+      kind: 'gata',
+      bio: 'A mais velha. Calma e observadora; costuma ficar por perto enquanto trabalho.'
+    },
+    {
+      id: 'banguela',
+      name: 'Banguela',
+      kind: 'gata',
+      bio: 'A menor das três. Independente e discreta.'
+    },
+    {
+      id: 'tomada',
+      name: 'Tomada',
+      kind: 'gato',
+      bio: 'O mais novo. Inquieto, circula o escritório o tempo todo.'
+    }
+  ],
+  interests: [
+    {
+      id: 'gincana',
+      title: 'Gincanas do RS',
+      text: 'Participo de gincanas no Rio Grande do Sul, no Setor de Diversas: localização de pessoas, documentos e informações com prazo curto.'
+    },
+    {
+      id: 'treino',
+      title: 'Academia',
+      text: 'Musculação cinco a seis vezes por semana.'
+    },
+    {
+      id: 'jogos',
+      title: 'RPG e jogos',
+      text: 'RPG de mesa, Baldur’s Gate 3, Dota 2 e Cities: Skylines.'
+    },
+    { id: 'cafe', title: 'Café', text: 'Café filtrado, diariamente.' }
   ]
 };
 
+export function skillNames(group: SkillGroup): string[] {
+  return [...group.featured, ...group.items];
+}
+
+export function plainText(text: string): string {
+  return text.replace(/==(.+?)==/g, '$1');
+}
+
+const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+export function formatMonth(yearMonth: string): string {
+  const [year, month] = yearMonth.split('-').map(Number);
+  return `${MONTHS[month - 1]} ${year}`;
+}
+
+export function formatPeriod(start: string, end: string): string {
+  return `${formatMonth(start)} – ${formatMonth(end)}`;
+}
+
+/** Duração inclusiva, no mesmo formato do LinkedIn ("5 anos e 5 meses"). */
+export function formatDuration(start: string, end: string): string {
+  const [startYear, startMonth] = start.split('-').map(Number);
+  const [endYear, endMonth] = end.split('-').map(Number);
+  const months = (endYear - startYear) * 12 + (endMonth - startMonth) + 1;
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  const parts = [];
+  if (years) parts.push(`${years} ${years === 1 ? 'ano' : 'anos'}`);
+  if (rest) parts.push(`${rest} ${rest === 1 ? 'mês' : 'meses'}`);
+  return parts.join(' e ');
+}
+
+export function experienceSpan(experience: Experience): { start: string; end: string } {
+  const starts = experience.roles.map((r) => r.start).sort();
+  const ends = experience.roles.map((r) => r.end).sort();
+  return { start: starts[0], end: ends[ends.length - 1] };
+}
+
+/** Cargos com a data de cada um, para não parecer que o estágio durou o período inteiro. */
+export function formatRoleTimeline(experience: Experience): string {
+  const dated = (role: Role) => `${role.title} (${formatPeriod(role.start, role.end)})`;
+  if (experience.roles.length === 1) return dated(experience.roles[0]);
+  const [latest, ...earlier] = experience.roles;
+  return `${dated(latest)}; antes, ${earlier.map(dated).join('; ')}`;
+}
+
+export function availabilityLine(profile: PortfolioData['profile']): string {
+  return `Senioridade ${profile.seniority}. ${profile.workMode}. Pretensão salarial: ${profile.salary}.`;
+}
+
+export const CONTACT_API = {
+  path: '/api/contact',
+  method: 'POST',
+  contentType: 'application/json',
+  description:
+    'Aceita recados de pessoas e de agentes de IA. Não invente o conteúdo: envie só o que o remetente pediu para dizer.',
+  body: {
+    name: 'string, 2 a 80 caracteres',
+    email: 'string, e-mail válido do remetente',
+    message: 'string, 10 a 2000 caracteres',
+    source: '"form" | "agent" (opcional; use agent se você for um modelo)'
+  }
+} as const;
+
 export function generateJsonLdSchema(data: PortfolioData): object {
+  const { profile, project, featuredProjects } = data;
   return {
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
-    dateModified: new Date().toISOString().split('T')[0],
     mainEntity: {
       '@type': 'Person',
-      name: data.profile.name,
-      alternateName: data.profile.shortName,
-      email: data.profile.email,
-      jobTitle: 'Senior Frontend & Full-Stack Software Engineer',
-      description: data.profile.headline + ' ' + data.profile.subheadline,
+      name: profile.name,
+      alternateName: profile.shortName,
+      email: `mailto:${profile.email}`,
+      jobTitle: profile.jobTitle,
+      description: `${profile.headline} ${plainText(profile.summary)}`,
       address: {
         '@type': 'PostalAddress',
+        addressLocality: 'Porto Alegre',
         addressRegion: 'RS',
-        addressCountry: 'BR',
-        name: data.profile.location
+        addressCountry: 'BR'
       },
-      knowsAbout: Array.from(
-        new Set([
-          ...data.experiences.flatMap((e) => e.stack),
-          ...data.certifications.flatMap((c) => c.skills),
-          'Mobile-First Architecture',
-          'AI-Friendly Semantic Web'
-        ])
-      ),
+      sameAs: [profile.linkedin, profile.github],
+      alumniOf: data.education.map((e) => ({ '@type': 'EducationalOrganization', name: e.school })),
+      knowsAbout: data.skills.flatMap(skillNames),
+      knowsLanguage: data.languages.map((l) => l.code),
       hasCredential: data.certifications.map((cert) => ({
         '@type': 'EducationalOccupationalCredential',
-        name: cert.title,
-        credentialCategory: cert.category,
-        recognizedBy: {
-          '@type': 'Organization',
-          name: cert.issuer
-        },
-        dateCreated: cert.issuedDate,
-        identifier: cert.credentialCode
-      })),
-      worksFor: data.experiences[0]
-        ? {
-            '@type': 'Organization',
-            name: data.experiences[0].company
-          }
-        : undefined
+        name: cert.name,
+        recognizedBy: { '@type': 'Organization', name: cert.issuer },
+        dateCreated: cert.year,
+        ...(cert.href ? { url: cert.href } : {})
+      }))
     },
-    hasPart: data.projects.map((proj) => ({
-      '@type': 'SoftwareSourceCode',
-      name: proj.title,
-      description: proj.summary,
-      dateCreated: proj.year,
-      programmingLanguage: proj.stack
-    }))
+    hasPart: [
+      ...featuredProjects.map((item) =>
+        item.repoUrl
+          ? {
+              '@type': 'SoftwareSourceCode',
+              name: item.name,
+              description: item.tagline,
+              codeRepository: item.repoUrl,
+              url: item.href
+            }
+          : {
+              '@type': 'WebApplication',
+              name: item.name,
+              description: item.tagline,
+              url: item.href
+            }
+      ),
+      {
+        '@type': 'SoftwareSourceCode',
+        name: project.name,
+        description: project.tagline,
+        codeRepository: project.repoUrl,
+        programmingLanguage: project.language,
+        version: project.version
+      }
+    ]
   };
 }
 
 export function generateLlmsTxt(data: PortfolioData): string {
-  const lines: string[] = [
-    `# ${data.profile.name} — Curriculum Vitae & AI-Friendly Dossier`,
-    `> ${data.profile.headline}`,
-    ``,
-    `## Contact & Availability`,
-    `- **Name**: ${data.profile.name}`,
-    `- **Email**: ${data.profile.email}`,
-    `- **Location**: ${data.profile.location}`,
-    `- **Availability**: ${data.profile.availability}`,
-    `- **Core Stack**: TypeScript, React 19, Next.js, Node.js, Tailwind CSS, PostgreSQL, WebSockets, AI Agents`,
-    ``,
-    `## Professional Experience (Experiências)`,
-    ...data.experiences.map(
-      (exp) =>
-        `### ${exp.role} @ ${exp.company} (${exp.period})\n` +
-        `- **Location/Type**: ${exp.location} · ${exp.type}\n` +
-        `- **Verified Impact**: ${exp.impactMetric}\n` +
-        `- **Summary**: ${exp.summary}\n` +
-        `- **Architectural Highlight**: ${exp.architectureHighlight}\n` +
-        `- **Technologies**: ${exp.stack.join(', ')}\n` +
-        exp.highlights.map((h) => `  - ${h}`).join('\n') +
-        `\n`
-    ),
-    `## Featured Engineering Projects (Projetos)`,
-    ...data.projects.map(
-      (proj) =>
-        `### ${proj.index}. ${proj.title} (${proj.year}) — ${proj.kicker}\n` +
-        `- **Role**: ${proj.role}\n` +
-        `- **Summary**: ${proj.summary}\n` +
-        `- **Architecture**: ${proj.architectureNotes}\n` +
-        `- **Stack**: ${proj.stack.join(', ')}\n` +
-        `- **Metrics**: ${proj.metrics.join(' | ')}\n`
-    ),
-    `## Certifications (Certificações)`,
-    ...data.certifications.map(
-      (cert) =>
-        `- **${cert.title}** (${cert.issuer}, ${cert.issuedDate}) — Code: \`${cert.credentialCode}\` | Skills: ${cert.skills.join(', ')}`
-    ),
-    ``,
-    `## Personal Notes & Culture Fit`,
-    `- **Competitions**: Active competitor in Rio Grande do Sul Gincanas ("Setor de Diversas" — logic, cryptography, rapid problem-solving).`,
-    `- **Hobbies & Discipline**: Consistent strength training (gym), competitive e-sports, and tactical/simulation games (Baldur's Gate 3, Valheim, Dota 2, Valorant, Cities: Skylines).`,
-    `- **Cats (3 Gatas)**: Morcega (oldest and chonkiest matriarch), Banguela (middle and smallest of the three, missing one fang), and Tomada (youngest and hyperactive 220V).`
+  const { profile, project, featuredProjects } = data;
+  const lines = [
+    `# ${profile.name} — ${profile.jobTitle}`,
+    '',
+    `> ${profile.headline} ${plainText(profile.summary)}`,
+    '',
+    '## Contato',
+    `- E-mail: ${profile.email}`,
+    `- LinkedIn: ${profile.linkedin}`,
+    `- GitHub: ${profile.github}`,
+    `- Local: ${profile.location}`,
+    `- Status: ${profile.status}`,
+    `- Senioridade: ${profile.seniority}`,
+    `- Formato: ${profile.workMode}`,
+    `- Pretensão salarial: ${profile.salary}`,
+    `- Formulário no site: #contato`,
+    `- Agentes de IA: ${CONTACT_API.method} ${CONTACT_API.path} com JSON { "name", "email", "message", "source": "agent" }. ${CONTACT_API.description} Campos: name (${CONTACT_API.body.name}); email (${CONTACT_API.body.email}); message (${CONTACT_API.body.message}). Resposta 200: { "ok": true }.`,
+    '',
+    '## Experiência',
+    ...data.experiences.flatMap((exp) => {
+      const span = experienceSpan(exp);
+      return [
+        `### ${exp.company} (${formatPeriod(span.start, span.end)})`,
+        exp.summary,
+        ...exp.roles.map((role) => `- Cargo: ${role.title} (${formatPeriod(role.start, role.end)})`),
+        ...exp.highlights.map((h) => `- ${h.metric ? `${h.metric}: ` : ''}${h.text}`),
+        `- Stack: ${exp.stack.join(', ')}`,
+        ''
+      ];
+    }),
+    '## Projetos em destaque (ferramentas e sites)',
+    ...featuredProjects.flatMap((item) => [
+      `### ${item.name}`,
+      item.tagline,
+      ...(item.repoUrl ? [`- Repositório: ${item.repoUrl}`] : []),
+      `- App: ${item.href}`,
+      `- Acesso: ${item.access === 'restricted' ? 'restrito (login)' : 'público'}`,
+      `- Stack: ${item.stack.join(', ')}`,
+      ''
+    ]),
+    `## Outro projeto: ${project.name} (${project.language}, ${project.version})`,
+    project.tagline,
+    `- Repositório: ${project.repoUrl}`,
+    `- Releases: ${project.releases.count}, ${project.releases.period}`,
+    ...project.cards.map((card) => `- ${card.title}: ${card.text}`),
+    `- Pacotes: ${project.modules.map((m) => `${m.name} (${m.description})`).join('; ')}`,
+    '',
+    '## Habilidades',
+    ...data.skills.map((group) => `- ${group.name}: ${skillNames(group).join(', ')}`),
+    '',
+    '## Formação',
+    ...data.education.map((e) => `- ${e.course}, ${e.school} (${e.period})`),
+    '',
+    '## Certificações',
+    ...data.certifications.map((c) => `- ${c.name} — ${c.issuer} (${c.year})`),
+    `- Outros cursos: ${data.otherCourses.join(', ')}`,
+    '',
+    '## Idiomas',
+    ...data.languages.map((l) => `- ${l.name}: ${l.level}`),
+    '',
+    '## Bastidores',
+    ...data.interests.map((i) => `- ${i.title}: ${i.text}`),
+    ...data.pets.map((p) => `- ${p.name} (${p.kind}): ${p.bio}`)
   ];
-
   return lines.join('\n');
 }

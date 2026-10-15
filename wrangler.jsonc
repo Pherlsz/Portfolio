@@ -1,0 +1,45 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "pherls",
+  "account_id": "82b6eed25b499085f51f718f8190b4d2",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-10-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": {
+    "enabled": true,
+    "logs": { "enabled": true, "invocation_logs": true },
+    "traces": { "enabled": true }
+  },
+  "upload_source_maps": true,
+  "vars": {
+    "GEMINI_MODELS": "gemini-flash-latest,gemini-flash-lite-latest"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "INBOX",
+      "id": "9513e6cd5e7f46feb1545faf27d48f1c"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "CHAT_LIMIT",
+      "namespace_id": "6101",
+      "simple": { "limit": 20, "period": 60 }
+    },
+    {
+      "name": "CONTACT_LIMIT",
+      "namespace_id": "6102",
+      "simple": { "limit": 8, "period": 60 }
+    }
+  ],
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "html_handling": "auto-trailing-slash",
+    "run_worker_first": ["/api/*", "/llms.txt", "/ai.json", "/robots.txt", "/sitemap.xml"]
+  },
+  "routes": [
+    { "pattern": "pherls.dev", "custom_domain": true }
+  ]
+}

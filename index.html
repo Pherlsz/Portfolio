@@ -1,68 +1,42 @@
 <!doctype html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pedro Lopes — Creative Engineer & Portfolio</title>
+    <title>Pedro Henrique Lopes · Frontend Engineer</title>
     <meta
       name="description"
-      content="Portfólio minimalista, interativo e AI-Friendly de Pedro Lopes. Engenharia de software, projetos, certificações, Gincanas RS, RPG e chat com IA dedicada."
+      content="Frontend Engineer com mais de 4 anos em produção com React, Next.js e TypeScript: design systems acessíveis, performance web e IA integrada a fluxos reais."
     />
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-    <meta name="ai-crawler-policy" content="allow-all, structured-resume-available, llms-txt-enabled" />
-    <link rel="alternate" type="text/plain" title="LLMs.txt Structured Profile" href="/llms.txt" />
-    <link rel="alternate" type="application/json" title="AI Recruiter JSON Profile" href="/ai.json" />
-    <meta property="og:title" content="Pedro Lopes — Creative Engineer & Portfolio" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f7f7f8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="alternate" type="text/plain" title="Perfil para agentes de IA" href="/llms.txt" />
+    <link rel="alternate" type="application/json" title="Perfil estruturado" href="/ai.json" />
+    <meta property="og:type" content="profile" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="Pedro Henrique Lopes · Frontend Engineer" />
     <meta
       property="og:description"
-      content="Portfólio minimalista, interativo e AI-Friendly de Pedro Lopes. Engenharia de software, projetos, certificações, Gincanas RS, RPG e chat com IA dedicada."
+      content="React, Next.js e TypeScript em produção: design systems acessíveis, performance web e IA integrada a fluxos reais."
     />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Pedro Lopes Portfolio" />
+    <meta property="og:image" content="/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Pedro Lopes — Creative Engineer & Portfolio" />
-    <meta
-      name="twitter:description"
-      content="Portfólio minimalista, interativo e AI-Friendly de Pedro Lopes. Engenharia de software, projetos, certificações, Gincanas RS, RPG e chat com IA dedicada."
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <script id="ai-schema-jsonld" type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "ProfilePage",
-        "mainEntity": {
-          "@type": "Person",
-          "name": "Pedro Henriques Lopes",
-          "email": "henriqueslopespedro@gmail.com",
-          "jobTitle": "Engenheiro de Software & Creative Technologist",
-          "homeLocation": {
-            "@type": "Place",
-            "name": "Rio Grande do Sul, Brasil"
-          },
-          "description": "Desenvolvedor focado em interfaces minimalistas de alta performance, sistemas escaláveis, resolução competitiva de problemas (Gincanas no RS - Setor de Diversas), e-sports, RPGs táticos e tutor da Morcega, Banguela e Tomada.",
-          "knowsAbout": [
-            "TypeScript",
-            "React",
-            "Node.js",
-            "Full-Stack Architecture",
-            "AI Engineering & Agents",
-            "UI/UX Minimalist Design",
-            "Mobile-First Web Apps",
-            "Competitive Problem Solving & Cryptography"
-          ]
-        }
-      }
+    <script>
+      (() => {
+        let dark = matchMedia('(prefers-color-scheme: dark)').matches;
+        try {
+          const stored = localStorage.getItem('theme');
+          if (stored) dark = stored === 'dark';
+        } catch {}
+        document.documentElement.classList.toggle('dark', dark);
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#17181b' : '#f7f7f8';
+      })();
     </script>
   </head>
-  <body class="bg-[#09090B] text-[#F4F4F5] antialiased selection:bg-[#E11D48] selection:text-white">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
-

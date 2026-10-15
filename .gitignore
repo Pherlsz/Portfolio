@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+.dev.vars
+.wrangler/
+worker-configuration.d.ts
+design/refs/
+data/inbox.json
