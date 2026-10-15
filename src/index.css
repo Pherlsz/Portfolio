@@ -113,6 +113,12 @@
     --valid: var(--green-600);
     --invalid: var(--rose-700);
     --focus: var(--ink);
+
+    --cta-bg: var(--neutral-950);
+    --cta-fg: var(--neutral-50);
+    --cta-fg-secondary: var(--neutral-950);
+    --cta-border: var(--neutral-700);
+    --focus-ring: var(--neutral-700);
   }
 
   html.dark {
@@ -133,6 +139,12 @@
     --valid: var(--green-400);
     --invalid: var(--rose-400);
     --focus: var(--ink);
+
+    --cta-bg: var(--yellow-400);
+    --cta-fg: var(--neutral-950);
+    --cta-fg-secondary: var(--neutral-50);
+    --cta-border: var(--neutral-300);
+    --focus-ring: var(--yellow-400);
   }
 
   html {
@@ -167,8 +179,8 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: 3px;
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
   }
 
   mark {
@@ -245,6 +257,70 @@
 
   .btn-ghost:hover {
     border-color: var(--ink);
+  }
+
+  .cta {
+    display: inline-flex;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding-inline: 1.25rem;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    text-align: center;
+    transition-property: background-color, color, border-color, transform, text-decoration-color;
+    transition-duration: 150ms;
+  }
+
+  .cta:active {
+    transform: translateY(1px);
+  }
+
+  .cta-primary {
+    border: 2px solid transparent;
+    background-color: var(--cta-bg);
+    color: var(--cta-fg);
+  }
+
+  .cta-primary:hover {
+    background-color: color-mix(in srgb, var(--cta-bg) 88%, var(--paper));
+  }
+
+  .cta-secondary {
+    border: 2px solid var(--cta-border);
+    background-color: transparent;
+    color: var(--cta-fg-secondary);
+  }
+
+  .cta-secondary:hover {
+    border-color: var(--cta-fg-secondary);
+    background-color: color-mix(in srgb, var(--cta-border) 12%, transparent);
+  }
+
+  .cta-tertiary {
+    min-height: 2.75rem;
+    padding-inline: 0.35rem;
+    border: none;
+    border-radius: 0.35rem;
+    background: transparent;
+    color: var(--cta-fg-secondary);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+  }
+
+  .cta-tertiary:hover {
+    text-decoration-color: var(--marker);
+    text-decoration-thickness: 2px;
+  }
+
+  .cta:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
   }
 
   .icon-btn {

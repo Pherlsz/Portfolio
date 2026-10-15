@@ -57,12 +57,7 @@ export default function App() {
       />
 
       <main id="conteudo" tabIndex={-1} className="divide-y divide-line">
-        <Hero
-          onOpenJobFit={() => {
-            setAssistantMode('jobfit');
-            setAssistantOpen(true);
-          }}
-        />
+        <Hero />
         <ExperienceSection />
         <div id="projeto" className="scroll-mt-20">
           <Suspense fallback={<div className="min-h-[28rem]" />}>

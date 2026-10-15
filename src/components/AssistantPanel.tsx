@@ -258,7 +258,7 @@ export function AssistantPanel({
           aria-haspopup="dialog"
           aria-expanded={false}
           aria-controls="assistente"
-          className="no-print btn btn-primary fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-30 shadow-lg shadow-neutral-950/20"
+          className="no-print cta cta-secondary fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-30 shadow-lg shadow-neutral-950/20"
         >
           <Sparkles className="size-4" aria-hidden="true" />
           <span className="sm:hidden">Perguntar</span>
@@ -436,7 +436,7 @@ export function AssistantPanel({
             <button
               type="submit"
               disabled={!jobDescription.trim() || isLoading}
-              className="btn btn-primary mt-3 w-full justify-center disabled:opacity-50"
+              className="cta cta-secondary mt-3 w-full justify-center disabled:opacity-50"
             >
               <Sparkles className="size-4" aria-hidden="true" />
               Analisar fit
