@@ -2,11 +2,12 @@ import { lazy, Suspense } from 'react';
 import { Download, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
+import { JobFitCta } from './JobFitCta';
 import { Marked } from './ui';
 
 const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
-export function Hero() {
+export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
 
   return (
@@ -54,9 +55,7 @@ export function Hero() {
           >
             Baixar CV (PDF)
           </CTA>
-          <CTA variant="secondary" href="#experiencia" className="w-full sm:w-auto">
-            Ver fit com a vaga
-          </CTA>
+          <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
           <CTA
             variant="tertiary"
             href={`mailto:${profile.email}`}

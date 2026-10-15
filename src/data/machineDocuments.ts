@@ -308,6 +308,7 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
       </section>
       <section id="contato" class="mx-auto max-w-6xl border-t border-line px-5 py-16 sm:px-8">
         <h2 class="display text-2xl sm:text-3xl">Contato</h2>
+        <p class="mt-4 max-w-3xl text-ink-soft">${escHtml(profile.trustCopy)}</p>
         <p class="mt-4 max-w-3xl text-ink-soft">${escHtml(availabilityLine(profile))}</p>
         <ul class="mt-4 list-disc space-y-3 pl-4">
           <li><a class="link" href="/llms.txt">/llms.txt</a></li>

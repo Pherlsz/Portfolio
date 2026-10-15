@@ -31,9 +31,15 @@ test('CTA component declares primary, secondary and tertiary variants', () => {
 
 test('Hero uses CTA hierarchy without ad-hoc btn-primary', () => {
   assert.match(heroSource, /variant="primary"/);
-  assert.match(heroSource, /variant="secondary"/);
+  assert.match(heroSource, /JobFitCta/);
   assert.match(heroSource, /variant="tertiary"/);
   assert.doesNotMatch(heroSource, /btn-primary/);
+});
+
+test('indexable contato shell includes trustCopy', () => {
+  const shell = readFileSync(new URL('../src/data/machineDocuments.ts', import.meta.url), 'utf8');
+  assert.match(shell, /profile\.trustCopy/);
+  assert.match(shell, /id="contato"/);
 });
 
 test('sticky header does not use solid primary CV button', () => {
