@@ -193,6 +193,7 @@ function StickerArt({
         {holoFoil && (
           <>
             <span className="sticker-holo-layer sticker-holo-foil" aria-hidden="true" />
+            <span className="sticker-holo-layer sticker-holo-sparkle" aria-hidden="true" />
             <span className="sticker-holo-layer sticker-holo-shine" aria-hidden="true" />
           </>
         )}
