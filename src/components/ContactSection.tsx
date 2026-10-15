@@ -140,7 +140,7 @@ export function ContactSection({ onOpenJobFit }: { onOpenJobFit: () => void }) {
               <CopyEmailButton
                 email={profile.email}
                 label="Copiar e-mail"
-                className="h-9 rounded-full border border-line px-3 text-sm font-semibold hover:border-ink"
+                className="h-9 cursor-pointer rounded-full border border-line px-3 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-ink hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[outline-color:var(--focus-ring)] active:translate-y-px"
               />
             </div>
 

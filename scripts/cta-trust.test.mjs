@@ -51,7 +51,10 @@ test('contact section uses one email pattern and a single copy control', () => {
   assert.match(contact, /label="Copiar e-mail"/);
   assert.match(contact, /variant="primary"/);
   assert.match(contact, /JobFitCta/);
-  assert.match(ui, /inline-flex items-center gap-1\.5 whitespace-nowrap/);
+  assert.match(ui, /inline-flex cursor-pointer items-center gap-1\.5 whitespace-nowrap/);
+  assert.match(contact, /cursor-pointer/);
+  assert.match(contact, /active:translate-y-px/);
+  assert.match(contact, /hover:border-ink/);
 });
 
 test('section anchors clear the sticky header and the spy watches every nav target', () => {
