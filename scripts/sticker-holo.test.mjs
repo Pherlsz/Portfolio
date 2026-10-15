@@ -7,7 +7,6 @@ const stickersSrc = readFileSync(new URL('../src/components/stickers.tsx', impor
 const cssSrc = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
 const pointerSrc = readFileSync(new URL('../src/utils/holoPointer.ts', import.meta.url), 'utf8');
 const sparkleSrc = readFileSync(new URL('../src/components/HoloSparkleCanvas.tsx', import.meta.url), 'utf8');
-const repoFiles = [holoSrc, stickersSrc, cssSrc, pointerSrc, sparkleSrc];
 
 function rollHolo(random, allOdds = 1 / 100, singleOdds = 0) {
   if (random() < allOdds) return { mode: 'all', id: null };
@@ -43,6 +42,7 @@ test('DEV query overrides do not write sessionStorage', () => {
 });
 
 test('simey v/vmax stack: color-dodge rainbow, soft glare, tilt, no gutters or white stripe', () => {
+  assert.match(cssSrc, /--holo-rainbow:/);
   assert.match(cssSrc, /--holo-grain:/);
   assert.match(cssSrc, /mix-blend-mode: color-dodge/);
   assert.match(cssSrc, /mix-blend-mode: soft-light/);
@@ -66,9 +66,12 @@ test('simey v/vmax stack: color-dodge rainbow, soft glare, tilt, no gutters or w
   assert.doesNotMatch(sheenBlock, /rgb\(255,\s*255,\s*255/);
 });
 
-test('clean die-cut rasters exist; cats keep dedicated holo masks', () => {
-  for (const id of ['morcega', 'banguela', 'tomada', 'cafe', 'd20', 'dossie', 'halter']) {
+test('lid rasters exist; unused sticker webps are not shipped', () => {
+  for (const id of ['morcega', 'banguela', 'tomada', 'd20']) {
     assert.equal(existsSync(new URL(`../public/stickers/${id}.webp`, import.meta.url)), true);
+  }
+  for (const id of ['cafe', 'dossie', 'halter']) {
+    assert.equal(existsSync(new URL(`../public/stickers/${id}.webp`, import.meta.url)), false);
   }
   for (const id of ['morcega', 'banguela', 'tomada']) {
     assert.equal(existsSync(new URL(`../public/holo-masks/${id}-cut.png`, import.meta.url)), true);

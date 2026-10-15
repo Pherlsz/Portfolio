@@ -111,12 +111,8 @@ export function resolveStickerHolo(): HoloState {
   return rolled;
 }
 
-export function isStickerHoloActive(
-  state: HoloState,
-  stickerId: string,
-  eligibleIds: readonly string[] = HOLO_ELIGIBLE_LID_STICKER_IDS
-): boolean {
-  if (!eligibleIds.includes(stickerId)) return false;
+export function isStickerHoloActive(state: HoloState, stickerId: string): boolean {
+  if (!isHoloEligibleId(stickerId)) return false;
   return state.mode === 'all';
 }
 

@@ -3,14 +3,12 @@ import { prefersReducedMotion } from '../utils/stickerHolo';
 
 const GLINT_COUNT = 56;
 
-function seedGlints() {
-  return Array.from({ length: GLINT_COUNT }, (_, i) => ({
-    x: (i * 0.173 + 0.09) % 1,
-    y: (i * 0.311 + 0.05) % 1,
-    r: 0.7 + (i % 4) * 0.22,
-    phase: i * 0.41
-  }));
-}
+const GLINTS = Array.from({ length: GLINT_COUNT }, (_, i) => ({
+  x: (i * 0.173 + 0.09) % 1,
+  y: (i * 0.311 + 0.05) % 1,
+  r: 0.7 + (i % 4) * 0.22,
+  phase: i * 0.41
+}));
 
 /** Sparse Canvas 2D sparkle. rAF only while on-screen, visible, and tilting. */
 export function HoloSparkleCanvas() {
@@ -25,7 +23,6 @@ export function HoloSparkleCanvas() {
     if (!ctx) return;
     if (prefersReducedMotion()) return;
 
-    const glints = seedGlints();
     let raf = 0;
     let visible = document.visibilityState === 'visible';
     let onscreen = true;
@@ -53,7 +50,7 @@ export function HoloSparkleCanvas() {
       const my = Number.parseFloat(cs.getPropertyValue('--my')) || 0.5;
       const size = Math.max(w, h);
 
-      for (const glint of glints) {
+      for (const glint of GLINTS) {
         const dist = Math.hypot(glint.x - mx, glint.y - my);
         const falloff = Math.max(0, 1 - dist * 2.1);
         const twinkle = 0.45 + 0.55 * Math.sin(time * 0.0014 + glint.phase);

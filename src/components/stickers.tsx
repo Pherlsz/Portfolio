@@ -9,12 +9,7 @@ import {
 import { animate, MotionConfig, motion, useMotionValue } from 'motion/react';
 import { HoloSparkleCanvas } from './HoloSparkleCanvas';
 import { useStickerHoloPointer } from '../utils/holoPointer';
-import {
-  HOLO_ELIGIBLE_LID_STICKER_IDS,
-  holoMaskUrl,
-  isStickerHoloActive,
-  useHoloRoulette
-} from '../utils/stickerHolo';
+import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
 
 export type StickerId =
   | 'morcega'
@@ -336,7 +331,7 @@ function LidSticker({
       data-sticker-id={slot.id}
       data-holo={holoActive ? 'true' : undefined}
       data-holo-state={holoActive ? 'idle' : undefined}
-      className={`group pointer-events-auto absolute cursor-grab touch-none active:cursor-grabbing${holoActive ? ' sticker-holo' : ''}`}
+      className="group pointer-events-auto absolute cursor-grab touch-none active:cursor-grabbing"
       style={{
         x,
         y,
@@ -354,7 +349,6 @@ function LidSticker({
 
 export function StickerLid() {
   const lidRef = useRef<HTMLDivElement>(null);
-  // Holo v2: 1/100/tab all three cats, or DEV ?holo=1|all (no storage write) — stickerHolo.ts
   const holo = useHoloRoulette();
   const [order, setOrder] = useState<StickerId[]>(() => LID_LAYOUT.map((slot) => slot.id));
   const [arrangement, setArrangement] = useState<Arrangement>(null);
@@ -382,7 +376,6 @@ export function StickerLid() {
           <ul
             aria-label="Stickers colados na tampa do notebook"
             data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
-            data-holo-state={holo.mode === 'none' ? undefined : 'idle'}
           >
             {LID_LAYOUT.map((slot) => (
               <li
@@ -394,7 +387,7 @@ export function StickerLid() {
                   slot={slot}
                   lidRef={lidRef}
                   arrangement={arrangement}
-                  holoActive={isStickerHoloActive(holo, slot.id, HOLO_ELIGIBLE_LID_STICKER_IDS)}
+                  holoActive={isStickerHoloActive(holo, slot.id)}
                   onFront={() => bringToFront(slot.id)}
                   onReact={setAnnouncement}
                 />
