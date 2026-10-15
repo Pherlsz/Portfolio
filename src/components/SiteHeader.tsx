@@ -49,28 +49,51 @@ function headerOffsetPx(): number {
   return (header?.getBoundingClientRect().height ?? 64) + 1;
 }
 
+function scrollLinePx() {
+  const pad = Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop);
+  const header = headerOffsetPx();
+  return (Number.isFinite(pad) ? Math.max(pad, header) : header) + 12;
+}
+
 function useActiveSection() {
   const [active, setActive] = useState<string | null>(null);
   const raf = useRef<number | undefined>(undefined);
 
   useEffect(() => {
+    let observer: IntersectionObserver | undefined;
+
     const sync = () => {
-      const marker = headerOffsetPx();
       const doc = document.documentElement;
-      const atBottom = window.innerHeight + window.scrollY >= doc.scrollHeight - 2;
+      const line = scrollLinePx();
+      const atBottom = window.innerHeight + window.scrollY >= doc.scrollHeight - 4;
       let current: string | null = null;
 
-      if (atBottom) {
-        current = SECTION_IDS[SECTION_IDS.length - 1];
-      } else {
-        for (const id of SECTION_IDS) {
-          const section = document.getElementById(id);
-          if (section && section.getBoundingClientRect().top <= marker) current = id;
-        }
+      for (const id of SECTION_IDS) {
+        const section = document.getElementById(id);
+        if (section && section.getBoundingClientRect().top <= line) current = id;
       }
+
+      const lastId = SECTION_IDS[SECTION_IDS.length - 1];
+      const last = document.getElementById(lastId);
+      if (atBottom && last && last.getBoundingClientRect().top > line) current = lastId;
 
       const next = current && current !== 'inicio' ? current : null;
       setActive((prev) => (prev === next ? prev : next));
+    };
+
+    const connect = () => {
+      observer?.disconnect();
+      const offset = headerOffsetPx();
+      observer = new IntersectionObserver(sync, {
+        root: null,
+        rootMargin: `-${offset}px 0px -40% 0px`,
+        threshold: [0, 0.15, 0.4, 0.7, 1]
+      });
+      for (const id of SECTION_IDS) {
+        const section = document.getElementById(id);
+        if (section) observer.observe(section);
+      }
+      sync();
     };
 
     const onScrollOrResize = () => {
@@ -81,22 +104,25 @@ function useActiveSection() {
       });
     };
 
-    sync();
+    connect();
     window.addEventListener('scroll', onScrollOrResize, { passive: true });
-    window.addEventListener('resize', onScrollOrResize);
+    window.addEventListener('resize', connect);
+    window.addEventListener('hashchange', onScrollOrResize);
     const root = document.getElementById('conteudo');
     let mutations: MutationObserver | undefined;
     if (root) {
       mutations = new MutationObserver(() => {
-        sync();
+        connect();
         if (SECTION_IDS.every((id) => document.getElementById(id))) mutations?.disconnect();
       });
       mutations.observe(root, { childList: true, subtree: true });
     }
 
     return () => {
+      observer?.disconnect();
       window.removeEventListener('scroll', onScrollOrResize);
-      window.removeEventListener('resize', onScrollOrResize);
+      window.removeEventListener('resize', connect);
+      window.removeEventListener('hashchange', onScrollOrResize);
       mutations?.disconnect();
       if (raf.current !== undefined) window.cancelAnimationFrame(raf.current);
     };
@@ -136,9 +162,19 @@ export function SiteHeader({ onOpenAssistant }: { onOpenAssistant: () => void })
       <li key={item.id}>
         <a
           href={`#${item.id}`}
-          onClick={onNavigate}
+          onClick={(event) => {
+            event.preventDefault();
+            onNavigate?.();
+            const id = item.id;
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                document.getElementById(id)?.scrollIntoView({ block: 'start' });
+                history.pushState(null, '', `#${id}`);
+              });
+            });
+          }}
           aria-current={active === item.id ? 'location' : undefined}
-          className="block rounded-full px-3 py-2 text-[0.9375rem] font-semibold text-ink-soft transition-colors hover:text-ink aria-[current=location]:bg-marker aria-[current=location]:text-on-marker"
+          className="block rounded-full px-2 py-2 text-[0.9375rem] font-semibold text-ink-soft transition-colors hover:text-ink aria-[current=location]:bg-marker aria-[current=location]:text-on-marker lg:px-3"
         >
           {item.label}
         </a>

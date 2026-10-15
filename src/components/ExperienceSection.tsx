@@ -92,7 +92,7 @@ export function ExperienceSection() {
     <section
       id="experiencia"
       aria-labelledby="experiencia-titulo"
-      className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 sm:px-8 sm:py-28"
+      className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-28"
     >
       <SectionHeading
         id="experiencia-titulo"

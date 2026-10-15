@@ -14,7 +14,7 @@ export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
     <section
       id="inicio"
       aria-labelledby="inicio-titulo"
-      className="mx-auto grid max-w-6xl scroll-mt-20 items-center gap-12 px-5 pb-20 pt-10 sm:px-8 sm:pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pb-28"
+      className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 sm:gap-12 sm:px-8 sm:pb-20 sm:pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pb-28"
     >
       <div className="notebook-margin">
         <p className="eyebrow inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1">
@@ -45,7 +45,7 @@ export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
         </p>
         <p className="mt-4 max-w-xl text-ink-soft">{profile.trustCopy}</p>
 
-        <div className="mt-8 flex w-full max-w-xl flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="mt-8 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
           <CTA
             variant="primary"
             href={profile.cvUrl}
@@ -56,11 +56,7 @@ export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
             Baixar CV (PDF)
           </CTA>
           <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
-          <CTA
-            variant="tertiary"
-            href={`mailto:${profile.email}`}
-            className="w-full sm:w-auto justify-center sm:justify-start"
-          >
+          <CTA variant="tertiary" href={`mailto:${profile.email}`} className="self-start sm:self-auto">
             Falar por e-mail
           </CTA>
         </div>

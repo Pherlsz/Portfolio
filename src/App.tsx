@@ -64,22 +64,22 @@ export default function App() {
           }}
         />
         <ExperienceSection />
-        <div id="projeto" className="scroll-mt-20">
+        <div id="projeto">
           <Suspense fallback={<div className="min-h-[28rem]" />}>
             <ProjectSection />
           </Suspense>
         </div>
-        <div id="formacao" className="scroll-mt-20">
+        <div id="formacao">
           <Suspense fallback={<div className="min-h-[32rem]" />}>
             <CredentialsSection />
           </Suspense>
         </div>
-        <div id="sobre" className="scroll-mt-20">
+        <div id="sobre">
           <Suspense fallback={<div className="min-h-[28rem]" />}>
             <AboutSection />
           </Suspense>
         </div>
-        <div id="contato" className="scroll-mt-20">
+        <div id="contato">
           <Suspense fallback={<div className="min-h-[24rem]" />}>
             <ContactSection
               onOpenJobFit={() => {

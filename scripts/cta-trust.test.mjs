@@ -54,6 +54,24 @@ test('contact section uses one email pattern and a single copy control', () => {
   assert.match(ui, /inline-flex items-center gap-1\.5 whitespace-nowrap/);
 });
 
+test('section anchors clear the sticky header and the spy watches every nav target', () => {
+  const header = readFileSync(new URL('../src/components/SiteHeader.tsx', import.meta.url), 'utf8');
+  const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+  assert.match(cssSource, /scroll-padding-top:\s*4\.25rem/);
+  assert.match(cssSource, /\.d20-face[\s\S]*z-index:\s*2/);
+  assert.match(cssSource, /\.d20-face[\s\S]*top:\s*52%/);
+  assert.match(header, /new IntersectionObserver/);
+  assert.doesNotMatch(app, /scroll-mt-20/);
+  for (const id of ['experiencia', 'projeto', 'formacao', 'sobre', 'contato']) {
+    assert.match(header, new RegExp(`id: '${id}'`));
+  }
+});
+
+test('contact section does not render a decorative sticker', () => {
+  const contact = readFileSync(new URL('../src/components/ContactSection.tsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(contact, /StaticSticker|from '\.\/stickers'/);
+});
+
 test('sticky header does not use solid primary CV button', () => {
   assert.doesNotMatch(headerSource, /btn-primary/);
   assert.match(headerSource, /variant="tertiary"/);

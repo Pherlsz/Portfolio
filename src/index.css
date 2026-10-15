@@ -181,6 +181,8 @@
     background-color: var(--paper);
     color: var(--ink);
     scroll-behavior: smooth;
+    /* Sticky header is h-16 plus its 1px border. */
+    scroll-padding-top: 4.25rem;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -728,7 +730,7 @@
     position: absolute;
     z-index: 2;
     left: 50%;
-    top: 43%;
+    top: 52%;
     translate: -50% -50%;
     font-family: var(--font-display);
     font-stretch: 125%;

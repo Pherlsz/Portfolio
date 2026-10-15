@@ -30,7 +30,7 @@ export function ProjectSection() {
   return (
     <section
       aria-labelledby="projeto-titulo"
-      className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28"
+      className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-28"
     >
       <SectionHeading id="projeto-titulo" eyebrow="Trabalho" title="Projetos" />
 
