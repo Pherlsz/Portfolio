@@ -52,5 +52,28 @@
   },
   "routes": [
     { "pattern": "pherls.dev", "custom_domain": true }
-  ]
+  ],
+  "previews": {
+    "vars": {
+      "GEMINI_MODELS": "gemini-flash-latest,gemini-flash-lite-latest"
+    },
+    "kv_namespaces": [
+      {
+        "binding": "INBOX",
+        "id": "2caac2a53908405e8b365bb10dd90ed3"
+      }
+    ],
+    "ratelimits": [
+      {
+        "name": "CHAT_LIMIT",
+        "namespace_id": "6201",
+        "simple": { "limit": 20, "period": 60 }
+      },
+      {
+        "name": "CONTACT_LIMIT",
+        "namespace_id": "6202",
+        "simple": { "limit": 8, "period": 60 }
+      }
+    ]
+  }
 }
