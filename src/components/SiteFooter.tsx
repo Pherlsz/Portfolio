@@ -19,6 +19,18 @@ export function SiteFooter({ onOpenInspector }: { onOpenInspector: () => void })
             /ai.json
           </a>
           <span aria-hidden="true">·</span>
+          <a href="/pedro.md" className="link font-mono text-sm">
+            /pedro.md
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href="/resume.json" className="link font-mono text-sm">
+            /resume.json
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href="/AGENTS.md" className="link font-mono text-sm">
+            /AGENTS.md
+          </a>
+          <span aria-hidden="true">·</span>
           <button type="button" onClick={onOpenInspector} className="link">
             Como este site foi feito
           </button>

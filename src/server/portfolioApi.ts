@@ -1,4 +1,11 @@
 import {
+  generateAgentsMd,
+  generatePedroMd,
+  generateResumeJson,
+  generateRobotsTxt,
+  generateSitemapXml
+} from '../data/machineDocuments.ts';
+import {
   availabilityLine,
   CONTACT_API,
   DEFAULT_PORTFOLIO_DATA,
@@ -237,55 +244,91 @@ async function generateWithGemini(
   return '';
 }
 
-function machineRoutes(url: URL): Response | null {
+type MachineDocument = {
+  body: string;
+  contentType: string;
+};
+
+function machineDocument(url: URL): MachineDocument | null {
   const { pathname, origin } = url;
   const data = DEFAULT_PORTFOLIO_DATA;
   const { profile } = data;
 
   if (pathname === '/llms.txt') {
-    return text(200, generateLlmsTxt(data, origin), 'text/plain; charset=utf-8');
+    return { body: generateLlmsTxt(data, origin), contentType: 'text/plain; charset=utf-8' };
+  }
+
+  if (pathname === '/pedro.md') {
+    return { body: generatePedroMd(data, origin), contentType: 'text/markdown; charset=utf-8' };
+  }
+
+  if (pathname === '/AGENTS.md' || pathname === '/agents.md') {
+    return { body: generateAgentsMd(origin), contentType: 'text/markdown; charset=utf-8' };
+  }
+
+  if (pathname === '/resume.json') {
+    return {
+      body: `${JSON.stringify(generateResumeJson(data, origin), null, 2)}\n`,
+      contentType: 'application/json; charset=utf-8'
+    };
   }
 
   if (pathname === '/ai.json') {
-    return json(200, {
-      candidate: profile.name,
-      contact: {
-        email: profile.email,
-        linkedin: profile.linkedin,
-        github: profile.github,
-        form: '#contato',
-        api: {
-          url: CONTACT_API.path,
-          method: CONTACT_API.method,
-          contentType: CONTACT_API.contentType,
-          description: CONTACT_API.description,
-          body: CONTACT_API.body,
-          example: {
-            name: 'Nome do remetente',
-            email: 'remetente@dominio.com',
-            message: 'Motivo do contato, em texto corrido.',
-            source: 'agent'
+    return {
+      body: JSON.stringify({
+        candidate: profile.name,
+        contact: {
+          email: profile.email,
+          linkedin: profile.linkedin,
+          github: profile.github,
+          form: '#contato',
+          api: {
+            url: CONTACT_API.path,
+            method: CONTACT_API.method,
+            contentType: CONTACT_API.contentType,
+            description: CONTACT_API.description,
+            body: CONTACT_API.body,
+            example: {
+              name: 'Nome do remetente',
+              email: 'remetente@dominio.com',
+              message: 'Motivo do contato, em texto corrido.',
+              source: 'agent'
+            }
           }
-        }
-      },
-      schemaOrgJsonLd: generateJsonLdSchema(data),
-      profile: data
-    });
+        },
+        documents: {
+          llmsTxt: `${origin}/llms.txt`,
+          markdown: `${origin}/pedro.md`,
+          agents: `${origin}/AGENTS.md`,
+          resume: `${origin}/resume.json`,
+          sitemap: `${origin}/sitemap.xml`
+        },
+        schemaOrgJsonLd: generateJsonLdSchema(data),
+        profile: data
+      }),
+      contentType: 'application/json; charset=utf-8'
+    };
   }
 
   if (pathname === '/robots.txt') {
-    return text(200, `User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`, 'text/plain; charset=utf-8');
+    return { body: generateRobotsTxt(origin), contentType: 'text/plain; charset=utf-8' };
   }
 
   if (pathname === '/sitemap.xml') {
-    return text(
-      200,
-      `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>${origin}/</loc></url>\n  <url><loc>${origin}/cv</loc></url>\n  <url><loc>${origin}/llms.txt</loc></url>\n  <url><loc>${origin}/ai.json</loc></url>\n</urlset>\n`,
-      'application/xml; charset=utf-8'
-    );
+    return { body: generateSitemapXml(origin), contentType: 'application/xml; charset=utf-8' };
   }
 
   return null;
+}
+
+function documentResponse(document: MachineDocument, method: string): Response {
+  const bytes = new TextEncoder().encode(document.body);
+  const headers = new Headers({
+    'Content-Type': document.contentType,
+    'X-Content-Type-Options': 'nosniff',
+    'Content-Length': String(bytes.byteLength)
+  });
+  return new Response(method === 'HEAD' ? null : bytes, { status: 200, headers });
 }
 
 async function handleChat(request: Request, env: PortfolioBindings): Promise<Response> {
@@ -437,8 +480,10 @@ export async function handlePortfolioRequest(request: Request, env: PortfolioBin
     return text(404, 'Not found', 'text/plain; charset=utf-8');
   }
 
-  const staticResponse = machineRoutes(url);
-  if (staticResponse && request.method === 'GET') return staticResponse;
+  if (request.method === 'GET' || request.method === 'HEAD') {
+    const document = machineDocument(url);
+    if (document) return documentResponse(document, request.method);
+  }
 
   if (pathname === '/api/chat' && request.method === 'POST') {
     return handleChat(request, env);

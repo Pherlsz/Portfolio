@@ -12,17 +12,31 @@
     <meta name="theme-color" content="#f7f7f8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="canonical" href="https://pherls.dev/" />
     <link rel="alternate" type="text/plain" title="Perfil para agentes de IA" href="/llms.txt" />
     <link rel="alternate" type="application/json" title="Perfil estruturado" href="/ai.json" />
+    <link rel="alternate" type="text/markdown" title="Perfil em Markdown" href="/pedro.md" />
+    <link rel="alternate" type="application/json" title="Currículo JSON" href="/resume.json" />
     <meta property="og:type" content="profile" />
     <meta property="og:locale" content="pt_BR" />
+    <meta property="og:url" content="https://pherls.dev/" />
     <meta property="og:title" content="Pedro Henrique Lopes · Frontend Engineer" />
     <meta
       property="og:description"
       content="React, Next.js e TypeScript em produção: design systems acessíveis, performance web e IA integrada a fluxos reais."
     />
-    <meta property="og:image" content="/og.png" />
+    <meta property="og:image" content="https://pherls.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Pedro Henrique Lopes · Frontend Engineer" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Pedro Henrique Lopes · Frontend Engineer" />
+    <meta
+      name="twitter:description"
+      content="React, Next.js e TypeScript em produção: design systems acessíveis, performance web e IA integrada a fluxos reais."
+    />
+    <meta name="twitter:image" content="https://pherls.dev/og.png" />
+    <meta name="twitter:image:alt" content="Pedro Henrique Lopes · Frontend Engineer" />
     <script>
       (() => {
         let dark = matchMedia('(prefers-color-scheme: dark)').matches;
@@ -36,23 +50,7 @@
     </script>
   </head>
   <body>
-    <div id="root">
-      <main id="conteudo">
-        <section id="inicio" class="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
-          <h1
-            id="inicio-titulo"
-            class="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]"
-          >
-            <span class="block">Pedro</span>
-            <span class="block">Henrique</span>
-            <span class="block">Lopes</span>
-          </h1>
-          <p class="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">
-            Transformo fluxos complexos em interfaces rápidas, acessíveis e fáceis de manter.
-          </p>
-        </section>
-      </main>
-    </div>
+    <div id="root"><!--indexable-shell--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
