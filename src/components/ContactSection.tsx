@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Download, Github, Linkedin } from 'lucide-react';
+import { FileText, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
@@ -96,7 +96,13 @@ function ContactForm({ email }: { email: string }) {
   );
 }
 
-export function ContactSection({ onOpenJobFit }: { onOpenJobFit: () => void }) {
+export function ContactSection({
+  onOpenJobFit,
+  onOpenCv
+}: {
+  onOpenJobFit: () => void;
+  onOpenCv: () => void;
+}) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
 
   return (
@@ -119,12 +125,13 @@ export function ContactSection({ onOpenJobFit }: { onOpenJobFit: () => void }) {
             <div className="flex flex-wrap items-center gap-3">
               <CTA
                 variant="primary"
-                href={profile.cvUrl}
-                download
+                onClick={onOpenCv}
+                aria-haspopup="dialog"
+                aria-controls="cv-preview"
                 className="w-full sm:w-auto"
-                icon={<Download className="size-4" aria-hidden="true" />}
+                icon={<FileText className="size-4" aria-hidden="true" />}
               >
-                Baixar CV (PDF)
+                Ver CV
               </CTA>
               <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
             </div>

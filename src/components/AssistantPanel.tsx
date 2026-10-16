@@ -38,7 +38,7 @@ const WELCOME: ChatMessage = {
   actions: [
     { label: 'Ver experiência', type: 'navigate', value: '#experiencia' },
     { label: 'Ver projetos', type: 'navigate', value: '#projeto' },
-    { label: 'Baixar CV', type: 'export_cv', value: 'pdf' }
+    { label: 'Ver CV', type: 'export_cv', value: 'pdf' }
   ]
 };
 
@@ -89,12 +89,14 @@ export function AssistantPanel({
   open,
   mode,
   onOpenChange,
-  onModeChange
+  onModeChange,
+  onOpenCv
 }: {
   open: boolean;
   mode: ChatMode;
   onOpenChange: (open: boolean) => void;
   onModeChange: (mode: ChatMode) => void;
+  onOpenCv: () => void;
 }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -127,10 +129,8 @@ export function AssistantPanel({
 
   const runAction = (action: ChatAction) => {
     if (action.type === 'export_cv') {
-      const link = document.createElement('a');
-      link.href = profile.cvUrl;
-      link.download = '';
-      link.click();
+      onOpenChange(false);
+      onOpenCv();
       return;
     }
     onOpenChange(false);

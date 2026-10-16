@@ -26,11 +26,15 @@ const AiFriendlyInspectorModal = lazy(() =>
     default: module.AiFriendlyInspectorModal
   }))
 );
+const CvPreviewModal = lazy(() =>
+  import('./components/CvPreviewModal').then((module) => ({ default: module.CvPreviewModal }))
+);
 
 export default function App() {
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [assistantMode, setAssistantMode] = useState<ChatMode>('chat');
   const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [cvOpen, setCvOpen] = useState(false);
 
   return (
     <>
@@ -54,6 +58,7 @@ export default function App() {
           setAssistantMode('chat');
           setAssistantOpen(true);
         }}
+        onOpenCv={() => setCvOpen(true)}
       />
 
       <main id="conteudo" tabIndex={-1} className="divide-y divide-line">
@@ -62,6 +67,7 @@ export default function App() {
             setAssistantMode('jobfit');
             setAssistantOpen(true);
           }}
+          onOpenCv={() => setCvOpen(true)}
         />
         <ExperienceSection />
         <div id="projeto">
@@ -86,6 +92,7 @@ export default function App() {
                 setAssistantMode('jobfit');
                 setAssistantOpen(true);
               }}
+              onOpenCv={() => setCvOpen(true)}
             />
           </Suspense>
         </div>
@@ -100,7 +107,13 @@ export default function App() {
             mode={assistantMode}
             onOpenChange={setAssistantOpen}
             onModeChange={setAssistantMode}
+            onOpenCv={() => setCvOpen(true)}
           />
+        </Suspense>
+      ) : null}
+      {cvOpen ? (
+        <Suspense fallback={null}>
+          <CvPreviewModal open={cvOpen} onClose={() => setCvOpen(false)} />
         </Suspense>
       ) : null}
       {inspectorOpen ? (

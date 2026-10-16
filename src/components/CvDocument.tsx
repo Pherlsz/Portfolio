@@ -49,9 +49,9 @@ export function CvDocument() {
             const span = experienceSpan(exp);
             return (
               <article key={exp.id} className="break-inside-avoid">
-                <div className="flex items-baseline justify-between gap-4">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
                   <h3 className="text-[11pt] font-bold">{exp.company}</h3>
-                  <p className="shrink-0 font-mono text-[9pt]">
+                  <p className="font-mono text-[9pt]">
                     {formatPeriod(span.start, span.end)} · {exp.location}
                   </p>
                 </div>
@@ -77,19 +77,19 @@ export function CvDocument() {
         <ul className="space-y-2">
           {featuredProjects.map((item) => (
             <li key={item.id} className="break-inside-avoid">
-              <div className="flex items-baseline justify-between gap-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
                 <h3 className="text-[11pt] font-bold">{item.name}</h3>
-                <p className="shrink-0 font-mono text-[9pt]">{shortUrl(item.repoUrl ?? item.href)}</p>
+                <p className="font-mono text-[9pt]">{shortUrl(item.repoUrl ?? item.href)}</p>
               </div>
               <p>{item.tagline}</p>
             </li>
           ))}
           <li className="break-inside-avoid">
-            <div className="flex items-baseline justify-between gap-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
               <h3 className="text-[11pt] font-bold">
                 {project.name} · {project.language} · {project.version}
               </h3>
-              <p className="shrink-0 font-mono text-[9pt]">{shortUrl(project.repoUrl)}</p>
+              <p className="font-mono text-[9pt]">{shortUrl(project.repoUrl)}</p>
             </div>
             <p>{project.tagline}</p>
           </li>

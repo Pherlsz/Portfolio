@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Download, Github, Linkedin } from 'lucide-react';
+import { FileText, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
@@ -7,7 +7,7 @@ import { Marked } from './ui';
 
 const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
-export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
+export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
 
   return (
@@ -48,12 +48,13 @@ export function Hero({ onOpenJobFit }: { onOpenJobFit: () => void }) {
         <div className="mt-8 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
           <CTA
             variant="primary"
-            href={profile.cvUrl}
-            download
+            onClick={onOpenCv}
+            aria-haspopup="dialog"
+            aria-controls="cv-preview"
             className="w-full sm:w-auto"
-            icon={<Download className="size-4" aria-hidden="true" />}
+            icon={<FileText className="size-4" aria-hidden="true" />}
           >
-            Baixar CV (PDF)
+            Ver CV
           </CTA>
           <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
           <CTA variant="tertiary" href={`mailto:${profile.email}`} className="self-start sm:self-auto">

@@ -75,6 +75,26 @@ test('contact section does not render a decorative sticker', () => {
   assert.doesNotMatch(contact, /StaticSticker|from '\.\/stickers'/);
 });
 
+test('CV buttons open a preview dialog and the PDF download stays inside it', () => {
+  const modal = readFileSync(new URL('../src/components/CvPreviewModal.tsx', import.meta.url), 'utf8');
+  const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+  const contact = readFileSync(new URL('../src/components/ContactSection.tsx', import.meta.url), 'utf8');
+  for (const source of [heroSource, contact, headerSource]) {
+    assert.match(source, /onOpenCv/);
+    assert.match(source, /aria-haspopup="dialog"/);
+    assert.doesNotMatch(source, /download/);
+  }
+  assert.match(app, /CvPreviewModal/);
+  assert.match(modal, /<dialog/);
+  assert.match(modal, /showModal\(\)/);
+  assert.match(modal, /dialog\.close\(\)/);
+  assert.match(modal, /src="\/cv"/);
+  assert.match(modal, /profile\.cvUrl/);
+  assert.match(modal, /Baixar PDF/);
+  assert.match(cssSource, /dialog\.cv-preview\[open\]/);
+  assert.match(cssSource, /cursor:\s*pointer/);
+});
+
 test('sticky header does not use solid primary CV button', () => {
   assert.doesNotMatch(headerSource, /btn-primary/);
   assert.match(headerSource, /variant="tertiary"/);

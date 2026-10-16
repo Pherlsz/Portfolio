@@ -131,7 +131,13 @@ function useActiveSection() {
   return active;
 }
 
-export function SiteHeader({ onOpenAssistant }: { onOpenAssistant: () => void }) {
+export function SiteHeader({
+  onOpenAssistant,
+  onOpenCv
+}: {
+  onOpenAssistant: () => void;
+  onOpenCv: () => void;
+}) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const { theme, toggleTheme } = useTheme();
   const active = useActiveSection();
@@ -209,12 +215,13 @@ export function SiteHeader({ onOpenAssistant }: { onOpenAssistant: () => void })
           </button>
           <CTA
             variant="tertiary"
-            href={profile.cvUrl}
-            download
+            onClick={onOpenCv}
+            aria-haspopup="dialog"
+            aria-controls="cv-preview"
             className="hidden min-h-10 px-2 text-sm sm:inline-flex"
-            aria-label="Baixar CV (PDF)"
+            aria-label="Ver currículo"
           >
-            CV (PDF)
+            Ver CV
           </CTA>
           <button
             type="button"
@@ -258,12 +265,16 @@ export function SiteHeader({ onOpenAssistant }: { onOpenAssistant: () => void })
           </button>
           <CTA
             variant="tertiary"
-            href={profile.cvUrl}
-            download
+            onClick={() => {
+              setMenuOpen(false);
+              onOpenCv();
+            }}
+            aria-haspopup="dialog"
+            aria-controls="cv-preview"
             className="mt-4 w-full justify-center text-sm"
-            aria-label="Baixar CV (PDF)"
+            aria-label="Ver currículo"
           >
-            CV (PDF)
+            Ver CV
           </CTA>
         </nav>
       )}
