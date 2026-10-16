@@ -42,6 +42,60 @@ test('indexable contato shell includes trustCopy', () => {
   assert.match(shell, /id="contato"/);
 });
 
+test('contact section uses one email pattern and a single copy control', () => {
+  const contact = readFileSync(new URL('../src/components/ContactSection.tsx', import.meta.url), 'utf8');
+  const ui = readFileSync(new URL('../src/components/ui.tsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(contact, /Falar por e-mail/);
+  assert.match(contact, /mailto:\$\{profile\.email\}/);
+  assert.match(contact, /CopyEmailButton/);
+  assert.match(contact, /label="Copiar e-mail"/);
+  assert.match(contact, /variant="primary"/);
+  assert.match(contact, /JobFitCta/);
+  assert.match(ui, /inline-flex cursor-pointer items-center gap-1\.5 whitespace-nowrap/);
+  assert.match(contact, /cursor-pointer/);
+  assert.match(contact, /active:translate-y-px/);
+  assert.match(contact, /hover:border-ink/);
+});
+
+test('section anchors clear the sticky header and the spy watches every nav target', () => {
+  const header = readFileSync(new URL('../src/components/SiteHeader.tsx', import.meta.url), 'utf8');
+  const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+  assert.match(cssSource, /scroll-padding-top:\s*4\.25rem/);
+  assert.match(cssSource, /\.d20-face[\s\S]*z-index:\s*2/);
+  assert.match(cssSource, /\.d20-face[\s\S]*top:\s*52%/);
+  assert.match(header, /new IntersectionObserver/);
+  assert.doesNotMatch(app, /scroll-mt-20/);
+  for (const id of ['experiencia', 'projeto', 'formacao', 'sobre', 'contato']) {
+    assert.match(header, new RegExp(`id: '${id}'`));
+  }
+});
+
+test('contact section does not render a decorative sticker', () => {
+  const contact = readFileSync(new URL('../src/components/ContactSection.tsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(contact, /StaticSticker|from '\.\/stickers'/);
+});
+
+test('CV buttons open a preview dialog and the PDF download stays inside it', () => {
+  const modal = readFileSync(new URL('../src/components/CvPreviewModal.tsx', import.meta.url), 'utf8');
+  const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+  const contact = readFileSync(new URL('../src/components/ContactSection.tsx', import.meta.url), 'utf8');
+  for (const source of [heroSource, contact, headerSource]) {
+    assert.match(source, /onOpenCv/);
+    assert.match(source, /aria-haspopup="dialog"/);
+    assert.doesNotMatch(source, /download/);
+  }
+  assert.match(app, /CvPreviewModal/);
+  assert.match(modal, /<dialog/);
+  assert.match(modal, /showModal\(\)/);
+  assert.match(modal, /dialog\.close\(\)/);
+  assert.match(modal, /\$\{profile\.cvUrl\}#navpanes=0&view=FitH/);
+  assert.doesNotMatch(modal, /src="\/cv"/);
+  assert.match(modal, /profile\.cvUrl/);
+  assert.match(modal, /Baixar PDF/);
+  assert.match(cssSource, /dialog\.cv-preview\[open\]/);
+  assert.match(cssSource, /cursor:\s*pointer/);
+});
+
 test('sticky header does not use solid primary CV button', () => {
   assert.doesNotMatch(headerSource, /btn-primary/);
   assert.match(headerSource, /variant="tertiary"/);

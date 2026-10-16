@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Download, Github, Linkedin } from 'lucide-react';
+import { FileText, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
@@ -96,13 +96,19 @@ function ContactForm({ email }: { email: string }) {
   );
 }
 
-export function ContactSection({ onOpenJobFit }: { onOpenJobFit: () => void }) {
+export function ContactSection({
+  onOpenJobFit,
+  onOpenCv
+}: {
+  onOpenJobFit: () => void;
+  onOpenCv: () => void;
+}) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
 
   return (
     <section
       aria-labelledby="contato-titulo"
-      className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24"
+      className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24"
     >
       <p className="eyebrow">Vamos conversar?</p>
       <div className="mt-3 grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start">
@@ -115,63 +121,63 @@ export function ContactSection({ onOpenJobFit }: { onOpenJobFit: () => void }) {
             {profile.workMode}. Pretensão salarial {profile.salary.toLowerCase()}.
           </p>
 
-          <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap">
-            <CTA
-              variant="primary"
-              href={profile.cvUrl}
-              download
-              className="w-full sm:w-auto"
-              icon={<Download className="size-4" aria-hidden="true" />}
-            >
-              Baixar CV (PDF)
-            </CTA>
-            <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
-            <CTA
-              variant="tertiary"
-              href={`mailto:${profile.email}`}
-              className="w-full sm:w-auto justify-center sm:justify-start"
-            >
-              Falar por e-mail
-            </CTA>
+          <div className="mt-8 flex max-w-xl flex-col gap-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <CTA
+                variant="primary"
+                onClick={onOpenCv}
+                aria-haspopup="dialog"
+                aria-controls="cv-preview"
+                className="w-full sm:w-auto"
+                icon={<FileText className="size-4" aria-hidden="true" />}
+              >
+                Ver CV
+              </CTA>
+              <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <a
+                href={`mailto:${profile.email}`}
+                translate="no"
+                className="text-lg font-semibold underline decoration-marker decoration-2 underline-offset-4"
+              >
+                {profile.email}
+              </a>
+              <CopyEmailButton
+                email={profile.email}
+                label="Copiar e-mail"
+                className="h-9 cursor-pointer rounded-full border border-line px-3 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-ink hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[outline-color:var(--focus-ring)] active:translate-y-px"
+              />
+            </div>
+
+            <ul className="flex flex-wrap gap-2">
+              <li>
+                <a
+                  href={profile.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
+                  className="btn btn-ghost"
+                >
+                  <Linkedin className="size-4" aria-hidden="true" />
+                  LinkedIn
+                </a>
+              </li>
+              <li>
+                <a
+                  href={profile.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Perfil no GitHub de Pedro Henrique Lopes"
+                  className="btn btn-ghost"
+                >
+                  <Github className="size-4" aria-hidden="true" />
+                  GitHub
+                </a>
+              </li>
+            </ul>
           </div>
-
-          <p className="mt-6 text-lg">
-            <a
-              href={`mailto:${profile.email}`}
-              translate="no"
-              className="font-semibold underline decoration-marker decoration-2 underline-offset-4"
-            >
-              {profile.email}
-            </a>
-          </p>
-          <CopyEmailButton email={profile.email} className="link mt-2 text-sm font-semibold" label="Copiar e-mail" />
-
-          <ul className="mt-8 flex flex-wrap gap-2">
-            <li>
-              <a
-                href={profile.linkedin}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
-                className="btn btn-ghost"
-              >
-                <Linkedin className="size-4" aria-hidden="true" />
-                LinkedIn
-              </a>
-            </li>
-            <li>
-              <a
-                href={profile.github}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Perfil no GitHub de Pedro Henrique Lopes"
-                className="btn btn-ghost"
-              >
-                <Github className="size-4" aria-hidden="true" />
-                GitHub
-              </a>
-            </li>
-          </ul>
         </div>
 
         <ContactForm email={profile.email} />

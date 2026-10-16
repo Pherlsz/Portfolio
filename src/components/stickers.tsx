@@ -397,7 +397,7 @@ export function StickerLid() {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <p id="tampa-ajuda" className="eyebrow">
           Arraste os stickers ou use as setas. Clique no D20 para rolar.
         </p>

@@ -8,7 +8,7 @@ export function CredentialsSection() {
   return (
     <section
       aria-labelledby="formacao-titulo"
-      className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28"
+      className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-28"
     >
       <SectionHeading id="formacao-titulo" eyebrow="Ferramentas, estudo e idiomas" title="Formação e stack" />
 

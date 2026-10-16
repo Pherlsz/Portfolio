@@ -80,14 +80,18 @@ export function CopyEmailButton({
   }
 
   return (
-    <button type="button" onClick={copy} className={className}>
-      {label ? <span>{copied ? 'Copiado' : label}</span> : <span translate="no">{email}</span>}
+    <button
+      type="button"
+      onClick={copy}
+      aria-label={copied ? 'E-mail copiado' : `Copiar ${email}`}
+      className={['inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap', className].filter(Boolean).join(' ')}
+    >
       {copied ? (
         <Check className="size-4 shrink-0" aria-hidden="true" />
       ) : (
         <Copy className="size-4 shrink-0" aria-hidden="true" />
       )}
-      {!label && <span className="sr-only"> (copiar)</span>}
+      {label ? <span>{copied ? 'Copiado' : label}</span> : <span translate="no">{email}</span>}
       <span className="sr-only" aria-live="polite">
         {copied ? 'E-mail copiado' : ''}
       </span>
