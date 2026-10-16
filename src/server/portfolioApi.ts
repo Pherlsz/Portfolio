@@ -25,6 +25,7 @@ import {
   validateUserChatInput
 } from '../utils/chatGuardrails.ts';
 import { suggestFollowUps } from '../utils/followUps.ts';
+import { sendContactNotification, type SendEmail } from './contactEmail.ts';
 
 const MAX_BODY = 64 * 1024;
 const DEFAULT_MODELS = 'gemini-flash-latest,gemini-flash-lite-latest';
@@ -52,6 +53,7 @@ export type PortfolioBindings = {
   GEMINI_API_KEY?: string;
   GEMINI_MODELS?: string;
   INBOX?: { put(key: string, value: string): Promise<void> };
+  SEND_EMAIL?: SendEmail;
   CHAT_LIMIT?: { limit(opts: { key: string }): Promise<{ success: boolean }> };
   CONTACT_LIMIT?: { limit(opts: { key: string }): Promise<{ success: boolean }> };
 };
@@ -453,6 +455,8 @@ async function handleContact(request: Request, env: PortfolioBindings): Promise<
     console.warn('Falha ao gravar contato.', error instanceof Error ? error.message : error);
     return json(500, { ok: false, error: 'Não foi possível guardar a mensagem.' }, CORS);
   }
+
+  await sendContactNotification(env.SEND_EMAIL, entry);
 
   return json(200, { ok: true }, CORS);
 }

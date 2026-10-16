@@ -13,7 +13,7 @@
     "stickers": "node scripts/stickers.mjs",
     "clean": "rm -rf dist .wrangler",
     "lint": "tsc --noEmit",
-    "test": "node --test scripts/cta-trust.test.mjs scripts/sticker-holo.test.mjs"
+    "test": "node --experimental-strip-types --test scripts/cta-trust.test.mjs scripts/sticker-holo.test.mjs scripts/contact-email.test.ts"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",

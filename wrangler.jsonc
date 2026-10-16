@@ -22,6 +22,9 @@
       "id": "9513e6cd5e7f46feb1545faf27d48f1c"
     }
   ],
+  "send_email": [
+    { "name": "SEND_EMAIL" }
+  ],
   "ratelimits": [
     {
       "name": "CHAT_LIMIT",
@@ -62,6 +65,9 @@
         "binding": "INBOX",
         "id": "2caac2a53908405e8b365bb10dd90ed3"
       }
+    ],
+    "send_email": [
+      { "name": "SEND_EMAIL" }
     ],
     "ratelimits": [
       {
