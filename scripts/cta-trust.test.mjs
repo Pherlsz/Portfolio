@@ -88,7 +88,8 @@ test('CV buttons open a preview dialog and the PDF download stays inside it', ()
   assert.match(modal, /<dialog/);
   assert.match(modal, /showModal\(\)/);
   assert.match(modal, /dialog\.close\(\)/);
-  assert.match(modal, /src="\/cv"/);
+  assert.match(modal, /\$\{profile\.cvUrl\}#navpanes=0&view=FitH/);
+  assert.doesNotMatch(modal, /src="\/cv"/);
   assert.match(modal, /profile\.cvUrl/);
   assert.match(modal, /Baixar PDF/);
   assert.match(cssSource, /dialog\.cv-preview\[open\]/);

@@ -5,6 +5,7 @@ import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const frameRef = useRef<HTMLIFrameElement>(null);
   const { profile } = DEFAULT_PORTFOLIO_DATA;
 
   useEffect(() => {
@@ -15,6 +16,18 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
       closeRef.current?.focus();
     }
     if (!open && dialog.open) dialog.close();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onBlur = () => {
+      window.setTimeout(() => {
+        const dialog = dialogRef.current;
+        if (dialog?.open && document.activeElement === frameRef.current) dialog.focus();
+      }, 0);
+    };
+    window.addEventListener('blur', onBlur);
+    return () => window.removeEventListener('blur', onBlur);
   }, [open]);
 
   const requestClose = () => {
@@ -34,6 +47,7 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
         if (event.target === dialogRef.current) requestClose();
       }}
       className="cv-preview no-print"
+      tabIndex={-1}
     >
       <header className="flex flex-col gap-3 border-b border-line px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
         <div className="min-w-0">
@@ -41,7 +55,7 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
             Currículo
           </h2>
           <p id="cv-preview-desc" className="mt-1 text-sm text-ink-soft">
-            Prévia para leitura. O arquivo para guardar é o PDF.
+            Visualização do PDF. Baixar PDF salva este mesmo arquivo.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -65,19 +79,10 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
         </div>
       </header>
       <iframe
-        title="Pré-visualização do currículo de Pedro Henrique Lopes"
-        src="/cv"
-        className="min-h-0 w-full flex-1 border-0 bg-white"
-        onLoad={(event) => {
-          const doc = event.currentTarget.contentDocument;
-          if (!doc || doc.documentElement.dataset.cvEscape === '1') return;
-          doc.documentElement.dataset.cvEscape = '1';
-          doc.addEventListener('keydown', (keyEvent) => {
-            if (keyEvent.key !== 'Escape') return;
-            keyEvent.preventDefault();
-            dialogRef.current?.close();
-          });
-        }}
+        ref={frameRef}
+        title="Currículo de Pedro Henrique Lopes em PDF"
+        src={`${profile.cvUrl}#navpanes=0&view=FitH`}
+        className="min-h-0 w-full flex-1 border-0 bg-neutral-700"
       />
     </dialog>
   );
