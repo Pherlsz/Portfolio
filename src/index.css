@@ -837,6 +837,9 @@
   .sticker-bubble {
     pointer-events: none;
     position: absolute;
+    left: 50%;
+    bottom: calc(100% + 0.25rem);
+    translate: -50% 0.25rem;
     z-index: 2;
     white-space: nowrap;
     border-radius: 9999px;
@@ -850,44 +853,70 @@
     transition-duration: 150ms;
   }
 
-  .sticker-bubble[data-caption-edge="above"] {
-    bottom: calc(100% + 0.25rem);
-    top: auto;
-  }
-
-  .sticker-bubble[data-caption-edge="below"] {
-    top: calc(100% + 0.25rem);
-    bottom: auto;
-  }
-
-  .sticker-bubble[data-caption-align="center"] {
-    left: 50%;
-    right: auto;
-    translate: calc(-50% + var(--caption-clamp-x, 0px)) 0.25rem;
-  }
-
-  .sticker-bubble[data-caption-align="start"] {
-    left: 0;
-    right: auto;
-    translate: var(--caption-clamp-x, 0px) 0.25rem;
-  }
-
-  .sticker-bubble[data-caption-align="end"] {
-    left: auto;
-    right: 0;
-    translate: var(--caption-clamp-x, 0px) 0.25rem;
-  }
-
-  .group:focus-visible .sticker-bubble,
-  .sticker-bubble[data-visible="true"] {
+  .group:focus-visible .sticker-bubble {
     opacity: 1;
-    pointer-events: auto;
+    translate: -50% 0;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .group:hover .sticker-bubble {
       opacity: 1;
-      pointer-events: auto;
+      translate: -50% 0;
+    }
+  }
+
+  @media (pointer: coarse) {
+    .sticker-bubble {
+      left: auto;
+      bottom: auto;
+      translate: 0 0.25rem;
+    }
+
+    .sticker-bubble[data-caption-edge="above"] {
+      bottom: calc(100% + 0.25rem);
+      top: auto;
+    }
+
+    .sticker-bubble[data-caption-edge="below"] {
+      top: calc(100% + 0.25rem);
+      bottom: auto;
+    }
+
+    .sticker-bubble[data-caption-align="center"] {
+      left: 50%;
+      right: auto;
+      translate: calc(-50% + var(--caption-clamp-x, 0px)) 0.25rem;
+    }
+
+    .sticker-bubble[data-caption-align="start"] {
+      left: 0;
+      right: auto;
+      translate: var(--caption-clamp-x, 0px) 0.25rem;
+    }
+
+    .sticker-bubble[data-caption-align="end"] {
+      left: auto;
+      right: 0;
+      translate: var(--caption-clamp-x, 0px) 0.25rem;
+    }
+
+    .group:hover .sticker-bubble,
+    .group:focus-visible .sticker-bubble {
+      opacity: 0;
+      translate: var(--caption-clamp-x, 0px) 0.25rem;
+    }
+
+    .sticker-bubble[data-visible="true"] {
+      opacity: 1;
+    }
+
+    .sticker-bubble[data-caption-align="center"][data-visible="true"] {
+      translate: calc(-50% + var(--caption-clamp-x, 0px)) 0;
+    }
+
+    .sticker-bubble[data-caption-align="start"][data-visible="true"],
+    .sticker-bubble[data-caption-align="end"][data-visible="true"] {
+      translate: var(--caption-clamp-x, 0px) 0;
     }
   }
 }

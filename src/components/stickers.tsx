@@ -11,6 +11,11 @@ import { HoloSparkleCanvas } from './HoloSparkleCanvas';
 import { useStickerHoloPointer } from '../utils/holoPointer';
 import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
 import {
+  createArrumarArrangement,
+  LID_LAYOUT,
+  type LidSlot
+} from '../utils/lidStickerSlots';
+import {
   resolveLidCaptionLayout,
   type LidCaptionLayout
 } from '../utils/stickerCaptionLayout';
@@ -111,29 +116,13 @@ const STICKERS: Record<StickerId, StickerDef> = {
   }
 };
 
-interface Slot {
-  id: StickerId;
-  x: number;
-  y: number;
-  w: number;
-  rotate: number;
-}
-
-/** Largura / altura da tampa unibody (aspect-ratio 16/10). */
-const LID_ASPECT = 16 / 10;
-
-/** Posição inicial na tampa, em % da largura (x, w) e da altura (y). */
-const LID_LAYOUT: Slot[] = [
-  { id: 'morcega', x: 3, y: 12, w: 20, rotate: -5 },
-  { id: 'react', x: 83, y: 14, w: 11, rotate: 10 },
-  { id: 'banguela', x: 4, y: 58, w: 15, rotate: 7 },
-  { id: 'tomada', x: 36, y: 70, w: 22, rotate: 2 },
-  { id: 'd20', x: 64, y: 42, w: 13, rotate: 12 },
-  { id: 'typescript', x: 81, y: 54, w: 11, rotate: -8 },
-  { id: 'nextjs', x: 85, y: 76, w: 10, rotate: 6 }
-];
+type Slot = LidSlot & { id: StickerId };
 
 const DEFAULT_CAPTION_LAYOUT: LidCaptionLayout = { edge: 'above', align: 'center', shiftX: 0 };
+
+function prefersCoarsePointer() {
+  return typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+}
 
 interface Reaction {
   text: string;
@@ -249,7 +238,7 @@ const SPRING = { type: 'spring', stiffness: 260, damping: 24 } as const;
 /** Centro do sticker no slot, em % da tampa. */
 function slotCenter(slot: Slot, id: StickerId) {
   const def = STICKERS[id];
-  const height = slot.w * LID_ASPECT * (def.height / def.width);
+  const height = slot.w * (16 / 10) * (def.height / def.width);
   return { x: slot.x + slot.w / 2, y: slot.y + height / 2 };
 }
 
@@ -265,17 +254,6 @@ function applyAxisConstraints(
     x: Math.min(Math.max(nextX, constraints.left), constraints.right),
     y: Math.min(Math.max(nextY, constraints.top), constraints.bottom)
   };
-}
-
-/** Pull motion offset so the sticker box sits inside the lid (handles rest slot overflow). */
-function correctionForRoom(space: { left: number; right: number; up: number; down: number }) {
-  let dx = 0;
-  let dy = 0;
-  if (space.left > 0) dx += space.left;
-  if (space.right < 0) dx += space.right;
-  if (space.up > 0) dy += space.up;
-  if (space.down < 0) dy += space.down;
-  return { dx, dy };
 }
 
 function LidSticker({
@@ -330,28 +308,17 @@ function LidSticker({
     dragConstraints.bottom = next.bottom;
   };
 
-  const snapInsideLid = () => {
-    for (let pass = 0; pass < 6; pass += 1) {
-      const space = room();
-      if (!space) return;
-      const { dx, dy } = correctionForRoom(space);
-      if (dx === 0 && dy === 0) break;
-      x.set(x.get() + dx);
-      y.set(y.get() + dy);
-    }
-    syncDragConstraints();
-  };
-
   const releasePressed = () => setPressed(false);
 
   useLayoutEffect(() => {
+    if (!prefersCoarsePointer()) return;
     const bubble = bubbleRef.current;
     if (!bubble) return;
     bubble.style.setProperty('--caption-clamp-x', `${captionLayout.shiftX}px`);
   }, [captionLayout.shiftX]);
 
   useLayoutEffect(() => {
-    if (!pressed && !reaction) return;
+    if (!prefersCoarsePointer() || (!pressed && !reaction)) return;
     const measure = () => {
       const lid = lidRef.current;
       const button = ref.current;
@@ -380,19 +347,13 @@ function LidSticker({
     };
   }, [dragControls]);
 
-  useLayoutEffect(() => {
-    snapInsideLid();
-  }, []);
-
   useEffect(() => {
     if (!arrangement) return;
     const target = arrangement.targets?.[slot.id];
     const lid = lidRef.current?.getBoundingClientRect();
     const space = room();
     if (!target || !lid || !space) {
-      void Promise.all([animate(x, 0, SPRING), animate(y, 0, SPRING), animate(rotate, slot.rotate, SPRING)]).then(
-        () => snapInsideLid()
-      );
+      void Promise.all([animate(x, 0, SPRING), animate(y, 0, SPRING), animate(rotate, slot.rotate, SPRING)]);
       return;
     }
     const from = slotCenter(slot, slot.id);
@@ -405,7 +366,7 @@ function LidSticker({
       animate(x, clamped.x, SPRING),
       animate(y, clamped.y, SPRING),
       animate(rotate, target.rotate, SPRING)
-    ]).then(() => snapInsideLid());
+    ]);
   }, [arrangement]);
 
   const nudge = (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -556,7 +517,7 @@ export function StickerLid() {
           <button
             type="button"
             onClick={() => {
-              setArrangement({ key: Date.now(), targets: null });
+              setArrangement(createArrumarArrangement(Date.now()));
               setAnnouncement('Stickers no lugar original.');
             }}
             className="btn btn-ghost min-h-9 px-4 text-sm"
