@@ -1,101 +1,91 @@
 import { lazy, Suspense } from 'react';
-import { FileText, Github, Linkedin } from 'lucide-react';
-import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
-import { CTA } from './CTA';
-import { JobFitCta } from './JobFitCta';
-import { Marked } from './ui';
+import { DEFAULT_PORTFOLIO_DATA, plainText } from '../data/portfolioData';
 
 const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
-export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
-  const { profile } = DEFAULT_PORTFOLIO_DATA;
+export function Hero({ onOpenCv }: { onOpenJobFit?: () => void; onOpenCv: () => void }) {
+  const { profile, featuredProjects, experiences, education } = DEFAULT_PORTFOLIO_DATA;
+  const featured = featuredProjects[0];
+  const firstJob = experiences[0];
+  const degree = education[0];
 
   return (
-    <section
-      id="inicio"
-      aria-labelledby="inicio-titulo"
-      className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 sm:gap-12 sm:px-8 sm:pb-20 sm:pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pb-28"
-    >
-      <div className="notebook-margin">
-        <p className="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-line bg-surface px-3 py-1">
-          <span className="size-2 shrink-0 rounded-full bg-status" aria-hidden="true" />
-          <span>{profile.status}</span>
-          <span className="hidden sm:inline" aria-hidden="true">·</span>
-          <span className="whitespace-nowrap basis-full sm:basis-auto">{profile.location}</span>
-        </p>
+    <div id="inicio" className="flex min-h-0 flex-1 flex-col">
+      <h1 id="inicio-titulo" className="display mt-5 text-[1.75rem] leading-tight text-balance lg:text-[2rem]">
+        {profile.name}
+      </h1>
+      <p className="mt-3 max-w-prose text-pretty text-[0.9375rem] leading-snug">{profile.headline}</p>
+      {/* shortcut: clamp summary so 01–05 stay on the first 360 screen, drop the clamp if the rail grows */}
+      <p className="mt-2 line-clamp-2 max-w-prose text-pretty text-[0.9375rem] leading-snug text-ink-soft">
+        {plainText(profile.summary)}
+      </p>
 
-        <h1
-          id="inicio-titulo"
-          className="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]"
-        >
-          {profile.name.split(' ').map((word) => (
-            <span key={word} className="block">
-              {word}{' '}
-            </span>
-          ))}
-        </h1>
+      {/* shortcut: native hash links, no scroll spy; restore a spy if a covering sticky bar returns */}
+      <nav aria-label="Índice" className="mt-6">
+        <ol>
+          <li className="border-t border-line">
+            <a href="#projeto" className="grid min-h-11 grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-2 py-2">
+              <span className="font-mono text-sm tabular-nums text-stamp">01</span>
+              <span className="min-w-0">
+                <span className="link font-medium">Projetos</span>
+                <span className="mt-0.5 block truncate text-sm text-ink-soft">{featured ? featured.tagline : ''}</span>
+              </span>
+            </a>
+          </li>
+          <li className="border-t border-line">
+            <a href="#experiencia" className="grid min-h-11 grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-2 py-2">
+              <span className="font-mono text-sm tabular-nums text-ink-soft">02</span>
+              <span className="min-w-0">
+                <span className="link font-medium">Experiência</span>
+                <span className="mt-0.5 block truncate text-sm text-ink-soft">{firstJob ? firstJob.summary : ''}</span>
+              </span>
+            </a>
+          </li>
+          <li className="border-t border-line">
+            <a href="#formacao" className="grid min-h-11 grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-2 py-2">
+              <span className="font-mono text-sm tabular-nums text-ink-soft">03</span>
+              <span className="min-w-0">
+                <span className="link font-medium">Formação</span>
+                <span className="mt-0.5 block truncate text-sm text-ink-soft">
+                  {degree ? `${degree.course}, ${degree.school}` : ''}
+                </span>
+              </span>
+            </a>
+          </li>
+          <li className="border-t border-line">
+            <button
+              type="button"
+              onClick={onOpenCv}
+              aria-haspopup="dialog"
+              aria-controls="cv-preview"
+              className="grid min-h-11 w-full grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-2 py-2 text-left"
+            >
+              <span className="font-mono text-sm tabular-nums text-ink-soft">04</span>
+              <span className="min-w-0">
+                <span className="link font-medium">CV</span>
+                <span className="mt-0.5 block truncate text-sm text-ink-soft">{profile.trustCopy}</span>
+              </span>
+            </button>
+          </li>
+          <li className="border-t border-line border-b">
+            <a href="#contato" className="grid min-h-11 grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-2 py-2">
+              <span className="font-mono text-sm tabular-nums text-ink-soft">05</span>
+              <span className="min-w-0">
+                <span className="link font-medium">Contato</span>
+                <span className="mt-0.5 block truncate text-sm text-ink-soft">
+                  {profile.email}. {profile.status}.
+                </span>
+              </span>
+            </a>
+          </li>
+        </ol>
+      </nav>
 
-        <p className="mt-5 font-mono text-[0.9375rem] text-ink-soft">
-          <span className="block">{profile.jobTitle}</span>
-          <span className="mt-1 block text-muted">React · Next.js · TypeScript</span>
-        </p>
-
-        <p className="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">
-          {profile.headline}
-        </p>
-        <p className="mt-4 max-w-xl text-ink-soft">
-          <Marked text={profile.summary} />
-        </p>
-        <p className="mt-4 max-w-xl text-ink-soft">{profile.trustCopy}</p>
-
-        <div className="mt-8 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
-          <CTA
-            variant="primary"
-            onClick={onOpenCv}
-            aria-haspopup="dialog"
-            aria-controls="cv-preview"
-            className="w-full sm:w-auto"
-            icon={<FileText className="size-4" aria-hidden="true" />}
-          >
-            Ver CV
-          </CTA>
-          <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
-          <CTA variant="tertiary" href={`mailto:${profile.email}`} className="self-start sm:self-auto">
-            Falar por e-mail
-          </CTA>
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          <a
-            href={profile.linkedin}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
-            className="icon-btn"
-          >
-            <Linkedin className="size-4" aria-hidden="true" />
-          </a>
-          <a
-            href={profile.github}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Perfil no GitHub de Pedro Henrique Lopes"
-            className="icon-btn"
-          >
-            <Github className="size-4" aria-hidden="true" />
-          </a>
-        </div>
+      <div className="mt-6 min-w-0">
+        <Suspense fallback={<div className="sticker-row aspect-[5.2/1] w-full max-w-[22rem]" />}>
+          <StickerLid />
+        </Suspense>
       </div>
-
-      <Suspense
-        fallback={
-          <div className="no-print">
-            <div className="notebook relative z-10 aspect-[16/10] w-full" />
-          </div>
-        }
-      >
-        <StickerLid />
-      </Suspense>
-    </section>
+    </div>
   );
 }

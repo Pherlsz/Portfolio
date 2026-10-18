@@ -447,7 +447,7 @@ function LidSticker({
         id={slot.id}
         reaction={reaction}
         face={face}
-        eager
+        eager={false}
         holoFoil={holoActive}
         captionLayout={captionLayout}
         captionVisible={pressed}
@@ -481,10 +481,10 @@ export function StickerLid() {
   return (
     <MotionConfig reducedMotion="user">
     <div className="no-print">
-      <div className="notebook relative z-10 aspect-[16/10] w-full">
+      <div className="sticker-row relative z-10 aspect-[5.2/1] w-full">
         <div ref={lidRef} className="lid absolute inset-0">
           <ul
-            aria-label="Stickers colados na tampa do notebook"
+            aria-label="Stickers"
             data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
           >
             {LID_LAYOUT.map((slot) => (
@@ -507,25 +507,23 @@ export function StickerLid() {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
         <p id="tampa-ajuda" className="eyebrow">
           Arraste os stickers ou use as setas. Clique no D20 para rolar.
         </p>
-        <div className="flex gap-2">
-          <button type="button" onClick={shuffle} className="btn btn-ghost min-h-9 px-4 text-sm">
-            Embaralhar
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setArrangement(createArrumarArrangement(Date.now()));
-              setAnnouncement('Stickers no lugar original.');
-            }}
-            className="btn btn-ghost min-h-9 px-4 text-sm"
-          >
-            Arrumar
-          </button>
-        </div>
+        <button type="button" onClick={shuffle} className="link min-h-11 text-sm">
+          Embaralhar
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setArrangement(createArrumarArrangement(Date.now()));
+            setAnnouncement('Stickers no lugar original.');
+          }}
+          className="link min-h-11 text-sm"
+        >
+          Arrumar
+        </button>
       </div>
 
       <p className="sr-only" aria-live="polite">

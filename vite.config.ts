@@ -16,7 +16,10 @@ function htmlHead(): Plugin {
         if (!html.includes(marker)) {
           throw new Error('index.html está sem o marcador <!--indexable-shell-->.');
         }
-        const font = Object.keys(ctx.bundle ?? {}).find((file) => file.includes('archivo-latin-wdth-normal'));
+        // shortcut: preload body face not Archivo, add a /cv preload if that route's LCP suffers
+        const font = Object.keys(ctx.bundle ?? {}).find((file) =>
+          file.includes('atkinson-hyperlegible-next-latin-wght-normal')
+        );
         const tags: HtmlTagDescriptor[] = [
           {
             tag: 'script',

@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { Download, X } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 
 export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -58,13 +57,12 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
             Visualização do PDF. Baixar PDF salva este mesmo arquivo.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex min-h-11 items-center gap-4">
           <a
             href={profile.cvUrl}
             download="Pedro-Henrique-Lopes-CV.pdf"
-            className="cta cta-primary min-h-11 flex-1 justify-center px-4 sm:flex-none"
+            className="cta cta-primary min-h-11"
           >
-            <Download className="size-4" aria-hidden="true" />
             Baixar PDF
           </a>
           <button
@@ -72,9 +70,9 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
             type="button"
             onClick={requestClose}
             aria-label="Fechar prévia"
-            className="icon-btn shrink-0"
+            className="link min-h-11 px-1"
           >
-            <X className="size-4" aria-hidden="true" />
+            Fechar
           </button>
         </div>
       </header>
@@ -82,7 +80,7 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
         ref={frameRef}
         title="Currículo de Pedro Henrique Lopes em PDF"
         src={`${profile.cvUrl}#navpanes=0&view=FitH`}
-        className="min-h-0 w-full flex-1 border-0 bg-neutral-700"
+        className="min-h-0 w-full flex-1 border-0 bg-ink"
       />
     </dialog>
   );

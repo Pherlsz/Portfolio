@@ -1,5 +1,4 @@
 import { useEffect, useReducer, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, Briefcase, Check, Copy, MessageSquare, RotateCcw, Send, Sparkles, X } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import {
@@ -328,9 +327,9 @@ export function AssistantPanel({
     .find((msg) => msg.role === 'model' && msg.id !== 'welcome')?.id;
 
   const tabClass = (active: boolean, compact = false) =>
-    `inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-semibold transition-colors ${
-      compact ? 'short-mobile:min-h-8 short-mobile:gap-1 short-mobile:px-2 short-mobile:text-xs' : ''
-    } ${active ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink'}`;
+    `inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-2 text-sm underline-offset-4 ${
+      compact ? 'short-mobile:min-h-11 short-mobile:px-2 short-mobile:text-sm' : ''
+    } ${active ? 'text-stamp underline' : 'link text-ink-soft'}`;
 
   const clearChat = () => {
     setMessages([WELCOME]);
@@ -342,21 +341,6 @@ export function AssistantPanel({
 
   return (
     <>
-      {!open && (
-        <CTA
-          variant="secondary"
-          onClick={() => onOpenChange(true)}
-          aria-haspopup="dialog"
-          aria-expanded={false}
-          aria-controls="assistente"
-          className="no-print fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-30 shadow-lg shadow-neutral-950/20"
-          icon={<Sparkles className="size-4" aria-hidden="true" />}
-        >
-          <span className="sm:hidden">Perguntar</span>
-          <span className="hidden sm:inline">Pergunte sobre o Pedro</span>
-        </CTA>
-      )}
-
       <dialog
         ref={dialogRef}
         id="assistente"
@@ -371,7 +355,7 @@ export function AssistantPanel({
         onClick={(event) => {
           if (event.target === dialogRef.current) onOpenChange(false);
         }}
-        className="no-print fixed inset-x-0 bottom-0 top-auto m-0 h-[86dvh] max-h-none w-full max-w-none flex-col overflow-hidden rounded-t-[1.75rem] border border-line bg-surface p-0 text-ink shadow-2xl shadow-neutral-950/30 open:flex short-mobile:inset-0 short-mobile:top-0 short-mobile:h-dvh short-mobile:rounded-none sm:inset-y-0 sm:left-auto sm:right-0 sm:h-dvh sm:max-w-md sm:rounded-none sm:rounded-l-[1.75rem]"
+        className="no-print fixed inset-x-0 bottom-0 top-auto m-0 h-[86dvh] max-h-none w-full max-w-none flex-col overflow-hidden rounded-none border border-line bg-surface p-0 text-ink open:flex short-mobile:inset-0 short-mobile:top-0 short-mobile:h-dvh sm:inset-y-0 sm:left-auto sm:right-0 sm:h-dvh sm:max-w-md"
       >
         <h2 id="assistente-titulo" className="sr-only">
           Assistente do portfólio
@@ -387,19 +371,17 @@ export function AssistantPanel({
               type="button"
               onClick={() => onOpenChange(false)}
               aria-label="Fechar assistente"
-              className="icon-btn size-10 shrink-0"
+              className="link min-h-11 shrink-0 px-1 text-sm"
             >
-              <X className="size-4" aria-hidden="true" />
+              Fechar
             </button>
           </div>
           <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2 sm:px-5 sm:py-2.5">
             <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto" role="group" aria-label="Modo do assistente">
               <button type="button" aria-pressed={mode === 'chat'} onClick={() => onModeChange('chat')} className={tabClass(mode === 'chat')}>
-                <MessageSquare className="size-4 shrink-0" aria-hidden="true" />
                 Perguntas
               </button>
               <button type="button" aria-pressed={mode === 'jobfit'} onClick={() => onModeChange('jobfit')} className={tabClass(mode === 'jobfit')}>
-                <Briefcase className="size-4 shrink-0" aria-hidden="true" />
                 Fit com vaga
               </button>
             </div>
@@ -408,9 +390,8 @@ export function AssistantPanel({
                 type="button"
                 onClick={clearChat}
                 aria-label="Limpar conversa"
-                className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm text-ink-soft hover:text-ink"
+                className="link min-h-11 shrink-0 px-1 text-sm"
               >
-                <RotateCcw className="size-4" aria-hidden="true" />
                 Limpar
               </button>
             )}
@@ -424,11 +405,9 @@ export function AssistantPanel({
             aria-label="Modo do assistente"
           >
             <button type="button" aria-pressed={mode === 'chat'} onClick={() => onModeChange('chat')} className={tabClass(mode === 'chat', true)}>
-              <MessageSquare className="size-3.5 shrink-0" aria-hidden="true" />
               Perguntas
             </button>
             <button type="button" aria-pressed={mode === 'jobfit'} onClick={() => onModeChange('jobfit')} className={tabClass(mode === 'jobfit', true)}>
-              <Briefcase className="size-3.5 shrink-0" aria-hidden="true" />
               Fit com vaga
             </button>
           </div>
@@ -437,18 +416,18 @@ export function AssistantPanel({
               type="button"
               onClick={clearChat}
               aria-label="Limpar conversa"
-              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full px-1.5 text-ink-soft hover:text-ink"
+              className="link min-h-11 shrink-0 px-1 text-sm"
             >
-              <RotateCcw className="size-3.5" aria-hidden="true" />
+              Limpar
             </button>
           )}
           <button
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label="Fechar assistente"
-            className="icon-btn size-9 shrink-0"
+            className="link min-h-11 shrink-0 px-1 text-sm"
           >
-            <X className="size-4" aria-hidden="true" />
+            Fechar
           </button>
         </div>
 
@@ -460,7 +439,7 @@ export function AssistantPanel({
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div
-                className={`group relative max-w-[90%] rounded-2xl px-4 py-3 text-[0.9375rem] leading-relaxed ${
+                className={`group relative max-w-[90%] px-4 py-3 text-[0.9375rem] leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-ink text-paper'
                     : 'border border-line bg-paper pr-10 text-ink-soft'
@@ -473,13 +452,9 @@ export function AssistantPanel({
                     type="button"
                     onClick={() => copyMessage(msg.id, msg.text)}
                     aria-label="Copiar resposta"
-                    className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-lg border border-control bg-surface text-muted hover:text-ink"
+                    className="link absolute right-2 top-2 inline-flex min-h-11 items-center px-1 text-sm"
                   >
-                    {copiedId === msg.id ? (
-                      <Check className="size-3.5" aria-hidden="true" />
-                    ) : (
-                      <Copy className="size-3.5" aria-hidden="true" />
-                    )}
+                    {copiedId === msg.id ? 'Copiado' : 'Copiar'}
                   </button>
                 )}
               </div>
@@ -490,10 +465,9 @@ export function AssistantPanel({
                       key={action.label}
                       type="button"
                       onClick={() => runAction(action)}
-                      className="inline-flex min-h-8 items-center gap-1 rounded-full border border-line px-3 text-sm hover:border-ink"
+                      className="link inline-flex min-h-11 items-center text-sm"
                     >
                       {action.label}
-                      <ArrowUpRight className="size-3.5" aria-hidden="true" />
                     </button>
                   ))}
                 </div>
@@ -506,7 +480,7 @@ export function AssistantPanel({
                       type="button"
                       onClick={() => sendFollowUp(followUp)}
                       disabled={isLoading}
-                      className="inline-flex min-h-8 items-center rounded-full border border-dashed border-control px-3 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
+                      className="link inline-flex min-h-11 items-center text-sm disabled:opacity-50"
                     >
                       {followUp}
                     </button>
@@ -549,16 +523,16 @@ export function AssistantPanel({
                     submitJobFollowUp(e);
                   }}
                   placeholder="Pergunte sobre esta vaga…"
-                  className="min-h-9 w-full rounded-full border border-control bg-paper px-3 text-[0.9375rem] placeholder:text-muted short-mobile:min-h-11 short-mobile:px-2.5 short-mobile:text-sm sm:min-h-11 sm:px-4"
+                  className="min-h-11 w-full border border-control bg-paper px-3 text-[0.9375rem] placeholder:text-muted"
                 />
                 <button
                   type="button"
                   onClick={(e) => submitJobFollowUp(e)}
                   disabled={!jobQuestion.trim() || isLoading}
                   aria-label="Enviar pergunta sobre a vaga"
-                  className="icon-btn shrink-0 bg-ink text-paper disabled:opacity-40"
+                  className="link min-h-11 shrink-0 px-1 disabled:opacity-40"
                 >
-                  <Send className="size-4" aria-hidden="true" />
+                  Enviar
                 </button>
               </div>
             )}
@@ -570,7 +544,7 @@ export function AssistantPanel({
                 aria-expanded={false}
                 aria-label={`Vaga em análise. Editar descrição da vaga: ${jobPreview}`}
                 onClick={expandJobDescription}
-                className="mt-1.5 flex min-h-11 w-full flex-col justify-center rounded-2xl border border-control bg-paper px-3 py-2 text-left outline-none transition-colors hover:border-ink focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-surface short-mobile:mt-1 short-mobile:flex-row short-mobile:items-center short-mobile:gap-1.5 short-mobile:px-2.5 short-mobile:py-2 sm:mt-3 sm:px-4 sm:py-3"
+                className="mt-1.5 flex min-h-11 w-full flex-col justify-center border border-control bg-paper px-3 py-2 text-left short-mobile:mt-1 short-mobile:flex-row short-mobile:items-center short-mobile:gap-1.5 short-mobile:px-2.5 short-mobile:py-2 sm:mt-3 sm:px-4 sm:py-3"
               >
                 <span className="font-semibold text-ink short-mobile:shrink-0 short-mobile:text-sm">
                   Vaga em análise · Editar
@@ -598,14 +572,14 @@ export function AssistantPanel({
                     collapseJobDescription();
                   }}
                   placeholder="Cole aqui os requisitos da vaga…"
-                  className="mt-2 block max-h-[calc(8lh+2rem)] min-h-[calc(4lh+2rem)] w-full resize-y overflow-y-auto rounded-2xl border border-control bg-paper p-4 text-[0.9375rem] leading-relaxed placeholder:text-muted"
+                  className="mt-2 block max-h-[calc(8lh+2rem)] min-h-[calc(4lh+2rem)] w-full resize-y overflow-y-auto border border-control bg-paper p-4 text-[0.9375rem] leading-relaxed placeholder:text-muted"
                 />
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                   {activeJob && (
                     <button
                       type="button"
                       onClick={collapseJobDescription}
-                      className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-line px-4 text-sm font-semibold text-ink-soft hover:border-ink hover:text-ink sm:w-auto"
+                      className="link inline-flex min-h-11 w-full items-center sm:w-auto"
                     >
                       Cancelar
                     </button>
@@ -615,7 +589,6 @@ export function AssistantPanel({
                     variant="secondary"
                     disabled={!jobDescription.trim() || isLoading}
                     className="w-full sm:flex-1"
-                    icon={<Sparkles className="size-4" aria-hidden="true" />}
                   >
                     Analisar fit
                   </CTA>
@@ -633,7 +606,7 @@ export function AssistantPanel({
                   type="button"
                   onClick={() => send(presetChipText(id), 'chat', { presetId: id })}
                   disabled={isLoading}
-                  className="shrink-0 whitespace-nowrap rounded-full border border-line px-3 py-1.5 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
+                  className="link min-h-11 shrink-0 whitespace-nowrap text-sm disabled:opacity-50"
                 >
                   {presetChipText(id)}
                 </button>
@@ -653,15 +626,15 @@ export function AssistantPanel({
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Pergunte sobre experiência, stack ou projetos…"
-                className="min-h-11 w-full rounded-full border border-control bg-paper px-4 text-[0.9375rem] placeholder:text-muted"
+                className="min-h-11 w-full border border-control bg-paper px-4 text-[0.9375rem] placeholder:text-muted"
               />
               <button
                 type="submit"
                 disabled={!question.trim() || isLoading}
                 aria-label="Enviar pergunta"
-                className="icon-btn shrink-0 bg-ink text-paper disabled:opacity-40"
+                className="link min-h-11 shrink-0 px-1 disabled:opacity-40"
               >
-                <Send className="size-4" aria-hidden="true" />
+                Enviar
               </button>
             </form>
           </div>

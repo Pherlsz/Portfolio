@@ -6,7 +6,7 @@ type JobFitCtaProps = {
   className?: string;
 };
 
-/** Abre o assistente em modo jobfit; `#experiencia` se o handler falhar ou sem JS. */
+/** Opens the assistant in job-fit mode; `#experiencia` if the handler fails or JS is off. */
 export function JobFitCta({ onOpenJobFit, className }: JobFitCtaProps) {
   const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -18,7 +18,7 @@ export function JobFitCta({ onOpenJobFit, className }: JobFitCtaProps) {
   };
 
   return (
-    <CTA variant="secondary" href="#experiencia" className={className} onClick={onClick}>
+    <CTA variant="tertiary" href="#experiencia" className={className} onClick={onClick}>
       Ver fit com a vaga
     </CTA>
   );

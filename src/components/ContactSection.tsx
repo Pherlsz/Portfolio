@@ -1,5 +1,4 @@
-import { useState, type FormEvent } from 'react';
-import { FileText, Github, Linkedin } from 'lucide-react';
+import { useState, type FormEvent, type KeyboardEvent } from 'react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
@@ -12,11 +11,11 @@ function ContactForm({ email }: { email: string }) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
-    const payload = {
+    const payload: { name: string; email: string; message: string; source: 'form' } = {
       name: String(data.get('name') ?? '').trim(),
       email: String(data.get('email') ?? '').trim(),
       message: String(data.get('message') ?? '').trim(),
-      source: 'form' as const
+      source: 'form'
     };
 
     setStatus('sending');
@@ -37,61 +36,67 @@ function ContactForm({ email }: { email: string }) {
     }
   };
 
+  const onMessageKey = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== 'Enter' || !(event.metaKey || event.ctrlKey)) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  };
+
   return (
-    <form
-      onSubmit={onSubmit}
-      aria-busy={status === 'sending'}
-      className="rounded-[1.75rem] border border-line bg-surface p-5 sm:p-6"
-    >
-      <p className="font-bold">Ou escreva sua mensagem</p>
+    <form onSubmit={onSubmit} aria-busy={status === 'sending'} className="max-w-prose border-t border-line pt-6">
+      <p className="font-semibold">Ou escreva sua mensagem</p>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <label className="block">
+        <label className="block" htmlFor="contato-nome">
           <span className="field-label">Nome</span>
           <input
+            id="contato-nome"
             name="name"
             type="text"
             required
             autoComplete="name"
-            placeholder="Seu nome"
+            placeholder="Seu nome…"
             className="field"
           />
         </label>
-        <label className="block">
+        <label className="block" htmlFor="contato-email">
           <span className="field-label">E-mail</span>
           <input
+            id="contato-email"
             name="email"
             type="email"
             required
             autoComplete="email"
             spellCheck={false}
-            placeholder="nome@dominio.com"
+            placeholder="nome@dominio.com…"
             className="field"
           />
         </label>
       </div>
-      <label className="mt-4 block">
+      <label className="mt-4 block" htmlFor="contato-mensagem">
         <span className="field-label">Mensagem</span>
         <textarea
+          id="contato-mensagem"
           name="message"
           required
           rows={5}
-          placeholder="Sobre o que você quer conversar?"
+          placeholder="Sobre o que você quer conversar?…"
           className="field field-area"
+          onKeyDown={onMessageKey}
         />
       </label>
-      <CTA type="submit" variant="secondary" className="mt-5 w-full" disabled={status === 'sending'}>
+      <CTA type="submit" variant="primary" className="mt-5" disabled={status === 'sending'}>
         {status === 'sending' ? 'Enviando…' : 'Enviar'}
       </CTA>
-      {status === 'sent' && (
-        <p className="eyebrow mt-3 text-valid" role="status">
+      {status === 'sent' ? (
+        <p className="eyebrow mt-3" role="status">
           Mensagem enviada.
         </p>
-      )}
-      {status === 'error' && (
+      ) : null}
+      {status === 'error' ? (
         <p className="eyebrow mt-3 text-invalid" role="status">
           Se o e-mail não abrir, copie o endereço ao lado.
         </p>
-      )}
+      ) : null}
     </form>
   );
 }
@@ -106,80 +111,53 @@ export function ContactSection({
   const { profile } = DEFAULT_PORTFOLIO_DATA;
 
   return (
-    <section
-      aria-labelledby="contato-titulo"
-      className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24"
-    >
-      <p className="eyebrow">Vamos conversar?</p>
-      <div className="mt-3 grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start">
-        <div>
-          <h2 id="contato-titulo" className="display-wide text-[clamp(2.4rem,7vw,5rem)] leading-[0.9]">
-            Entre em contato
-          </h2>
-          <p className="mt-5 max-w-md text-lg text-ink-soft">{profile.trustCopy}</p>
-          <p className="mt-4 max-w-md text-ink-soft">
-            {profile.workMode}. Pretensão salarial {profile.salary.toLowerCase()}.
-          </p>
+    <section aria-labelledby="contato-titulo" className="scroll-mt-5 px-5 py-14 sm:px-8 sm:py-20">
+      <h2 id="contato-titulo" className="display text-[1.5rem] leading-tight sm:text-[1.75rem]">
+        Entre em contato
+      </h2>
+      <p className="mt-4 max-w-prose text-ink-soft">{profile.trustCopy}</p>
+      <p className="mt-3 max-w-prose text-ink-soft">
+        {profile.workMode}. Pretensão salarial {profile.salary.toLowerCase()}.
+      </p>
 
-          <div className="mt-8 flex max-w-xl flex-col gap-5">
-            <div className="flex flex-wrap items-center gap-3">
-              <CTA
-                variant="primary"
-                onClick={onOpenCv}
-                aria-haspopup="dialog"
-                aria-controls="cv-preview"
-                className="w-full sm:w-auto"
-                icon={<FileText className="size-4" aria-hidden="true" />}
-              >
-                Ver CV
-              </CTA>
-              <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
-            </div>
+      <div className="mt-6 flex max-w-prose flex-col gap-4">
+        <p className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1">
+          <CTA variant="tertiary" onClick={onOpenCv} aria-haspopup="dialog" aria-controls="cv-preview">
+            Ver CV
+          </CTA>
+          <JobFitCta onOpenJobFit={onOpenJobFit} />
+        </p>
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <a
-                href={`mailto:${profile.email}`}
-                translate="no"
-                className="text-lg font-semibold underline decoration-marker decoration-2 underline-offset-4"
-              >
-                {profile.email}
-              </a>
-              <CopyEmailButton
-                email={profile.email}
-                label="Copiar e-mail"
-                className="h-9 cursor-pointer rounded-full border border-line px-3 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-ink hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[outline-color:var(--focus-ring)] active:translate-y-px"
-              />
-            </div>
+        <p className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1">
+          <a href={`mailto:${profile.email}`} translate="no" className="link text-lg font-semibold">
+            {profile.email}
+          </a>
+          <CopyEmailButton email={profile.email} label="Copiar e-mail" className="link cursor-pointer" />
+        </p>
 
-            <ul className="flex flex-wrap gap-2">
-              <li>
-                <a
-                  href={profile.linkedin}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
-                  className="btn btn-ghost"
-                >
-                  <Linkedin className="size-4" aria-hidden="true" />
-                  LinkedIn
-                </a>
-              </li>
-              <li>
-                <a
-                  href={profile.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Perfil no GitHub de Pedro Henrique Lopes"
-                  className="btn btn-ghost"
-                >
-                  <Github className="size-4" aria-hidden="true" />
-                  GitHub
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <p className="flex min-h-11 flex-wrap items-center gap-x-4">
+          <a
+            href={profile.linkedin}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
+            className="link"
+          >
+            LinkedIn
+          </a>
+          <a
+            href={profile.github}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Perfil no GitHub de Pedro Henrique Lopes"
+            className="link"
+          >
+            GitHub
+          </a>
+        </p>
+      </div>
 
+      <div className="mt-10">
         <ContactForm email={profile.email} />
       </div>
     </section>

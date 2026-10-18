@@ -2,44 +2,41 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'reac
 
 export type CtaVariant = 'primary' | 'secondary' | 'tertiary';
 
-type CtaClassProps = {
+type CtaShared = {
   variant: CtaVariant;
   className?: string;
   children: ReactNode;
   icon?: ReactNode;
 };
 
+type CtaLinkProps = CtaShared &
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'children'> & {
+    href: string;
+  };
+
+type CtaButtonProps = CtaShared &
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
+    href?: undefined;
+  };
+
 export function ctaClassName(variant: CtaVariant, className = '') {
   return ['cta', `cta-${variant}`, className].filter(Boolean).join(' ');
 }
 
-type CtaLinkProps = CtaClassProps &
-  AnchorHTMLAttributes<HTMLAnchorElement> & {
-    href: string;
-  };
-
-type CtaButtonProps = CtaClassProps &
-  ButtonHTMLAttributes<HTMLButtonElement> & {
-    href?: undefined;
-  };
-
 export function CTA(props: CtaLinkProps | CtaButtonProps) {
-  const { variant, className, children, icon, ...rest } = props;
-  const classes = ctaClassName(variant, className);
-
-  if ('href' in props && props.href !== undefined) {
-    const { href, ...anchorRest } = rest as AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
+  if (props.href !== undefined) {
+    const { variant, className, children, icon, href, ...anchorRest } = props;
     return (
-      <a href={href} className={classes} {...anchorRest}>
+      <a href={href} className={ctaClassName(variant, className)} {...anchorRest}>
         {icon}
         {children}
       </a>
     );
   }
 
-  const buttonRest = rest as ButtonHTMLAttributes<HTMLButtonElement>;
+  const { variant, className, children, icon, ...buttonRest } = props;
   return (
-    <button type={buttonRest.type ?? 'button'} className={classes} {...buttonRest}>
+    <button type={buttonRest.type ?? 'button'} className={ctaClassName(variant, className)} {...buttonRest}>
       {icon}
       {children}
     </button>

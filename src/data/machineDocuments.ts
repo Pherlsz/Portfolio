@@ -273,10 +273,9 @@ export function generateResumeJson(data: PortfolioData, origin = SITE_ORIGIN) {
 /** Resumo no HTML inicial. O React substitui `#root` quando o JavaScript roda. */
 export function generateIndexableHomeHtml(data: PortfolioData): string {
   const { profile, project, featuredProjects } = data;
-  const name = profile.name
-    .split(' ')
-    .map((word) => `<span class="block">${escHtml(word)}</span>`)
-    .join('');
+  const featured = featuredProjects[0];
+  const firstJob = data.experiences[0];
+  const degree = data.education[0];
   const experience = data.experiences
     .map((exp) => {
       const span = experienceSpan(exp);
@@ -296,15 +295,26 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
     `<li><a class="link" href="${escHtml(project.repoUrl)}">${escHtml(project.name)}</a> — ${escHtml(project.tagline)}</li>`
   ].join('');
 
+  const tocProjetos = featured ? featured.tagline : project.tagline;
+  const tocExperiencia = firstJob ? firstJob.summary : '';
+  const tocFormacao = degree ? `${degree.course}, ${degree.school}` : '';
+
   return `<main id="conteudo">
-      <section id="inicio" class="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
-        <p class="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1">${escHtml(profile.status)}<span class="hidden sm:inline" aria-hidden="true">·</span><span class="whitespace-nowrap basis-full sm:basis-auto">${escHtml(profile.location)}</span></p>
-        <h1 id="inicio-titulo" class="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]">${name}</h1>
-        <p class="mt-5 font-mono text-[0.9375rem] text-ink-soft"><span class="block">${escHtml(profile.jobTitle)}</span><span class="mt-1 block text-muted">React · Next.js · TypeScript</span></p>
-        <p class="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">${escHtml(profile.headline)}</p>
-        <p class="mt-4 max-w-xl text-ink-soft">${escHtml(plainText(profile.summary))}</p>
+      <section id="inicio" class="px-5 pb-10 pt-8 sm:px-8">
+        <p class="eyebrow">${escHtml(profile.jobTitle)} · ${escHtml(profile.location)}</p>
+        <h1 id="inicio-titulo" class="display mt-4 text-[1.75rem] leading-tight">${escHtml(profile.name)}</h1>
+        <p class="mt-3 max-w-prose">${escHtml(profile.headline)}</p>
+        <p class="mt-2 max-w-prose text-ink-soft">${escHtml(plainText(profile.summary))}</p>
+        <nav aria-label="Índice" class="mt-6">
+          <ol class="max-w-prose space-y-3">
+            <li><a class="link" href="#projeto">01 Projetos</a> — ${escHtml(tocProjetos)}</li>
+            <li><a class="link" href="#experiencia">02 Experiência</a> — ${escHtml(tocExperiencia)}</li>
+            <li><a class="link" href="#formacao">03 Formação</a> — ${escHtml(tocFormacao)}</li>
+            <li><a class="link" href="${escHtml(profile.cvUrl)}">04 CV</a> — ${escHtml(profile.trustCopy)}</li>
+            <li><a class="link" href="#contato">05 Contato</a> — ${escHtml(profile.email)}</li>
+          </ol>
+        </nav>
         <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1">
-          <a class="link" href="${escHtml(profile.cvUrl)}">Baixar CV (PDF)</a>
           <a class="link" href="mailto:${escHtml(profile.email)}">${escHtml(profile.email)}</a>
           <a class="link" href="${escHtml(profile.linkedin)}">LinkedIn</a>
           <a class="link" href="${escHtml(profile.github)}">GitHub</a>

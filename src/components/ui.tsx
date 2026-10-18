@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, Copy } from 'lucide-react';
 
-/** Renderiza trechos entre ==sinais== com marca-texto. */
+/** Renders ==marked== spans from portfolio copy. */
 export function Marked({ text }: { text: string }) {
   return (
     <>
@@ -12,22 +11,19 @@ export function Marked({ text }: { text: string }) {
 
 export function SectionHeading({
   id,
-  eyebrow,
   title,
   intro
 }: {
   id: string;
-  eyebrow: string;
   title: string;
   intro?: string;
 }) {
   return (
-    <header className="mb-10 max-w-3xl sm:mb-14">
-      <p className="eyebrow">{eyebrow}</p>
-      <h2 id={id} className="display mt-2 text-[clamp(2rem,4.2vw,3rem)] leading-[1.02]">
+    <header className="mb-8 max-w-prose sm:mb-10">
+      <h2 id={id} className="display text-[1.5rem] leading-tight text-balance sm:text-[1.75rem]">
         {title}
       </h2>
-      {intro && <p className="mt-4 text-lg text-ink-soft">{intro}</p>}
+      {intro ? <p className="mt-3 max-w-prose text-pretty text-ink-soft">{intro}</p> : null}
     </header>
   );
 }
@@ -62,16 +58,10 @@ export function CopyEmailButton({
   if (hint) {
     return (
       <button type="button" onClick={copy} className={`group text-left ${className}`}>
-        <span
-          translate="no"
-          className="display break-all text-[clamp(1.35rem,3.4vw,2.15rem)] underline decoration-marker decoration-4 underline-offset-8"
-        >
+        <span translate="no" className="display break-all text-[clamp(1.2rem,3vw,1.75rem)] underline underline-offset-4">
           {email}
         </span>
-        <span className="eyebrow mt-3 flex items-center gap-2">
-          {copied ? 'Copiado!' : 'Copiar e-mail'}
-          {copied ? <Check className="size-3.5" aria-hidden="true" /> : <Copy className="size-3.5" aria-hidden="true" />}
-        </span>
+        <span className="eyebrow mt-3 block">{copied ? 'Copiado!' : 'Copiar e-mail'}</span>
         <span className="sr-only" aria-live="polite">
           {copied ? 'E-mail copiado' : ''}
         </span>
@@ -84,13 +74,10 @@ export function CopyEmailButton({
       type="button"
       onClick={copy}
       aria-label={copied ? 'E-mail copiado' : `Copiar ${email}`}
-      className={['inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap', className].filter(Boolean).join(' ')}
+      className={['inline-flex min-h-11 cursor-pointer items-center underline underline-offset-4', className]
+        .filter(Boolean)
+        .join(' ')}
     >
-      {copied ? (
-        <Check className="size-4 shrink-0" aria-hidden="true" />
-      ) : (
-        <Copy className="size-4 shrink-0" aria-hidden="true" />
-      )}
       {label ? <span>{copied ? 'Copiado' : label}</span> : <span translate="no">{email}</span>}
       <span className="sr-only" aria-live="polite">
         {copied ? 'E-mail copiado' : ''}
