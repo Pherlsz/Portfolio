@@ -151,7 +151,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     cvUrl: '/cv/Pedro-Henrique-Lopes-CV.pdf',
     about: [
       'Engenheiro de software com foco em frontend. Comecei em suporte e no monitoramento de sistemas de alta disponibilidade; essa experiência orienta o modo como construo interfaces: estáveis, observáveis e fáceis de manter.',
-      'Participo de gincanas no Setor de Diversas, em Porto Alegre e região. Parte dos projetos pessoais nasceu desse contexto. Treino com regularidade, jogo RPG e convivo com três gatos.'
+      'Participo de gincanas no RS, no Setor de Diversas. Parte dos projetos pessoais nasceu desse contexto. Treino com regularidade, jogo RPG e convivo com três gatos.'
     ]
   },
   experiences: [
@@ -235,7 +235,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       id: 'lebes',
       company: 'Lojas Lebes',
       location: 'Eldorado do Sul, RS',
-      summary: 'Sistemas corporativos (ERP e CRM) de uma rede varejista da região de Porto Alegre.',
+      summary: 'Sistemas corporativos (ERP e CRM) de uma rede varejista gaúcha.',
       roles: [{ title: 'Analista de Suporte a Sistemas', start: '2018-02', end: '2019-08' }],
       highlights: [
         {
@@ -393,7 +393,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     {
       id: 'gincana',
       title: 'Gincanas do RS',
-      text: 'Participo de gincanas no Setor de Diversas, em Porto Alegre e região: localização de pessoas, documentos e informações com prazo curto.'
+      text: 'Participo de gincanas no RS, no Setor de Diversas: localização de pessoas, documentos e informações com prazo curto.'
     },
     {
       id: 'treino',
