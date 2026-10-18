@@ -20,8 +20,8 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
         <p className="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-line bg-surface px-3 py-1">
           <span className="size-2 shrink-0 rounded-full bg-status" aria-hidden="true" />
           <span>{profile.status}</span>
-          <span aria-hidden="true">·</span>
-          <span className="whitespace-nowrap">{profile.location}</span>
+          <span className="hidden sm:inline" aria-hidden="true">·</span>
+          <span className="whitespace-nowrap basis-full sm:basis-auto">{profile.location}</span>
         </p>
 
         <h1

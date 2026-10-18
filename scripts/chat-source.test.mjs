@@ -13,6 +13,7 @@ import {
   presetChipText,
   presetIdForChipText
 } from '../src/utils/presetQuestions.ts';
+import { buildTokenEfficientSystemPrompt } from '../src/utils/chatGuardrails.ts';
 import { buildLocalFallback } from '../src/utils/localChatFallback.ts';
 
 const originalFetch = globalThis.fetch;
@@ -355,7 +356,7 @@ const followUpCandidateMatrix = () => [
     input: {
       mode: 'chat',
       asked: 'Entendi',
-      reply: buildPresetFallback('stack'),
+      reply: 'A stack principal dele inclui React, TypeScript e Go.',
       data: DEFAULT_PORTFOLIO_DATA
     }
   },
@@ -379,11 +380,63 @@ const followUpCandidateMatrix = () => [
   }
 ];
 
+function assertFollowUpBranch(label, candidates) {
+  const hasPreset = (...ids) => ids.every((id) => candidates.includes(presetChipText(id)));
+  switch (label) {
+    case 'jobfit base (no seniority/tests in JD)':
+      assert.ok(candidates.includes('E se a vaga for sênior?'));
+      assert.ok(candidates.includes('A vaga pede testes automatizados?'));
+      break;
+    case 'jobfit isFollowUp':
+      assert.ok(candidates.includes('Quais perguntas eu faço na entrevista?'));
+      break;
+    case 'jobfit híbrido sem Porto Alegre':
+      assert.ok(candidates.includes('O híbrido é em Porto Alegre?'));
+      break;
+    case 'jobfit LLM/IA':
+      assert.ok(candidates.includes('A IA é function calling em fluxo real?'));
+      break;
+    case 'chat project':
+      assert.ok(candidates.includes('Qual a stack desse projeto?'));
+      assert.ok(candidates.includes('Ele usa isso em produção?'));
+      break;
+    case 'chat stack question':
+      assert.ok(hasPreset('atlas_ai', 'compare_job_fit', 'recruiter_summary'));
+      break;
+    case 'chat salary question':
+      assert.ok(candidates.includes(presetChipText('compare_job_fit')));
+      break;
+    case 'chat Atlas/WCAG':
+      assert.ok(hasPreset('atlas_ai', 'stack', 'recruiter_summary'));
+      break;
+    case 'chat reply-only stack':
+      assert.ok(hasPreset('atlas_ai', 'compare_job_fit'));
+      assert.equal(candidates.filter((chip) => chip === presetChipText('stack')).length, 1);
+      break;
+    case 'chat reply-only salary':
+      assert.ok(candidates.includes(presetChipText('compare_job_fit')));
+      break;
+    case 'chat neutral':
+      assert.ok(hasPreset('recruiter_summary', 'stack', 'atlas_ai', 'compare_job_fit'));
+      assert.equal(candidates.length, 4);
+      break;
+    default:
+      assert.fail(`unknown matrix label: ${label}`);
+  }
+}
+
+test('system prompt includes Atlas end line derived from portfolio data', () => {
+  const sentence = 'O cargo na Atlas Governance terminou em jul/2026; ele está aberto a oportunidades.';
+  const prompt = buildTokenEfficientSystemPrompt(DEFAULT_PORTFOLIO_DATA);
+  assert.ok(prompt.includes(sentence));
+});
+
 test('followUpCandidates only emit allowlisted preset or free-text chips across branches', () => {
   for (const { label, input } of followUpCandidateMatrix()) {
     const candidates = followUpCandidates(input);
     assert.ok(candidates.length > 0, label);
     assertChipsMapToExpectedPresetsOrFreeText(candidates);
+    assertFollowUpBranch(label, candidates);
   }
 });
 
