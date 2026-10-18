@@ -49,7 +49,7 @@ export function buildPresetFallback(id: PresetQuestionId, data: PortfolioData = 
   switch (id) {
     case 'recruiter_summary': {
       const summary = plainText(profile.summary);
-      return `**${profile.name}** — ${profile.jobTitle} (Rio Grande do Sul).\n\n${summary} Trajetória de estágio a júnior; aberto a vagas pleno quando houver fit.\n\nStatus: ${profile.status.toLowerCase()}. Contato: ${profile.email}.`;
+      return `**${profile.name}** — ${profile.jobTitle} (${profile.location}).\n\n${summary} Trajetória de estágio a júnior; aberto a vagas pleno quando houver fit.\n\nStatus: ${profile.status.toLowerCase()}. Contato: ${profile.email}.`;
     }
     case 'stack': {
       const lines = skills.map((g) => `- **${g.name}**: ${skillNames(g).join(', ')}`);

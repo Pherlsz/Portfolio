@@ -141,7 +141,7 @@ export function generateAgentsMd(origin = SITE_ORIGIN): string {
     '',
     `> Status: publicado. Instruções estáveis para quem lê ${origin}/ (revisão ${PROFILE_UPDATED}). Não é rascunho.`,
     '',
-    'Este site é o portfólio público de Pedro Henrique Lopes, frontend engineer.',
+    'Este site é o portfólio público de Pedro Henrique Lopes, Software Engineer · Frontend.',
     '',
     '## O que ler',
     '',
@@ -208,7 +208,7 @@ export function generateResumeJson(data: PortfolioData, origin = SITE_ORIGIN) {
       summary: `${profile.headline} ${plainText(profile.summary)}`,
       location: {
         city: 'Porto Alegre',
-        region: 'Rio Grande do Sul',
+        region: 'RS',
         countryCode: 'BR'
       },
       profiles: [

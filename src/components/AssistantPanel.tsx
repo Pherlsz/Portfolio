@@ -463,7 +463,7 @@ export function AssistantPanel({
                 className={`group relative max-w-[90%] rounded-2xl px-4 py-3 text-[0.9375rem] leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-ink text-paper'
-                    : 'border border-line bg-paper pr-10 text-ink-soft sm:pr-4'
+                    : 'border border-line bg-paper pr-10 text-ink-soft'
                 }`}
               >
                 {msg.role === 'model' && msg.source === 'ai' && <AiReplyBadge />}

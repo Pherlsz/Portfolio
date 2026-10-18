@@ -192,6 +192,14 @@ test('jobfit local fallback is tagged local', async () => {
   assert.ok(data.reply.length > 20);
 });
 
+/** Independent of PresetQuestionIdSchema / PRESET_QUESTIONS — tests fail if registry drifts. */
+const EXPECTED_PRESET_IDS = Object.freeze([
+  'recruiter_summary',
+  'stack',
+  'atlas_ai',
+  'compare_job_fit'
+]);
+
 const stackFollowUpInput = () => ({
   mode: 'chat',
   asked: presetChipText('stack'),
@@ -199,18 +207,33 @@ const stackFollowUpInput = () => ({
   data: DEFAULT_PORTFOLIO_DATA
 });
 
-function assertChipsAreValidPresetsOrFreeText(chips) {
+function assertChipsMapToExpectedPresetsOrFreeText(chips) {
+  const known = new Set(EXPECTED_PRESET_IDS);
   for (const chip of chips) {
     const presetId = presetIdForChipText(chip);
-    if (presetId !== undefined) {
-      assert.equal(PresetQuestionIdSchema.safeParse(presetId).success, true, chip);
-    }
+    if (presetId === undefined) continue;
+    assert.ok(known.has(presetId), `chip "${chip}" maps to unexpected preset id: ${presetId}`);
+    assert.ok(
+      buildPresetFallback(presetId).trim().length > 0,
+      `preset ${presetId} has no fallback text`
+    );
   }
 }
 
+test('preset ids match independent expected list and each has fallback', () => {
+  assert.equal(PRESET_QUESTIONS.length, EXPECTED_PRESET_IDS.length);
+  const fromQuestions = PRESET_QUESTIONS.map((preset) => preset.id).sort();
+  const expected = [...EXPECTED_PRESET_IDS].sort();
+  assert.deepEqual(fromQuestions, expected);
+  for (const id of EXPECTED_PRESET_IDS) {
+    assert.equal(PresetQuestionIdSchema.safeParse(id).success, true, id);
+    assert.ok(buildPresetFallback(id).trim().length > 0, `missing fallback for ${id}`);
+  }
+});
+
 test('stack question follow-ups suggest only valid presets or free-text chips', () => {
   const chips = suggestFollowUps(stackFollowUpInput());
-  assertChipsAreValidPresetsOrFreeText(chips);
+  assertChipsMapToExpectedPresetsOrFreeText(chips);
   assert.ok(chips.some((c) => presetIdForChipText(c) === 'atlas_ai' || c.includes('IA')));
 });
 
@@ -253,6 +276,6 @@ test('every suggestFollowUps chip maps to a preset or free text across modes', (
     }
   ];
   for (const input of scenarios) {
-    assertChipsAreValidPresetsOrFreeText(suggestFollowUps(input));
+    assertChipsMapToExpectedPresetsOrFreeText(suggestFollowUps(input));
   }
 });
