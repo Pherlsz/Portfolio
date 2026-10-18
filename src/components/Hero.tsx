@@ -15,12 +15,12 @@ export function Hero({ onOpenCv }: { onOpenJobFit?: () => void; onOpenCv: () => 
         {profile.name}
       </h1>
       <p className="mt-3 max-w-prose text-pretty text-[0.9375rem] leading-snug">{profile.headline}</p>
-      {/* shortcut: clamp summary so 01–05 stay on the first 360 screen, drop the clamp if the rail grows */}
+      // shortcut: clamp summary so 01–05 stay on the first 360 screen, drop the clamp if the rail grows
       <p className="mt-2 line-clamp-2 max-w-prose text-pretty text-[0.9375rem] leading-snug text-ink-soft">
         {plainText(profile.summary)}
       </p>
 
-      {/* shortcut: native hash links, no scroll spy; restore a spy if a covering sticky bar returns */}
+      // shortcut: native hash links with no scroll spy, restore a spy if a covering sticky bar returns
       <nav aria-label="Índice" className="mt-6">
         <ol>
           <li className="border-t border-line">

@@ -19,6 +19,7 @@ type CtaButtonProps = CtaShared &
     href?: undefined;
   };
 
+// shortcut: primary/secondary/tertiary share one underlined look, split them if a filled control returns
 export function ctaClassName(variant: CtaVariant, className = '') {
   return ['cta', `cta-${variant}`, className].filter(Boolean).join(' ');
 }
