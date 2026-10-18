@@ -328,8 +328,8 @@ export function AssistantPanel({
     .find((msg) => msg.role === 'model' && msg.id !== 'welcome')?.id;
 
   const tabClass = (active: boolean, compact = false) =>
-    `inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap  px-3 text-sm font-semibold transition-colors ${
-      compact ? 'short-mobile:min-h-8 short-mobile:gap-1 short-mobile:px-2 short-mobile:text-xs' : ''
+    `inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 text-sm font-semibold transition-colors ${
+      compact ? 'short-mobile:min-h-11 short-mobile:gap-1 short-mobile:px-2 short-mobile:text-xs' : ''
     } ${active ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink'}`;
 
   const clearChat = () => {
@@ -407,7 +407,7 @@ export function AssistantPanel({
                 type="button"
                 onClick={clearChat}
                 aria-label="Limpar conversa"
-                className="inline-flex min-h-9 shrink-0 items-center gap-1.5  px-3 text-sm text-ink-soft hover:text-ink"
+                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 px-3 text-sm text-ink-soft hover:text-ink"
               >
                 <RotateCcw className="size-4" aria-hidden="true" />
                 Limpar
@@ -489,7 +489,7 @@ export function AssistantPanel({
                       key={action.label}
                       type="button"
                       onClick={() => runAction(action)}
-                      className="inline-flex min-h-8 items-center gap-1  border border-line px-3 text-sm hover:border-ink"
+                      className="inline-flex min-h-11 items-center gap-1 border border-line px-3 text-sm hover:border-ink"
                     >
                       {action.label}
                       <ArrowUpRight className="size-3.5" aria-hidden="true" />
@@ -505,7 +505,7 @@ export function AssistantPanel({
                       type="button"
                       onClick={() => sendFollowUp(followUp)}
                       disabled={isLoading}
-                      className="inline-flex min-h-8 items-center  border border-dashed border-control px-3 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
+                      className="inline-flex min-h-11 items-center border border-dashed border-control px-3 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
                     >
                       {followUp}
                     </button>
@@ -548,7 +548,7 @@ export function AssistantPanel({
                     submitJobFollowUp(e);
                   }}
                   placeholder="Pergunte sobre esta vaga…"
-                  className="min-h-9 w-full  border border-control bg-paper px-3 text-[0.9375rem] placeholder:text-muted short-mobile:min-h-11 short-mobile:px-2.5 short-mobile:text-sm sm:min-h-11 sm:px-4"
+                  className="min-h-11 w-full border border-control bg-paper px-3 text-[0.9375rem] placeholder:text-muted short-mobile:px-2.5 short-mobile:text-sm sm:px-4"
                 />
                 <button
                   type="button"
@@ -632,7 +632,7 @@ export function AssistantPanel({
                   type="button"
                   onClick={() => send(presetChipText(id), 'chat', { presetId: id })}
                   disabled={isLoading}
-                  className="shrink-0 whitespace-nowrap  border border-line px-3 py-1.5 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
+                  className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap border border-line px-3 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
                 >
                   {presetChipText(id)}
                 </button>
