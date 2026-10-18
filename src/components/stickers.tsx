@@ -6,7 +6,7 @@ import {
   type KeyboardEvent,
   type RefObject
 } from 'react';
-import { animate, MotionConfig, motion, useMotionValue } from 'motion/react';
+import { animate, MotionConfig, motion, useDragControls, useMotionValue } from 'motion/react';
 import { HoloSparkleCanvas } from './HoloSparkleCanvas';
 import { useStickerHoloPointer } from '../utils/holoPointer';
 import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
@@ -251,8 +251,23 @@ function LidSticker({
   const y = useMotionValue(0);
   const rotate = useMotionValue(slot.rotate);
   const dragged = useRef(false);
+  const dragControls = useDragControls();
   const { reaction, react, face } = useStickerReaction(slot.id);
   useStickerHoloPointer(ref, holoActive);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const stopDrag = () => {
+      dragControls.stop();
+    };
+    node.addEventListener('lostpointercapture', stopDrag);
+    node.addEventListener('pointercancel', stopDrag);
+    return () => {
+      node.removeEventListener('lostpointercapture', stopDrag);
+      node.removeEventListener('pointercancel', stopDrag);
+    };
+  }, [dragControls]);
 
   const room = () => {
     const lid = lidRef.current?.getBoundingClientRect();
@@ -307,6 +322,8 @@ function LidSticker({
       ref={ref}
       type="button"
       drag
+      dragControls={dragControls}
+      dragListener
       dragConstraints={lidRef}
       dragElastic={0}
       dragMomentum={false}
