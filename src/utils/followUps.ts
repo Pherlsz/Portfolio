@@ -32,20 +32,24 @@ function presetChips(...ids: PresetQuestionId[]): string[] {
   return ids.map((id) => presetChipText(id));
 }
 
-export function suggestFollowUps(input: {
+export type FollowUpInput = {
   mode: ChatMode;
   asked: string;
   reply: string;
   job?: string;
   isFollowUp?: boolean;
   data: PortfolioData;
-}): string[] {
+};
+
+function pickFollowUps(asked: string, candidates: string[]): string[] {
+  return unique(candidates.filter((chip) => !alreadyAsked(asked, chip))).slice(0, 3);
+}
+
+/** Full unsliced chip list before dedupe, alreadyAsked filter, and slice(0, 3). */
+export function followUpCandidates(input: FollowUpInput): string[] {
   const { mode, asked, reply, job, isFollowUp, data } = input;
   const q = fold(asked);
   const replyAndJob = `${fold(reply)} ${fold(job ?? '')}`;
-
-  const pick = (...candidates: string[]) =>
-    unique(candidates.filter((chip) => !alreadyAsked(asked, chip))).slice(0, 3);
 
   if (mode === 'jobfit') {
     const fromJd = fold(job ?? '') || q;
@@ -69,7 +73,7 @@ export function suggestFollowUps(input: {
       chips.push('Quais perguntas eu faço na entrevista?');
     }
     chips.push('Resume em 5 linhas para colar no LinkedIn.');
-    return pick(...chips);
+    return chips;
   }
 
   const chips: string[] = [];
@@ -91,5 +95,10 @@ export function suggestFollowUps(input: {
   }
 
   chips.push(...presetChips('recruiter_summary', 'stack', 'atlas_ai', 'compare_job_fit'));
-  return pick(...chips);
+  return chips;
+}
+
+export function suggestFollowUps(input: FollowUpInput): string[] {
+  const { asked } = input;
+  return pickFollowUps(asked, followUpCandidates(input));
 }

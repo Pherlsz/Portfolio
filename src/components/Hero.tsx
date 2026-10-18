@@ -17,9 +17,11 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
       className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 sm:gap-12 sm:px-8 sm:pb-20 sm:pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pb-28"
     >
       <div className="notebook-margin">
-        <p className="eyebrow inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1">
-          <span className="size-2 rounded-full bg-status" aria-hidden="true" />
-          {profile.status} · {profile.location}
+        <p className="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-line bg-surface px-3 py-1">
+          <span className="size-2 shrink-0 rounded-full bg-status" aria-hidden="true" />
+          <span>{profile.status}</span>
+          <span className="hidden sm:inline" aria-hidden="true">·</span>
+          <span className="whitespace-nowrap basis-full sm:basis-auto">{profile.location}</span>
         </p>
 
         <h1
@@ -34,7 +36,8 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
         </h1>
 
         <p className="mt-5 font-mono text-[0.9375rem] text-ink-soft">
-          {profile.role} · React · Next.js · TypeScript
+          <span className="block">{profile.jobTitle}</span>
+          <span className="mt-1 block text-muted">React · Next.js · TypeScript</span>
         </p>
 
         <p className="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">

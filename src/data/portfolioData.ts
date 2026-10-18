@@ -34,7 +34,7 @@ export interface Project {
   language: string;
   version: string;
   spec: string;
-  releases: { count: number; period: string };
+  releasesPeriod: string;
   license: string;
   modules: { name: string; description: string }[];
   cards: { title: string; text: string }[];
@@ -133,7 +133,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
   profile: {
     name: 'Pedro Henrique Lopes',
     shortName: 'Pedro Lopes',
-    role: 'Frontend Engineer',
+    role: 'Software Engineer · Frontend',
     jobTitle: 'Software Engineer · Frontend',
     headline: 'Transformo fluxos complexos em interfaces rápidas, acessíveis e fáceis de manter.',
     summary:
@@ -141,7 +141,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     trustCopy:
       'São cerca de 5 anos construindo front-end em produção, de estágio a júnior, usando IA no dia a dia para entregar mais e melhor. Estou aberto a vagas pleno quando houver fit.',
     status: 'Aberto a oportunidades',
-    location: 'Rio Grande do Sul, Brasil',
+    location: 'Porto Alegre, RS',
     seniority: 'Júnior/Pleno',
     workMode: 'Remoto, ou híbrido/presencial em Porto Alegre',
     salary: 'A combinar',
@@ -151,7 +151,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     cvUrl: '/cv/Pedro-Henrique-Lopes-CV.pdf',
     about: [
       'Engenheiro de software com foco em frontend. Comecei em suporte e no monitoramento de sistemas de alta disponibilidade; essa experiência orienta o modo como construo interfaces: estáveis, observáveis e fáceis de manter.',
-      'Participo de gincanas no Rio Grande do Sul, no Setor de Diversas. Parte dos projetos pessoais nasceu desse contexto. Treino com regularidade, jogo RPG e convivo com três gatos.'
+      'Participo de gincanas no RS, no Setor de Diversas. Parte dos projetos pessoais nasceu desse contexto. Treino com regularidade, jogo RPG e convivo com três gatos.'
     ]
   },
   experiences: [
@@ -160,7 +160,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       company: 'Atlas Governance',
       location: 'Brasil',
       summary:
-        'Plataforma de governança corporativa. Entrei como estagiário e segui como Software Engineer, com foco no frontend do Atlas PLG e do Atlas Sign, em design system e em integração de IA.',
+        'Plataforma de governança corporativa. Atuei no frontend do Atlas PLG e do Atlas Sign como Software Engineer, com design system e integração de IA, após período de estágio.',
       roles: [
         { title: 'Software Engineer', start: '2021-11', end: '2026-07' },
         { title: 'Estagiário em Engenharia de Software', start: '2021-03', end: '2021-11' }
@@ -235,7 +235,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       id: 'lebes',
       company: 'Lojas Lebes',
       location: 'Eldorado do Sul, RS',
-      summary: 'Sistemas corporativos (ERP e CRM) de uma rede varejista do Rio Grande do Sul.',
+      summary: 'Sistemas corporativos (ERP e CRM) de uma rede varejista gaúcha.',
       roles: [{ title: 'Analista de Suporte a Sistemas', start: '2018-02', end: '2019-08' }],
       highlights: [
         {
@@ -271,7 +271,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     language: 'Go',
     version: 'v0.7.0',
     spec: 'Core Spec 0.4',
-    releases: { count: 9, period: 'de julho a agosto de 2026' },
+    releasesPeriod: 'de julho a agosto de 2026',
     license: 'Código público para leitura, licença proprietária.',
     cards: [
       {
@@ -393,7 +393,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     {
       id: 'gincana',
       title: 'Gincanas do RS',
-      text: 'Participo de gincanas no Rio Grande do Sul, no Setor de Diversas: localização de pessoas, documentos e informações com prazo curto.'
+      text: 'Participo de gincanas no RS, no Setor de Diversas: localização de pessoas, documentos e informações com prazo curto.'
     },
     {
       id: 'treino',
@@ -476,7 +476,7 @@ export const CONTACT_API = {
 export const SITE_ORIGIN = 'https://pherls.dev';
 export const PROFILE_IMAGE_PATH = '/og.png';
 /** Revisão pública do perfil. Atualize quando os fatos do currículo mudarem. */
-export const PROFILE_UPDATED = '2026-10-15';
+export const PROFILE_UPDATED = '2026-10-18';
 
 export function generateJsonLdSchema(data: PortfolioData): object {
   const { profile, project, featuredProjects } = data;
@@ -612,7 +612,7 @@ export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): stri
     `## Outro projeto: ${project.name} (${project.language}, ${project.version})`,
     project.tagline,
     mdItem('Repositório', project.repoUrl),
-    mdItem('Releases', project.releasesUrl, `${project.releases.count}, ${project.releases.period}`),
+    mdItem('Releases', project.releasesUrl, project.releasesPeriod),
     ...project.cards.map((card) => `- ${card.title}: ${card.text}`),
     `- Pacotes: ${project.modules.map((m) => `${m.name} (${m.description})`).join('; ')}`,
     '',

@@ -141,7 +141,7 @@ export function generateAgentsMd(origin = SITE_ORIGIN): string {
     '',
     `> Status: publicado. Instruções estáveis para quem lê ${origin}/ (revisão ${PROFILE_UPDATED}). Não é rascunho.`,
     '',
-    'Este site é o portfólio público de Pedro Henrique Lopes, frontend engineer.',
+    'Este site é o portfólio público de Pedro Henrique Lopes, Software Engineer · Frontend.',
     '',
     '## O que ler',
     '',
@@ -208,7 +208,7 @@ export function generateResumeJson(data: PortfolioData, origin = SITE_ORIGIN) {
       summary: `${profile.headline} ${plainText(profile.summary)}`,
       location: {
         city: 'Porto Alegre',
-        region: 'Rio Grande do Sul',
+        region: 'RS',
         countryCode: 'BR'
       },
       profiles: [
@@ -298,9 +298,9 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
 
   return `<main id="conteudo">
       <section id="inicio" class="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
-        <p class="eyebrow">${escHtml(profile.status)} · ${escHtml(profile.location)}</p>
+        <p class="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1">${escHtml(profile.status)}<span class="hidden sm:inline" aria-hidden="true">·</span><span class="whitespace-nowrap basis-full sm:basis-auto">${escHtml(profile.location)}</span></p>
         <h1 id="inicio-titulo" class="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]">${name}</h1>
-        <p class="mt-5 font-mono text-[0.9375rem] text-ink-soft">${escHtml(profile.role)} · React · Next.js · TypeScript</p>
+        <p class="mt-5 font-mono text-[0.9375rem] text-ink-soft"><span class="block">${escHtml(profile.jobTitle)}</span><span class="mt-1 block text-muted">React · Next.js · TypeScript</span></p>
         <p class="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">${escHtml(profile.headline)}</p>
         <p class="mt-4 max-w-xl text-ink-soft">${escHtml(plainText(profile.summary))}</p>
         <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1">

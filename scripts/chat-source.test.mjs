@@ -3,15 +3,17 @@ import { test, afterEach } from 'node:test';
 import { handlePortfolioRequest } from '../src/server/portfolioApi.ts';
 import { ChatRequestSchema } from '../src/utils/chatGuardrails.ts';
 import { ChatResponseSchema, ChatSourceSchema } from '../src/utils/chatResponseSchema.ts';
-import { suggestFollowUps } from '../src/utils/followUps.ts';
+import { followUpCandidates, suggestFollowUps } from '../src/utils/followUps.ts';
 import { DEFAULT_PORTFOLIO_DATA } from '../src/data/portfolioData.ts';
 import {
   PRESET_QUESTIONS,
   PresetQuestionIdSchema,
+  SUGGESTED_PRESET_IDS,
   buildPresetFallback,
   presetChipText,
   presetIdForChipText
 } from '../src/utils/presetQuestions.ts';
+import { buildTokenEfficientSystemPrompt } from '../src/utils/chatGuardrails.ts';
 import { buildLocalFallback } from '../src/utils/localChatFallback.ts';
 
 const originalFetch = globalThis.fetch;
@@ -192,6 +194,26 @@ test('jobfit local fallback is tagged local', async () => {
   assert.ok(data.reply.length > 20);
 });
 
+/** Independent of PresetQuestionIdSchema / PRESET_QUESTIONS — tests fail if registry drifts. */
+const EXPECTED_PRESET_IDS = Object.freeze([
+  'recruiter_summary',
+  'stack',
+  'atlas_ai',
+  'compare_job_fit'
+]);
+
+/** Must match free-text chips in src/utils/followUps.ts (jobfit ~54-71, chat ~77). */
+const FREE_TEXT_CHIPS = Object.freeze([
+  'E se a vaga for sênior?',
+  'A vaga pede testes automatizados?',
+  'O híbrido é em Porto Alegre?',
+  'A IA é function calling em fluxo real?',
+  'Quais perguntas eu faço na entrevista?',
+  'Resume em 5 linhas para colar no LinkedIn.',
+  'Qual a stack desse projeto?',
+  'Ele usa isso em produção?'
+]);
+
 const stackFollowUpInput = () => ({
   mode: 'chat',
   asked: presetChipText('stack'),
@@ -199,18 +221,45 @@ const stackFollowUpInput = () => ({
   data: DEFAULT_PORTFOLIO_DATA
 });
 
-function assertChipsAreValidPresetsOrFreeText(chips) {
+function assertChipsMapToExpectedPresetsOrFreeText(chips) {
+  const knownPresets = new Set(EXPECTED_PRESET_IDS);
+  const knownFreeText = new Set(FREE_TEXT_CHIPS);
   for (const chip of chips) {
     const presetId = presetIdForChipText(chip);
     if (presetId !== undefined) {
-      assert.equal(PresetQuestionIdSchema.safeParse(presetId).success, true, chip);
+      assert.ok(knownPresets.has(presetId), `chip "${chip}" maps to unexpected preset id: ${presetId}`);
+      assert.ok(
+        buildPresetFallback(presetId).trim().length > 0,
+        `preset ${presetId} has no fallback text`
+      );
+      continue;
     }
+    assert.ok(
+      knownFreeText.has(chip),
+      `chip "${chip}" is not a preset chip text nor listed in FREE_TEXT_CHIPS`
+    );
   }
 }
 
+test('initial assistant preset chips map to expected presets', () => {
+  const chips = SUGGESTED_PRESET_IDS.map((id) => presetChipText(id));
+  assertChipsMapToExpectedPresetsOrFreeText(chips);
+});
+
+test('preset ids match independent expected list and each has fallback', () => {
+  assert.equal(PRESET_QUESTIONS.length, EXPECTED_PRESET_IDS.length);
+  const fromQuestions = PRESET_QUESTIONS.map((preset) => preset.id).sort();
+  const expected = [...EXPECTED_PRESET_IDS].sort();
+  assert.deepEqual(fromQuestions, expected);
+  for (const id of EXPECTED_PRESET_IDS) {
+    assert.equal(PresetQuestionIdSchema.safeParse(id).success, true, id);
+    assert.ok(buildPresetFallback(id).trim().length > 0, `missing fallback for ${id}`);
+  }
+});
+
 test('stack question follow-ups suggest only valid presets or free-text chips', () => {
   const chips = suggestFollowUps(stackFollowUpInput());
-  assertChipsAreValidPresetsOrFreeText(chips);
+  assertChipsMapToExpectedPresetsOrFreeText(chips);
   assert.ok(chips.some((c) => presetIdForChipText(c) === 'atlas_ai' || c.includes('IA')));
 });
 
@@ -229,30 +278,179 @@ test('Gymkhana local fallback lists repo only without vercel or undefined', () =
   assert.doesNotMatch(reply, /undefined/);
 });
 
+const followUpCandidateMatrix = () => [
+  {
+    label: 'jobfit base (no seniority/tests in JD)',
+    input: {
+      mode: 'jobfit',
+      asked: 'Analise a vaga',
+      reply: 'Fit parcial.',
+      job: 'React TypeScript remoto',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'jobfit isFollowUp',
+    input: {
+      mode: 'jobfit',
+      asked: 'E o salário?',
+      reply: 'Ainda não sei.',
+      job: 'React TypeScript remoto',
+      isFollowUp: true,
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'jobfit híbrido sem Porto Alegre',
+    input: {
+      mode: 'jobfit',
+      asked: 'Vaga',
+      reply: 'Ok.',
+      job: 'Frontend híbrido duas vezes por semana',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'jobfit LLM/IA',
+    input: {
+      mode: 'jobfit',
+      asked: 'Vaga',
+      reply: 'Ok.',
+      job: 'Integração com IA e function calling em produção',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat project',
+    input: {
+      mode: 'chat',
+      asked: 'Gymkhana',
+      reply: buildLocalFallback('Gymkhana', 'chat'),
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat stack question',
+    input: stackFollowUpInput()
+  },
+  {
+    label: 'chat salary question',
+    input: {
+      mode: 'chat',
+      asked: 'Qual a pretensão salarial?',
+      reply: 'Depende.',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat Atlas/WCAG',
+    input: {
+      mode: 'chat',
+      asked: 'Como foi o design system e WCAG na Atlas?',
+      reply: 'Design system modular.',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat reply-only stack',
+    input: {
+      mode: 'chat',
+      asked: 'Entendi',
+      reply: 'A stack principal dele inclui React, TypeScript e Go.',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat reply-only salary',
+    input: {
+      mode: 'chat',
+      asked: 'Entendi',
+      reply: '**Disponibilidade**\n- Remoto. Pretensão a combinar.',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat neutral',
+    input: {
+      mode: 'chat',
+      asked: 'Olá',
+      reply: 'Oi.',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  }
+];
+
+function assertFollowUpBranch(label, candidates) {
+  const hasPreset = (...ids) => ids.every((id) => candidates.includes(presetChipText(id)));
+  switch (label) {
+    case 'jobfit base (no seniority/tests in JD)':
+      assert.ok(candidates.includes('E se a vaga for sênior?'));
+      assert.ok(candidates.includes('A vaga pede testes automatizados?'));
+      break;
+    case 'jobfit isFollowUp':
+      assert.ok(candidates.includes('Quais perguntas eu faço na entrevista?'));
+      break;
+    case 'jobfit híbrido sem Porto Alegre':
+      assert.ok(candidates.includes('O híbrido é em Porto Alegre?'));
+      break;
+    case 'jobfit LLM/IA':
+      assert.ok(candidates.includes('A IA é function calling em fluxo real?'));
+      break;
+    case 'chat project':
+      assert.ok(candidates.includes('Qual a stack desse projeto?'));
+      assert.ok(candidates.includes('Ele usa isso em produção?'));
+      break;
+    case 'chat stack question':
+      assert.ok(hasPreset('atlas_ai', 'compare_job_fit', 'recruiter_summary'));
+      break;
+    case 'chat salary question':
+      assert.ok(candidates.includes(presetChipText('compare_job_fit')));
+      break;
+    case 'chat Atlas/WCAG':
+      assert.ok(hasPreset('atlas_ai', 'stack', 'recruiter_summary'));
+      break;
+    case 'chat reply-only stack':
+      assert.ok(hasPreset('atlas_ai', 'compare_job_fit'));
+      assert.equal(candidates.filter((chip) => chip === presetChipText('stack')).length, 1);
+      break;
+    case 'chat reply-only salary':
+      assert.ok(candidates.includes(presetChipText('compare_job_fit')));
+      break;
+    case 'chat neutral':
+      assert.ok(hasPreset('recruiter_summary', 'stack', 'atlas_ai', 'compare_job_fit'));
+      assert.equal(candidates.length, 4);
+      break;
+    default:
+      assert.fail(`unknown matrix label: ${label}`);
+  }
+}
+
+test('system prompt includes Atlas end line derived from portfolio data', () => {
+  const sentence = 'O cargo na Atlas Governance terminou em jul/2026; ele está aberto a oportunidades.';
+  const prompt = buildTokenEfficientSystemPrompt(DEFAULT_PORTFOLIO_DATA);
+  assert.ok(prompt.includes(sentence));
+});
+
+test('followUpCandidates only emit allowlisted preset or free-text chips across branches', () => {
+  for (const { label, input } of followUpCandidateMatrix()) {
+    const candidates = followUpCandidates(input);
+    assert.ok(candidates.length > 0, label);
+    assertChipsMapToExpectedPresetsOrFreeText(candidates);
+    assertFollowUpBranch(label, candidates);
+  }
+});
+
 test('every suggestFollowUps chip maps to a preset or free text across modes', () => {
   const scenarios = [
-    stackFollowUpInput(),
+    ...followUpCandidateMatrix().map((item) => item.input),
     {
       mode: 'chat',
       asked: presetChipText('recruiter_summary'),
       reply: buildPresetFallback('recruiter_summary'),
       data: DEFAULT_PORTFOLIO_DATA
-    },
-    {
-      mode: 'chat',
-      asked: 'Gymkhana',
-      reply: buildLocalFallback('Gymkhana', 'chat'),
-      data: DEFAULT_PORTFOLIO_DATA
-    },
-    {
-      mode: 'jobfit',
-      asked: 'Vaga React',
-      reply: 'Fit parcial.',
-      job: 'React TypeScript remoto',
-      data: DEFAULT_PORTFOLIO_DATA
     }
   ];
   for (const input of scenarios) {
-    assertChipsAreValidPresetsOrFreeText(suggestFollowUps(input));
+    assertChipsMapToExpectedPresetsOrFreeText(suggestFollowUps(input));
   }
 });
