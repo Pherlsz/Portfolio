@@ -41,13 +41,13 @@ export type FeaturedProjectResumeFields = FeaturedProjectLinkFields & {
 export function resumeFeaturedProjectEntry(project: FeaturedProjectResumeFields): Record<string, unknown> {
   const entry: Record<string, unknown> = {
     name: project.name,
-    description: project.description,
-    keywords: project.keywords
+    description: project.description
   };
   const site = trimmed(project.href);
   const repo = trimmed(project.repoUrl);
   if (site) entry.url = site;
   if (repo) entry.codeRepository = repo;
+  entry.keywords = project.keywords;
   return entry;
 }
 

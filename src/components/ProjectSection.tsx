@@ -121,14 +121,14 @@ export function ProjectSection() {
             <h4 className="display mt-1 text-2xl">{project.name}</h4>
             <p className="mt-2 text-[0.9375rem] text-ink-soft">{project.tagline}</p>
           </div>
-          <div className="flex min-h-11 flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             <CTA
               variant="secondary"
               href={project.repoUrl}
               target="_blank"
               rel="noreferrer"
               aria-label={`Ver código-fonte de ${project.name} no GitHub`}
-              className="min-h-11 px-4"
+              className="min-h-10 px-4"
               icon={<Github className="size-4" aria-hidden="true" />}
             >
               Código no GitHub
