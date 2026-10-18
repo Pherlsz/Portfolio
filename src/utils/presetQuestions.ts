@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import {
-  availabilityLine,
   DEFAULT_PORTFOLIO_DATA,
-  formatRoleTimeline,
+  formatPeriod,
   plainText,
   skillNames,
   type PortfolioData
@@ -59,74 +58,48 @@ export function presetIdForChipText(text: string): PresetQuestionId | undefined 
   return PRESET_QUESTIONS.find((preset) => preset.text === trimmed)?.id;
 }
 
-function atlasHighlight(data: PortfolioData, metric: string) {
-  return data.experiences[0].highlights.find((h) => h.metric === metric);
-}
-
 export function buildPresetFallback(id: PresetQuestionId, data: PortfolioData = DEFAULT_PORTFOLIO_DATA): string {
   const { profile, experiences, skills } = data;
   const atlas = experiences[0];
+  const engineer = atlas.roles[0];
+  const intern = atlas.roles[1];
 
   switch (id) {
     case 'experience': {
-      return `**${atlas.company}** é a experiência principal.\n${formatRoleTimeline(atlas)}.\n${plainText(atlas.summary)}`;
+      return `A experiência principal do Pedro é na **${atlas.company}**, plataforma de governança corporativa. Começou como estagiário (${formatPeriod(intern.start, intern.end)}) e seguiu como ${engineer.title} (${formatPeriod(engineer.start, engineer.end)}), com foco no frontend do Atlas PLG e do Atlas Sign, em design system e em integração de IA.`;
     }
     case 'recruiter_summary': {
-      return `**${profile.name}** — ${profile.jobTitle}, ${profile.location}.\n\n${plainText(profile.summary)}\n\n${profile.trustCopy}\n\nStatus: ${profile.status}. Contato: ${profile.email}.`;
+      const summary = plainText(profile.summary).replace(/^um /, '');
+      return `**${profile.name}** — ${profile.jobTitle} (Rio Grande do Sul).\n\n${summary} Trajetória de estágio a júnior; aberto a vagas pleno quando houver fit.\n\nStatus: ${profile.status.toLowerCase()}. Contato: ${profile.email}.`;
     }
     case 'design_system_wcag': {
-      const ds = atlasHighlight(data, '30+ componentes');
-      const line = ds ? `- **${ds.metric}**: ${ds.text}` : '- Design system modular em conformidade com WCAG 2.1 AA.';
-      return `**Design system e WCAG na ${atlas.company}**\n${line}`;
+      return `**Design system e WCAG na ${atlas.company}**\n- Design system modular com **30+ componentes** em conformidade com **WCAG 2.1 AA**, base do frontend do Atlas PLG (React, Next.js e TypeScript).`;
     }
     case 'atlas_ai': {
-      const llm = atlasHighlight(data, 'LLMs em produção');
-      const line = llm?.text ?? 'Integrou modelos de IA aos fluxos de negócio.';
-      return `**IA na ${atlas.company}**\n- ${line}`;
+      return `**IA na ${atlas.company}**\n- Pedro integrou modelos de IA aos fluxos de negócio com function calling e tool calling, via APIs REST em Python e C#/.NET Core.`;
     }
     case 'stack': {
       const lines = skills.map((g) => `- **${g.name}**: ${skillNames(g).join(', ')}`);
       return `**Stack principal**\n${lines.join('\n')}`;
     }
     case 'accessibility_testing': {
-      const ds = atlasHighlight(data, '30+ componentes');
-      const flows = atlasHighlight(data, '10.000+ usuários');
-      const lines = [
-        ds ? `- Conformidade **WCAG 2.1 AA** no design system (${ds.metric}).` : '- Design system em conformidade com WCAG 2.1 AA.',
-        flows ? `- ${flows.text}` : ''
-      ].filter(Boolean);
-      return `**Acessibilidade e testes na ${atlas.company}**\n${lines.join('\n')}`;
+      return `**Acessibilidade na ${atlas.company}**\n- O design system tem **30+ componentes** em conformidade com **WCAG 2.1 AA**.\n- O portfólio não detalha as ferramentas de auditoria de acessibilidade usadas (como axe ou testes com leitor de tela).`;
     }
     case 'atlas_list_performance': {
-      const perf = atlasHighlight(data, '5.000+ registros');
-      const line = perf?.text ?? 'Listagens grandes com virtualização de DOM.';
-      return `**Listas na ${atlas.company}**\n- ${line}`;
+      return `**Listas na ${atlas.company}**\n- Listagens do Atlas Sign com **5.000+ registros** sem travar, usando virtualização de DOM (TanStack Virtual) e code splitting.\n- Pedro também separou estado de servidor e de interface (TanStack Query, Zustand e Context API), eliminando requisições redundantes.`;
     }
     case 'atlas_sign_performance': {
-      const perf = atlasHighlight(data, '5.000+ registros');
-      const line =
-        perf?.text ??
-        'Listagens do Atlas Sign com virtualização e code splitting para reduzir gargalos de renderização.';
-      return `**Performance no Atlas Sign**\n- ${line}\n\nO portfólio não detalha ferramentas de medição além da estabilização dessas listagens em produção.`;
+      return `**Como a performance foi medida no Atlas Sign**\nO portfólio não traz métricas de ferramenta (como Lighthouse ou Web Vitals). O resultado registrado é prático: as listagens com 5.000+ registros deixaram de travar depois da virtualização e do code splitting. Para números, vale perguntar direto ao Pedro.`;
     }
     case 'production_backend': {
-      const llm = atlasHighlight(data, 'LLMs em produção');
-      const messaging = atlasHighlight(data, '1.000+ templates');
-      const stackLine = `- **Stack em produção (Atlas)**: ${atlas.stack.filter((t) => /python|\.net|c#/i.test(t)).join(', ') || atlas.stack.join(', ')}.`;
-      const lines = [stackLine];
-      if (llm) lines.push(`- ${llm.text}`);
-      if (messaging) lines.push(`- ${messaging.text}`);
-      return `**Backend em produção**\n${lines.join('\n')}`;
+      const backendStack = atlas.stack.filter((tech) => /python|\.net|c#/i.test(tech)).join(' e ');
+      return `**Backend em produção**\n- **Stack na ${atlas.company}**: ${backendStack}.\n- Pedro refatorou o serviço de mensageria em C#/.NET Core, consolidando templates de e-mail legados em modelos parametrizados, com Docker e CI/CD no Azure DevOps.`;
     }
     case 'atlas_testing': {
-      const tests = atlasHighlight(data, '10.000+ usuários');
-      const line =
-        tests?.text ??
-        'Fluxos críticos cobertos com Vitest e React Testing Library, com Error Boundaries na navegação.';
-      return `**Testes na ${atlas.company}**\n- ${line}`;
+      return `**Testes na ${atlas.company}**\n- Fluxos críticos de assinatura eletrônica (Atlas Sign, 10.000+ usuários) cobertos com **Vitest** e **React Testing Library**, com Error Boundaries na navegação.`;
     }
     case 'compare_job_fit': {
-      return `Use o modo **Fit com vaga** neste assistente: cole o anúncio e a análise compara os requisitos com a experiência em produção do Pedro.\n\n${availabilityLine(profile)}\n\n${profile.trustCopy}`;
+      return `Use o modo **Fit com vaga** neste assistente: cole o anúncio e a análise compara os requisitos com a experiência do Pedro em produção.\n\nSenioridade: ${profile.seniority} · Formato: ${profile.workMode.toLowerCase()} · Pretensão: ${profile.salary.toLowerCase()}.`;
     }
   }
 }

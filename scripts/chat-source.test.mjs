@@ -33,6 +33,17 @@ async function chatJson(body, env = {}) {
   return json;
 }
 
+function normalizedFallbackFragments(text) {
+  const stripped = text
+    .replace(/\*\*/g, '')
+    .replace(/^[-*•]\s*/gm, '')
+    .split(/\n+/)
+    .flatMap((line) => line.split(/(?<=[.!?])\s+/))
+    .map((part) => part.trim().toLowerCase())
+    .filter((part) => part.length >= 12);
+  return stripped;
+}
+
 test('chat response schema accepts valid payloads and rejects invalid source', () => {
   const valid = ChatResponseSchema.safeParse({
     reply: 'ok',
@@ -91,6 +102,25 @@ test('every preset id has a non-empty distinct fallback', () => {
   const design = buildPresetFallback('design_system_wcag');
   assert.doesNotMatch(design, /10\.000\+ usuários/i);
   assert.doesNotMatch(design, /5\.000\+ registros/i);
+});
+
+test('preset fallbacks share no normalized sentence or bullet', () => {
+  const ownersByFragment = new Map();
+  for (const preset of PRESET_QUESTIONS) {
+    const answer = buildPresetFallback(preset.id);
+    for (const fragment of normalizedFallbackFragments(answer)) {
+      const owners = ownersByFragment.get(fragment) ?? [];
+      owners.push(preset.id);
+      ownersByFragment.set(fragment, owners);
+    }
+  }
+  for (const [fragment, owners] of ownersByFragment) {
+    assert.equal(
+      owners.length,
+      1,
+      `shared fragment across ${owners.join(', ')}: ${fragment.slice(0, 100)}`
+    );
+  }
 });
 
 test('preset chip uses dedicated fallback when AI is unavailable', async () => {
