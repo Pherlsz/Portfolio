@@ -3,7 +3,7 @@ import { test, afterEach } from 'node:test';
 import { handlePortfolioRequest } from '../src/server/portfolioApi.ts';
 import { ChatRequestSchema } from '../src/utils/chatGuardrails.ts';
 import { ChatResponseSchema, ChatSourceSchema } from '../src/utils/chatResponseSchema.ts';
-import { suggestFollowUps } from '../src/utils/followUps.ts';
+import { followUpCandidates, suggestFollowUps } from '../src/utils/followUps.ts';
 import { DEFAULT_PORTFOLIO_DATA } from '../src/data/portfolioData.ts';
 import {
   PRESET_QUESTIONS,
@@ -277,26 +277,123 @@ test('Gymkhana local fallback lists repo only without vercel or undefined', () =
   assert.doesNotMatch(reply, /undefined/);
 });
 
-test('every suggestFollowUps chip maps to a preset or free text across modes', () => {
-  const scenarios = [
-    stackFollowUpInput(),
-    {
-      mode: 'chat',
-      asked: presetChipText('recruiter_summary'),
-      reply: buildPresetFallback('recruiter_summary'),
+const followUpCandidateMatrix = () => [
+  {
+    label: 'jobfit base (no seniority/tests in JD)',
+    input: {
+      mode: 'jobfit',
+      asked: 'Analise a vaga',
+      reply: 'Fit parcial.',
+      job: 'React TypeScript remoto',
       data: DEFAULT_PORTFOLIO_DATA
-    },
-    {
+    }
+  },
+  {
+    label: 'jobfit isFollowUp',
+    input: {
+      mode: 'jobfit',
+      asked: 'E o salário?',
+      reply: 'Ainda não sei.',
+      job: 'React TypeScript remoto',
+      isFollowUp: true,
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'jobfit híbrido sem Porto Alegre',
+    input: {
+      mode: 'jobfit',
+      asked: 'Vaga',
+      reply: 'Ok.',
+      job: 'Frontend híbrido duas vezes por semana',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'jobfit LLM/IA',
+    input: {
+      mode: 'jobfit',
+      asked: 'Vaga',
+      reply: 'Ok.',
+      job: 'Integração com IA e function calling em produção',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat project',
+    input: {
       mode: 'chat',
       asked: 'Gymkhana',
       reply: buildLocalFallback('Gymkhana', 'chat'),
       data: DEFAULT_PORTFOLIO_DATA
-    },
+    }
+  },
+  {
+    label: 'chat stack question',
+    input: stackFollowUpInput()
+  },
+  {
+    label: 'chat salary question',
+    input: {
+      mode: 'chat',
+      asked: 'Qual a pretensão salarial?',
+      reply: 'Depende.',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat Atlas/WCAG',
+    input: {
+      mode: 'chat',
+      asked: 'Como foi o design system e WCAG na Atlas?',
+      reply: 'Design system modular.',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat reply-only stack',
+    input: {
+      mode: 'chat',
+      asked: 'Entendi',
+      reply: buildPresetFallback('stack'),
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat reply-only salary',
+    input: {
+      mode: 'chat',
+      asked: 'Entendi',
+      reply: '**Disponibilidade**\n- Remoto. Pretensão a combinar.',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  },
+  {
+    label: 'chat neutral',
+    input: {
+      mode: 'chat',
+      asked: 'Olá',
+      reply: 'Oi.',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  }
+];
+
+test('followUpCandidates only emit allowlisted preset or free-text chips across branches', () => {
+  for (const { label, input } of followUpCandidateMatrix()) {
+    const candidates = followUpCandidates(input);
+    assert.ok(candidates.length > 0, label);
+    assertChipsMapToExpectedPresetsOrFreeText(candidates);
+  }
+});
+
+test('every suggestFollowUps chip maps to a preset or free text across modes', () => {
+  const scenarios = [
+    ...followUpCandidateMatrix().map((item) => item.input),
     {
-      mode: 'jobfit',
-      asked: 'Vaga React',
-      reply: 'Fit parcial.',
-      job: 'React TypeScript remoto',
+      mode: 'chat',
+      asked: presetChipText('recruiter_summary'),
+      reply: buildPresetFallback('recruiter_summary'),
       data: DEFAULT_PORTFOLIO_DATA
     }
   ];
