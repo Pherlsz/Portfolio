@@ -14,6 +14,9 @@ import {
   showCollapsedJobDescription,
   truncateJobDescriptionPreview
 } from '../utils/jobDescriptionDisclosure';
+import { ChatResponseSchema, type ChatSource } from '../utils/chatResponseSchema';
+import { presetChipText, presetIdForChipText, SUGGESTED_PRESET_IDS } from '../utils/presetQuestions';
+import { AiReplyBadge } from './AiReplyBadge';
 
 export interface ChatAction {
   label: string;
@@ -25,17 +28,10 @@ interface ChatMessage {
   id: string;
   role: 'user' | 'model';
   text: string;
+  source?: ChatSource;
   actions?: ChatAction[];
   followUps?: string[];
 }
-
-const SUGGESTED_QUESTIONS = [
-  'Qual a principal experiência dele?',
-  'Resumo rápido para recrutador',
-  'Como ficou o design system e a WCAG?',
-  'O que ele fez com IA na Atlas?',
-  'Qual a stack principal?'
-];
 
 const WELCOME: ChatMessage = {
   id: 'welcome',
@@ -210,7 +206,7 @@ export function AssistantPanel({
     });
   };
 
-  const send = async (text: string, sendMode: ChatMode, opts?: { job?: string }) => {
+  const send = async (text: string, sendMode: ChatMode, opts?: { job?: string; presetId?: string }) => {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
 
@@ -249,22 +245,29 @@ export function AssistantPanel({
           mode: sendMode,
           message: check.sanitized,
           history,
-          ...(opts?.job ? { job: opts.job } : {})
+          ...(opts?.job ? { job: opts.job } : {}),
+          ...(() => {
+            const presetId = opts?.presetId ?? presetIdForChipText(check.sanitized);
+            return presetId ? { presetId } : {};
+          })()
         })
       });
-      const data = (await response.json()) as {
-        reply?: string;
-        error?: string;
-        actions?: ChatAction[];
-        followUps?: string[];
-      };
-      if (!response.ok && !data.reply) throw new Error(data.error);
+      const raw: unknown = await response.json();
+      const parsed = ChatResponseSchema.safeParse(raw);
+      if (!parsed.success) {
+        throw new Error('Resposta inválida');
+      }
+      if (!response.ok && !parsed.data.reply) {
+        throw new Error(parsed.data.error ?? 'Erro ao consultar o assistente');
+      }
+      const data = parsed.data;
       setMessages((prev) => [
         ...prev,
         {
           id: `model-${Date.now()}`,
           role: 'model',
           text: data.reply ?? '',
+          source: data.source,
           actions: data.actions,
           followUps: data.followUps
         }
@@ -458,9 +461,12 @@ export function AssistantPanel({
             <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div
                 className={`group relative max-w-[90%] rounded-2xl px-4 py-3 text-[0.9375rem] leading-relaxed ${
-                  msg.role === 'user' ? 'bg-ink text-paper' : 'border border-line bg-paper text-ink-soft'
+                  msg.role === 'user'
+                    ? 'bg-ink text-paper'
+                    : 'border border-line bg-paper pr-10 text-ink-soft sm:pr-4'
                 }`}
               >
+                {msg.role === 'model' && msg.source === 'ai' && <AiReplyBadge />}
                 {msg.role === 'model' ? renderFormattedText(msg.text) : <p className="whitespace-pre-wrap">{msg.text}</p>}
                 {msg.role === 'model' && msg.id !== 'welcome' && (
                   <button
@@ -621,15 +627,15 @@ export function AssistantPanel({
           <div className="shrink-0 border-t border-line p-4">
             {messages.length <= 1 && (
             <div className="flex gap-1.5 overflow-x-auto pb-3 [scrollbar-width:none]">
-              {SUGGESTED_QUESTIONS.map((q) => (
+              {SUGGESTED_PRESET_IDS.map((id) => (
                 <button
-                  key={q}
+                  key={id}
                   type="button"
-                  onClick={() => send(q, 'chat')}
+                  onClick={() => send(presetChipText(id), 'chat', { presetId: id })}
                   disabled={isLoading}
                   className="shrink-0 whitespace-nowrap rounded-full border border-line px-3 py-1.5 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
                 >
-                  {q}
+                  {presetChipText(id)}
                 </button>
               ))}
             </div>
