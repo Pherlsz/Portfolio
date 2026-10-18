@@ -6,6 +6,7 @@ import {
   skillNames,
   type PortfolioData
 } from '../data/portfolioData.ts';
+import { PresetQuestionIdSchema } from './presetQuestions.ts';
 
 export type ChatMode = 'chat' | 'jobfit';
 
@@ -87,7 +88,7 @@ export const ChatRequestSchema = z.discriminatedUnion('mode', [
     mode: z.literal('chat'),
     message: QuestionSchema,
     history: HistorySchema,
-    presetId: z.string().trim().max(40).optional()
+    presetId: PresetQuestionIdSchema.optional().catch(undefined)
   }),
   z.object({
     mode: z.literal('jobfit'),

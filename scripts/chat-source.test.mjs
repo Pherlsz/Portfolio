@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict';
-import { writeFileSync } from 'node:fs';
 import { test, afterEach } from 'node:test';
 import { handlePortfolioRequest } from '../src/server/portfolioApi.ts';
+import { ChatRequestSchema } from '../src/utils/chatGuardrails.ts';
 import { ChatResponseSchema, ChatSourceSchema } from '../src/utils/chatResponseSchema.ts';
+import { suggestFollowUps } from '../src/utils/followUps.ts';
+import { DEFAULT_PORTFOLIO_DATA } from '../src/data/portfolioData.ts';
 import {
   PRESET_QUESTIONS,
   PresetQuestionIdSchema,
-  buildPresetFallback
+  buildPresetFallback,
+  presetChipText
 } from '../src/utils/presetQuestions.ts';
 
 const originalFetch = globalThis.fetch;
@@ -114,6 +117,27 @@ test('unknown preset id does not crash and falls back to keyword matcher', async
   assert.ok(parsed.data.reply.includes('Stack'));
 });
 
+test('invalid preset id type is stripped at parse and uses keyword matcher', async () => {
+  const parsed = ChatRequestSchema.safeParse({
+    mode: 'chat',
+    message: 'Qual a stack principal?',
+    presetId: 'x'.repeat(41),
+    history: []
+  });
+  assert.equal(parsed.success, true);
+  assert.equal(parsed.data.presetId, undefined);
+
+  const data = await chatJson({
+    mode: 'chat',
+    message: 'Qual a stack principal?',
+    presetId: 123,
+    history: []
+  });
+  assert.equal(data.source, 'local');
+  assert.ok(data.reply.includes('Stack'));
+  assert.equal(data.blockedByZod, false);
+});
+
 test('jobfit local fallback is tagged local', async () => {
   const data = await chatJson({
     mode: 'jobfit',
@@ -124,11 +148,26 @@ test('jobfit local fallback is tagged local', async () => {
   assert.ok(data.reply.length > 20);
 });
 
-test('write preset fallback evidence table', () => {
-  const rows = PRESET_QUESTIONS.map((preset) => {
-    const answer = buildPresetFallback(preset.id).replace(/\|/g, '\\|').replace(/\n/g, '<br>');
-    return `| ${preset.id} | ${preset.text} | ${answer} |`;
-  });
-  const md = `| preset id | chip text | full fallback answer |\n| --- | --- | --- |\n${rows.join('\n')}\n`;
-  writeFileSync('/opt/cursor/artifacts/2026-10-18-preset-fallbacks.md', md);
+const stackFollowUpInput = () => ({
+  mode: 'chat',
+  asked: presetChipText('stack'),
+  reply: buildPresetFallback('stack'),
+  data: DEFAULT_PORTFOLIO_DATA
+});
+
+test('stack question follow-ups can suggest production_backend chip', () => {
+  const chips = suggestFollowUps(stackFollowUpInput());
+  assert.ok(chips.includes(presetChipText('production_backend')));
+});
+
+test('availability follow-up suggests compare_job_fit chip', () => {
+  const asked = 'Qual a pretensão salarial e se aceita remoto?';
+  const reply = `**Disponibilidade**\n- Senioridade Júnior/Pleno. Remoto.`;
+  const chips = suggestFollowUps({ mode: 'chat', asked, reply, data: DEFAULT_PORTFOLIO_DATA });
+  assert.ok(chips.includes(presetChipText('compare_job_fit')));
+});
+
+test('stack question follow-ups can suggest atlas_testing chip', () => {
+  const chips = suggestFollowUps(stackFollowUpInput());
+  assert.ok(chips.includes(presetChipText('atlas_testing')));
 });

@@ -38,15 +38,13 @@ export function suggestFollowUps(input: {
 }): string[] {
   const { mode, asked, reply, job, isFollowUp, data } = input;
   const q = fold(asked);
-  const r = fold(reply);
-  const jd = fold(job ?? '');
-  const combined = `${q} ${r} ${jd}`;
+  const replyAndJob = `${fold(reply)} ${fold(job ?? '')}`;
 
   const pick = (...candidates: string[]) =>
     unique(candidates.filter((chip) => !alreadyAsked(asked, chip))).slice(0, 3);
 
   if (mode === 'jobfit') {
-    const fromJd = jd || q;
+    const fromJd = fold(job ?? '') || q;
     const chips: string[] = [];
     if (!/senior|staff|principal|pleno|junior/.test(fromJd)) {
       chips.push('E se a vaga for sênior?');
@@ -73,17 +71,21 @@ export function suggestFollowUps(input: {
   const chips: string[] = [];
   if (mentionsPersonalProject(asked, data) || /\bprojet/.test(q)) {
     chips.push('Qual a stack desse projeto?', 'Ele usa isso em produção?');
-  } else if (/wcag|acessib|design system/.test(combined)) {
+  } else if (/stack|tecnolog|skill/.test(q)) {
+    chips.push(presetChipText('production_backend'), presetChipText('atlas_testing'));
+  } else if (/salar|remoto|hibrid|senioridade|pleno|pretens/.test(q)) {
+    chips.push(presetChipText('compare_job_fit'));
+  } else if (/wcag|acessib|design system/.test(q) || /wcag|acessib|design system/.test(replyAndJob)) {
     chips.push(presetChipText('accessibility_testing'), presetChipText('atlas_list_performance'));
-  } else if (/atlas|sign|plg|experi|carreira|trabalh/.test(combined)) {
+  } else if (/atlas|sign|plg|experi|carreira|trabalh/.test(q) || /atlas|sign|plg|experi|carreira|trabalh/.test(replyAndJob)) {
     chips.push(
       presetChipText('design_system_wcag'),
       presetChipText('atlas_sign_performance'),
       presetChipText('atlas_ai')
     );
-  } else if (/stack|tecnolog|skill/.test(combined)) {
+  } else if (/stack|tecnolog|skill/.test(replyAndJob)) {
     chips.push(presetChipText('production_backend'), presetChipText('atlas_testing'));
-  } else if (/salar|remoto|hibrid|senioridade|pleno|pretens/.test(combined)) {
+  } else if (/salar|remoto|hibrid|senioridade|pleno|pretens/.test(replyAndJob)) {
     chips.push(presetChipText('compare_job_fit'));
   }
 
