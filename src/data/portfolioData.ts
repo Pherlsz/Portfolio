@@ -1,3 +1,8 @@
+import {
+  featuredProjectLlmsMdItems,
+  featuredProjectSchemaOrg
+} from '../utils/featuredProjectLinks.ts';
+
 export interface Highlight {
   metric?: string;
   text: string;
@@ -40,17 +45,13 @@ export interface FeaturedProject {
   name: string;
   kicker: string;
   tagline: string;
-  /** App em produção. Usado quando o repositório é privado. */
-  href: string;
-  /** Se o GitHub for público, o card aponta para cá. */
+  /** Live app URL. Omit when there is no public site. */
+  href?: string;
+  /** GitHub repository URL. Omit when the code is not public. */
   repoUrl?: string;
   access: 'public' | 'restricted';
   stack: string[];
   image: string;
-}
-
-export function featuredProjectUrl(project: FeaturedProject): string {
-  return project.repoUrl ?? project.href;
 }
 
 export interface Certification {
@@ -255,7 +256,6 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       kicker: 'Aplicação web',
       tagline:
         'Cadastro de pessoas, contas e documentos. Assistente de IA para busca e correlação de documentos com as tarefas. Tabela no estilo Excel, com fórmulas e filtros avançados.',
-      href: 'https://gymkhana-database.vercel.app',
       repoUrl: 'https://github.com/Pherlsz/Gymkhana-Database',
       access: 'public',
       stack: ['React', 'TypeScript', 'Ant Design', 'Go'],
@@ -484,22 +484,7 @@ export function generateJsonLdSchema(data: PortfolioData): object {
   const personId = `${SITE_ORIGIN}/#person`;
   const description = `${profile.headline} ${plainText(profile.summary)}`;
   const hasPart = [
-    ...featuredProjects.map((item) =>
-      item.repoUrl
-        ? {
-            '@type': 'SoftwareSourceCode',
-            name: item.name,
-            description: item.tagline,
-            codeRepository: item.repoUrl,
-            url: item.href
-          }
-        : {
-            '@type': 'WebApplication',
-            name: item.name,
-            description: item.tagline,
-            url: item.href
-          }
-    ),
+    ...featuredProjects.map((item) => featuredProjectSchemaOrg(item)),
     {
       '@type': 'SoftwareSourceCode',
       name: project.name,
@@ -619,8 +604,7 @@ export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): stri
     ...featuredProjects.flatMap((item) => [
       `### ${item.name}`,
       item.tagline,
-      ...(item.repoUrl ? [mdItem('Repositório', item.repoUrl)] : []),
-      mdItem('App', item.href),
+      ...featuredProjectLlmsMdItems(item, mdItem),
       `- Acesso: ${item.access === 'restricted' ? 'restrito (login)' : 'público'}`,
       `- Stack: ${item.stack.join(', ')}`,
       ''

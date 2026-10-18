@@ -1,4 +1,9 @@
 import {
+  featuredProjectPedroMdLines,
+  featuredProjectPrimaryUrl,
+  resumeFeaturedProjectEntry
+} from '../utils/featuredProjectLinks.ts';
+import {
   availabilityLine,
   CONTACT_API,
   experienceSpan,
@@ -96,8 +101,7 @@ export function generatePedroMd(data: PortfolioData, origin = SITE_ORIGIN): stri
     ...featuredProjects.flatMap((item) => [
       `### ${item.name}`,
       item.tagline,
-      `- App: ${item.href}`,
-      ...(item.repoUrl ? [`- Repositório: ${item.repoUrl}`] : []),
+      ...featuredProjectPedroMdLines(item),
       `- Stack: ${item.stack.join(', ')}`,
       ''
     ]),
@@ -247,13 +251,15 @@ export function generateResumeJson(data: PortfolioData, origin = SITE_ORIGIN) {
       ...(item.href ? { url: item.href } : {})
     })),
     projects: [
-      ...featuredProjects.map((item) => ({
-        name: item.name,
-        description: item.tagline,
-        url: item.href,
-        ...(item.repoUrl ? { codeRepository: item.repoUrl } : {}),
-        keywords: item.stack
-      })),
+      ...featuredProjects.map((item) =>
+        resumeFeaturedProjectEntry({
+          name: item.name,
+          description: item.tagline,
+          href: item.href,
+          repoUrl: item.repoUrl,
+          keywords: item.stack
+        })
+      ),
       {
         name: project.name,
         description: project.tagline,
@@ -278,9 +284,15 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
     })
     .join('');
   const projects = [
-    ...featuredProjects.map(
-      (item) => `<li><a class="link" href="${escHtml(item.href)}">${escHtml(item.name)}</a> — ${escHtml(item.tagline)}</li>`
-    ),
+    ...featuredProjects.map((item) => {
+      const primary = featuredProjectPrimaryUrl(item);
+      const title = escHtml(item.name);
+      const body = escHtml(item.tagline);
+      if (primary) {
+        return `<li><a class="link" href="${escHtml(primary)}">${title}</a> — ${body}</li>`;
+      }
+      return `<li><strong>${title}</strong> — ${body}</li>`;
+    }),
     `<li><a class="link" href="${escHtml(project.repoUrl)}">${escHtml(project.name)}</a> — ${escHtml(project.tagline)}</li>`
   ].join('');
 
