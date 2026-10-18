@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -10,6 +11,11 @@ import { animate, MotionConfig, motion, useDragControls, useMotionValue } from '
 import { HoloSparkleCanvas } from './HoloSparkleCanvas';
 import { useStickerHoloPointer } from '../utils/holoPointer';
 import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
+import {
+  roomToDragConstraints,
+  ZERO_DRAG_CONSTRAINTS,
+  type AxisDragConstraints
+} from '../utils/stickerDragConstraints';
 
 export type StickerId =
   | 'morcega'
@@ -252,8 +258,30 @@ function LidSticker({
   const rotate = useMotionValue(slot.rotate);
   const dragged = useRef(false);
   const dragControls = useDragControls();
+  const [dragConstraints, setDragConstraints] = useState<AxisDragConstraints>(ZERO_DRAG_CONSTRAINTS);
   const { reaction, react, face } = useStickerReaction(slot.id);
   useStickerHoloPointer(ref, holoActive);
+
+  const room = () => {
+    const lid = lidRef.current?.getBoundingClientRect();
+    const box = ref.current?.getBoundingClientRect();
+    if (!lid || !box) return null;
+    return {
+      left: lid.left - box.left,
+      right: lid.right - box.right,
+      up: lid.top - box.top,
+      down: lid.bottom - box.bottom
+    };
+  };
+
+  const syncDragConstraints = () => {
+    const space = room();
+    if (space) setDragConstraints(roomToDragConstraints(space));
+  };
+
+  useLayoutEffect(() => {
+    syncDragConstraints();
+  }, []);
 
   useEffect(() => {
     const node = ref.current;
@@ -268,18 +296,6 @@ function LidSticker({
       node.removeEventListener('pointercancel', stopDrag);
     };
   }, [dragControls]);
-
-  const room = () => {
-    const lid = lidRef.current?.getBoundingClientRect();
-    const box = ref.current?.getBoundingClientRect();
-    if (!lid || !box) return null;
-    return {
-      left: lid.left - box.left,
-      right: lid.right - box.right,
-      up: lid.top - box.top,
-      down: lid.bottom - box.bottom
-    };
-  };
 
   useEffect(() => {
     if (!arrangement) return;
@@ -323,15 +339,18 @@ function LidSticker({
       type="button"
       drag
       dragControls={dragControls}
-      dragListener
-      dragConstraints={lidRef}
+      dragConstraints={dragConstraints}
       dragElastic={0}
       dragMomentum={false}
       whileDrag={{ scale: 1.08 }}
-      onPointerDown={onFront}
+      onPointerDown={() => {
+        onFront();
+        syncDragConstraints();
+      }}
       onDragStart={() => {
         dragged.current = true;
         onFront();
+        syncDragConstraints();
       }}
       onDragEnd={() => {
         window.setTimeout(() => {

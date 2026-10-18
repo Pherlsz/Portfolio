@@ -512,18 +512,6 @@
     .lid {
       overflow: hidden;
     }
-
-    .sticker-bubble {
-      bottom: auto;
-      top: calc(100% + 0.25rem);
-      translate: -50% 0;
-    }
-
-    .group:hover .sticker-bubble,
-    .group:focus-visible .sticker-bubble,
-    .sticker-bubble[data-visible="true"] {
-      translate: -50% 0;
-    }
   }
 
   .sticker-face-host {
@@ -859,6 +847,20 @@
   .sticker-bubble[data-visible="true"] {
     opacity: 1;
     translate: -50% 0;
+  }
+
+  @media (pointer: coarse) {
+    .sticker-bubble {
+      bottom: auto;
+      top: calc(100% + 0.25rem);
+      translate: -50% 0.25rem;
+    }
+
+    .group:hover .sticker-bubble,
+    .group:focus-visible .sticker-bubble,
+    .sticker-bubble[data-visible="true"] {
+      translate: -50% 0;
+    }
   }
 }
 

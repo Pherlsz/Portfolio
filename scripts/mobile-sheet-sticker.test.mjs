@@ -39,6 +39,8 @@ test('truncateJobDescriptionPreview', () => {
 test('AssistantPanel wires disclosure reducer and mobile scroll lock', () => {
   assert.match(assistantSrc, /jobDescriptionEditorReducer/);
   assert.match(assistantSrc, /assistente-vaga-disclosure/);
+  assert.match(assistantSrc, /onCancel/);
+  assert.match(assistantSrc, /aria-label="Limpar conversa"/);
   assert.match(assistantSrc, /matchMedia\('\(max-width: 639px\)'\)/);
   const scrollLockEffect = assistantSrc.slice(
     assistantSrc.indexOf("matchMedia('(max-width: 639px)')"),
@@ -52,4 +54,9 @@ test('stickers stop drag on lost pointer capture', () => {
   assert.match(stickersSrc, /useDragControls/);
   assert.match(stickersSrc, /lostpointercapture/);
   assert.match(stickersSrc, /dragControls\.stop\(\)/);
+});
+
+test('stickers use numeric drag constraints from room()', () => {
+  assert.match(stickersSrc, /roomToDragConstraints/);
+  assert.doesNotMatch(stickersSrc, /dragConstraints=\{lidRef\}/);
 });

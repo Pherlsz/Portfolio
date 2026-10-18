@@ -182,6 +182,17 @@ export function AssistantPanel({
     requestAnimationFrame(() => jobDisclosureRef.current?.focus());
   }, [activeJob, jobEditor.expanded]);
 
+  useEffect(() => {
+    if (!open) return;
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const keepTailVisible = () => {
+      endRef.current?.scrollIntoView({ block: 'end' });
+    };
+    viewport.addEventListener('resize', keepTailVisible);
+    return () => viewport.removeEventListener('resize', keepTailVisible);
+  }, [open]);
+
   const runAction = (action: ChatAction) => {
     if (action.type === 'export_cv') {
       onOpenChange(false);
@@ -313,10 +324,18 @@ export function AssistantPanel({
     .reverse()
     .find((msg) => msg.role === 'model' && msg.id !== 'welcome')?.id;
 
-  const tabClass = (active: boolean) =>
-    `inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-semibold transition-colors short-mobile:min-h-8 short-mobile:gap-1 short-mobile:px-2 short-mobile:text-xs ${
-      active ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink'
-    }`;
+  const tabClass = (active: boolean, compact = false) =>
+    `inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-semibold transition-colors ${
+      compact ? 'short-mobile:min-h-8 short-mobile:gap-1 short-mobile:px-2 short-mobile:text-xs' : ''
+    } ${active ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink'}`;
+
+  const clearChat = () => {
+    setMessages([WELCOME]);
+    setActiveJob(null);
+    setJobQuestion('');
+    setJobDescription('');
+    dispatchJobEditor({ type: 'clear' });
+  };
 
   return (
     <>
@@ -340,57 +359,94 @@ export function AssistantPanel({
         id="assistente"
         aria-labelledby="assistente-titulo"
         onClose={() => onOpenChange(false)}
+        onCancel={(event) => {
+          if (mode === 'jobfit' && activeJob && jobEditor.expanded) {
+            event.preventDefault();
+            collapseJobDescription();
+          }
+        }}
         onClick={(event) => {
           if (event.target === dialogRef.current) onOpenChange(false);
         }}
         className="no-print fixed inset-x-0 bottom-0 top-auto m-0 h-[86dvh] max-h-none w-full max-w-none flex-col overflow-hidden rounded-t-[1.75rem] border border-line bg-surface p-0 text-ink shadow-2xl shadow-neutral-950/30 open:flex short-mobile:inset-0 short-mobile:top-0 short-mobile:h-dvh short-mobile:rounded-none sm:inset-y-0 sm:left-auto sm:right-0 sm:h-dvh sm:max-w-md sm:rounded-none sm:rounded-l-[1.75rem]"
       >
-        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-line px-3 py-2 sm:px-5 sm:py-3 short-mobile:flex-nowrap short-mobile:gap-1 short-mobile:px-2 short-mobile:py-1.5">
-          <h2
-            id="assistente-titulo"
-            className="display w-full text-lg sm:w-auto short-mobile:sr-only short-mobile:w-px short-mobile:overflow-hidden"
-          >
-            Assistente do portfólio
-          </h2>
-          <p className="hidden w-full text-sm text-muted sm:order-last sm:block sm:w-full">
-            Responde só sobre o Pedro, com base neste site.
-          </p>
-          <div className="flex min-w-0 flex-1 gap-1 short-mobile:gap-0.5" role="group" aria-label="Modo do assistente">
-            <button type="button" aria-pressed={mode === 'chat'} onClick={() => onModeChange('chat')} className={tabClass(mode === 'chat')}>
-              <MessageSquare className="size-4 shrink-0 short-mobile:size-3.5" aria-hidden="true" />
-              Perguntas
-            </button>
-            <button type="button" aria-pressed={mode === 'jobfit'} onClick={() => onModeChange('jobfit')} className={tabClass(mode === 'jobfit')}>
-              <Briefcase className="size-4 shrink-0 short-mobile:size-3.5" aria-hidden="true" />
-              Fit com vaga
-            </button>
-          </div>
-          <div className="flex shrink-0 items-center gap-0.5 short-mobile:gap-0">
-            {messages.length > 1 && (
-              <button
-                type="button"
-                onClick={() => {
-                  setMessages([WELCOME]);
-                  setActiveJob(null);
-                  setJobQuestion('');
-                  setJobDescription('');
-                  dispatchJobEditor({ type: 'clear' });
-                }}
-                className="inline-flex min-h-9 items-center gap-1 rounded-full px-2 text-sm text-ink-soft hover:text-ink short-mobile:min-h-8 short-mobile:px-1.5 short-mobile:text-xs"
-              >
-                <RotateCcw className="size-4 short-mobile:size-3.5" aria-hidden="true" />
-                <span className="short-mobile:hidden">Limpar</span>
-              </button>
-            )}
+        <h2 id="assistente-titulo" className="sr-only">
+          Assistente do portfólio
+        </h2>
+
+        <div className="short-mobile:hidden">
+          <div className="flex items-start justify-between gap-3 border-b border-line px-3 py-3 sm:px-5 sm:py-4">
+            <div>
+              <p className="display text-lg" aria-hidden="true">Assistente do portfólio</p>
+              <p className="hidden text-sm text-muted sm:block">Responde só sobre o Pedro, com base neste site.</p>
+            </div>
             <button
               type="button"
               onClick={() => onOpenChange(false)}
               aria-label="Fechar assistente"
-              className="icon-btn size-10 shrink-0 short-mobile:size-9"
+              className="icon-btn size-10 shrink-0"
             >
               <X className="size-4" aria-hidden="true" />
             </button>
           </div>
+          <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2 sm:px-5 sm:py-2.5">
+            <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto" role="group" aria-label="Modo do assistente">
+              <button type="button" aria-pressed={mode === 'chat'} onClick={() => onModeChange('chat')} className={tabClass(mode === 'chat')}>
+                <MessageSquare className="size-4 shrink-0" aria-hidden="true" />
+                Perguntas
+              </button>
+              <button type="button" aria-pressed={mode === 'jobfit'} onClick={() => onModeChange('jobfit')} className={tabClass(mode === 'jobfit')}>
+                <Briefcase className="size-4 shrink-0" aria-hidden="true" />
+                Fit com vaga
+              </button>
+            </div>
+            {messages.length > 1 && (
+              <button
+                type="button"
+                onClick={clearChat}
+                aria-label="Limpar conversa"
+                className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm text-ink-soft hover:text-ink"
+              >
+                <RotateCcw className="size-4" aria-hidden="true" />
+                Limpar
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="hidden short-mobile:flex short-mobile:flex-nowrap short-mobile:items-center short-mobile:gap-1 short-mobile:border-b short-mobile:border-line short-mobile:px-2 short-mobile:py-1.5">
+          <div
+            className="flex min-w-0 flex-1 gap-0.5 overflow-x-auto [scrollbar-width:none]"
+            role="group"
+            aria-label="Modo do assistente"
+          >
+            <button type="button" aria-pressed={mode === 'chat'} onClick={() => onModeChange('chat')} className={tabClass(mode === 'chat', true)}>
+              <MessageSquare className="size-3.5 shrink-0" aria-hidden="true" />
+              Perguntas
+            </button>
+            <button type="button" aria-pressed={mode === 'jobfit'} onClick={() => onModeChange('jobfit')} className={tabClass(mode === 'jobfit', true)}>
+              <Briefcase className="size-3.5 shrink-0" aria-hidden="true" />
+              Fit com vaga
+            </button>
+          </div>
+          {messages.length > 1 && (
+            <button
+              type="button"
+              onClick={clearChat}
+              aria-label="Limpar conversa"
+              className="inline-flex min-h-8 shrink-0 items-center rounded-full px-1.5 text-ink-soft hover:text-ink"
+            >
+              <RotateCcw className="size-3.5" aria-hidden="true" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            aria-label="Fechar assistente"
+            className="icon-btn size-9 shrink-0"
+          >
+            <X className="size-4" aria-hidden="true" />
+          </button>
         </div>
 
         <div
@@ -506,7 +562,6 @@ export function AssistantPanel({
                 type="button"
                 id="assistente-vaga-disclosure"
                 aria-expanded={false}
-                aria-controls="assistente-vaga-editor"
                 aria-label={`Vaga em análise. Editar descrição da vaga: ${jobPreview}`}
                 onClick={expandJobDescription}
                 className="mt-1.5 flex min-h-11 w-full flex-col justify-center rounded-2xl border border-control bg-paper px-3 py-2 text-left outline-none transition-colors hover:border-ink focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-surface short-mobile:mt-1 short-mobile:flex-row short-mobile:items-center short-mobile:gap-1.5 short-mobile:px-2.5 short-mobile:py-2 sm:mt-3 sm:px-4 sm:py-3"
@@ -533,7 +588,7 @@ export function AssistantPanel({
                   onChange={(e) => setJobDescription(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key !== 'Escape' || !activeJob) return;
-                    e.stopPropagation();
+                    e.preventDefault();
                     collapseJobDescription();
                   }}
                   placeholder="Cole aqui os requisitos da vaga…"
