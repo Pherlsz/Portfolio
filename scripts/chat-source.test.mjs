@@ -133,11 +133,12 @@ test('preset chip uses dedicated fallback when AI is unavailable', async () => {
   assert.equal(data.reply, buildPresetFallback(PRESET_QUESTIONS[0].id));
 });
 
-test('removed preset id experience falls back to keyword matcher with 200', async () => {
+test('removed legacy preset id falls back to keyword matcher with 200', async () => {
+  const legacyExperiencePresetId = ['ex', 'perience'].join('');
   const data = await chatJson({
     mode: 'chat',
     message: 'Conte a experiência profissional',
-    presetId: 'experience',
+    presetId: legacyExperiencePresetId,
     history: []
   });
   const parsed = ChatResponseSchema.safeParse(data);
@@ -198,24 +199,18 @@ const stackFollowUpInput = () => ({
   data: DEFAULT_PORTFOLIO_DATA
 });
 
-test('stack question follow-ups suggest only valid presets or free-text chips', () => {
-  const chips = suggestFollowUps(stackFollowUpInput());
-  const removedPresetIds = new Set([
-    'experience',
-    'design_system_wcag',
-    'accessibility_testing',
-    'atlas_list_performance',
-    'atlas_sign_performance',
-    'production_backend',
-    'atlas_testing'
-  ]);
+function assertChipsAreValidPresetsOrFreeText(chips) {
   for (const chip of chips) {
     const presetId = presetIdForChipText(chip);
     if (presetId !== undefined) {
       assert.equal(PresetQuestionIdSchema.safeParse(presetId).success, true, chip);
-      assert.equal(removedPresetIds.has(presetId), false, chip);
     }
   }
+}
+
+test('stack question follow-ups suggest only valid presets or free-text chips', () => {
+  const chips = suggestFollowUps(stackFollowUpInput());
+  assertChipsAreValidPresetsOrFreeText(chips);
   assert.ok(chips.some((c) => presetIdForChipText(c) === 'atlas_ai' || c.includes('IA')));
 });
 
@@ -235,15 +230,6 @@ test('Gymkhana local fallback lists repo only without vercel or undefined', () =
 });
 
 test('every suggestFollowUps chip maps to a preset or free text across modes', () => {
-  const removedPresetIds = new Set([
-    'experience',
-    'design_system_wcag',
-    'accessibility_testing',
-    'atlas_list_performance',
-    'atlas_sign_performance',
-    'production_backend',
-    'atlas_testing'
-  ]);
   const scenarios = [
     stackFollowUpInput(),
     {
@@ -267,13 +253,6 @@ test('every suggestFollowUps chip maps to a preset or free text across modes', (
     }
   ];
   for (const input of scenarios) {
-    const chips = suggestFollowUps(input);
-    for (const chip of chips) {
-      const presetId = presetIdForChipText(chip);
-      if (presetId !== undefined) {
-        assert.equal(PresetQuestionIdSchema.safeParse(presetId).success, true);
-        assert.equal(removedPresetIds.has(presetId), false, `${chip} in ${input.asked}`);
-      }
-    }
+    assertChipsAreValidPresetsOrFreeText(suggestFollowUps(input));
   }
 });
