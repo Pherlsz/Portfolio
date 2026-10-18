@@ -822,10 +822,16 @@
     transition-duration: 200ms;
   }
 
-  .group:hover .sticker-art,
   .group:focus-visible .sticker-art {
     transform: translateY(-3px) rotate(-2deg);
     filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.2)) drop-shadow(0 16px 20px rgb(0 0 0 / 0.22));
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .group:hover .sticker-art {
+      transform: translateY(-3px) rotate(-2deg);
+      filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.2)) drop-shadow(0 16px 20px rgb(0 0 0 / 0.22));
+    }
   }
 
   .sticker-bubble {
@@ -857,33 +863,32 @@
   .sticker-bubble[data-caption-align="center"] {
     left: 50%;
     right: auto;
-    translate: -50% 0.25rem;
+    translate: calc(-50% + var(--caption-clamp-x, 0px)) 0.25rem;
   }
 
   .sticker-bubble[data-caption-align="start"] {
     left: 0;
     right: auto;
-    translate: 0 0.25rem;
+    translate: var(--caption-clamp-x, 0px) 0.25rem;
   }
 
   .sticker-bubble[data-caption-align="end"] {
     left: auto;
     right: 0;
-    translate: 0 0.25rem;
+    translate: var(--caption-clamp-x, 0px) 0.25rem;
   }
 
-  .group:hover .sticker-bubble,
   .group:focus-visible .sticker-bubble,
   .sticker-bubble[data-visible="true"] {
     opacity: 1;
     pointer-events: auto;
-    translate: var(--caption-shift-x, 0) 0;
   }
 
-  .group:hover .sticker-bubble[data-caption-align="center"],
-  .group:focus-visible .sticker-bubble[data-caption-align="center"],
-  .sticker-bubble[data-caption-align="center"][data-visible="true"] {
-    --caption-shift-x: -50%;
+  @media (hover: hover) and (pointer: fine) {
+    .group:hover .sticker-bubble {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 }
 

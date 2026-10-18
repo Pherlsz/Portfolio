@@ -133,7 +133,7 @@ const LID_LAYOUT: Slot[] = [
   { id: 'nextjs', x: 85, y: 76, w: 10, rotate: 6 }
 ];
 
-const DEFAULT_CAPTION_LAYOUT: LidCaptionLayout = { edge: 'above', align: 'center' };
+const DEFAULT_CAPTION_LAYOUT: LidCaptionLayout = { edge: 'above', align: 'center', shiftX: 0 };
 
 interface Reaction {
   text: string;
@@ -267,6 +267,17 @@ function applyAxisConstraints(
   };
 }
 
+/** Pull motion offset so the sticker box sits inside the lid (handles rest slot overflow). */
+function correctionForRoom(space: { left: number; right: number; up: number; down: number }) {
+  let dx = 0;
+  let dy = 0;
+  if (space.left > 0) dx += space.left;
+  if (space.right < 0) dx += space.right;
+  if (space.up > 0) dy += space.up;
+  if (space.down < 0) dy += space.down;
+  return { dx, dy };
+}
+
 function LidSticker({
   slot,
   lidRef,
@@ -319,7 +330,23 @@ function LidSticker({
     dragConstraints.bottom = next.bottom;
   };
 
+  const snapInsideLid = () => {
+    const space = room();
+    if (!space) return;
+    const { dx, dy } = correctionForRoom(space);
+    if (dx === 0 && dy === 0) return;
+    x.set(x.get() + dx);
+    y.set(y.get() + dy);
+    syncDragConstraints();
+  };
+
   const releasePressed = () => setPressed(false);
+
+  useLayoutEffect(() => {
+    const bubble = bubbleRef.current;
+    if (!bubble) return;
+    bubble.style.setProperty('--caption-clamp-x', `${captionLayout.shiftX}px`);
+  }, [captionLayout.shiftX]);
 
   useLayoutEffect(() => {
     if (!pressed && !reaction) return;
@@ -351,15 +378,19 @@ function LidSticker({
     };
   }, [dragControls]);
 
+  useLayoutEffect(() => {
+    snapInsideLid();
+  }, []);
+
   useEffect(() => {
     if (!arrangement) return;
     const target = arrangement.targets?.[slot.id];
     const lid = lidRef.current?.getBoundingClientRect();
     const space = room();
     if (!target || !lid || !space) {
-      animate(x, 0, SPRING);
-      animate(y, 0, SPRING);
-      animate(rotate, slot.rotate, SPRING);
+      void Promise.all([animate(x, 0, SPRING), animate(y, 0, SPRING), animate(rotate, slot.rotate, SPRING)]).then(
+        () => snapInsideLid()
+      );
       return;
     }
     const from = slotCenter(slot, slot.id);
@@ -368,9 +399,11 @@ function LidSticker({
     const deltaX = ((to.x - from.x) / 100) * lid.width;
     const deltaY = ((to.y - from.y) / 100) * lid.height;
     const clamped = applyAxisConstraints(constraints, { x: x.get(), y: y.get() }, deltaX, deltaY);
-    animate(x, clamped.x, SPRING);
-    animate(y, clamped.y, SPRING);
-    animate(rotate, target.rotate, SPRING);
+    void Promise.all([
+      animate(x, clamped.x, SPRING),
+      animate(y, clamped.y, SPRING),
+      animate(rotate, target.rotate, SPRING)
+    ]).then(() => snapInsideLid());
   }, [arrangement]);
 
   const nudge = (event: KeyboardEvent<HTMLButtonElement>) => {

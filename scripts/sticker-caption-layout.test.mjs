@@ -19,3 +19,25 @@ test('resolveLidCaptionLayout flips below when the top is tight', () => {
   );
   assert.equal(layout.edge, 'below');
 });
+
+test('resolveLidCaptionLayout shifts wide pills inside the right edge', () => {
+  const lid = { left: 0, top: 0, right: 360, bottom: 200, width: 360, height: 200, x: 0, y: 0, toJSON: () => '' };
+  const sticker = {
+    left: 320,
+    top: 80,
+    right: 400,
+    bottom: 128,
+    width: 80,
+    height: 48,
+    x: 0,
+    y: 0,
+    toJSON: () => ''
+  };
+  const bubble = { left: 0, top: 0, right: 150, bottom: 28, width: 150, height: 28, x: 0, y: 0, toJSON: () => '' };
+  const layout = resolveLidCaptionLayout(lid, sticker, bubble);
+  const naturalLeft = sticker.right - bubble.width;
+  const clampedLeft = lid.right - bubble.width;
+  assert.equal(layout.align, 'end');
+  assert.equal(layout.shiftX, clampedLeft - naturalLeft);
+  assert.ok(naturalLeft + layout.shiftX + bubble.width <= lid.right + 0.01);
+});
