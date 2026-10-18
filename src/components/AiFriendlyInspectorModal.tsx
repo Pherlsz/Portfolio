@@ -64,7 +64,7 @@ export function AiFriendlyInspectorModal({
     <button
       type="button"
       onClick={() => copy(text)}
-      className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border border-line px-3 text-sm hover:border-ink"
+      className="inline-flex min-h-9 shrink-0 items-center gap-1.5  border border-line px-3 text-sm hover:border-ink"
     >
       {copied ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
       {copied ? 'Copiado' : label}
@@ -79,7 +79,7 @@ export function AiFriendlyInspectorModal({
       onClick={(event) => {
         if (event.target === dialogRef.current) onClose();
       }}
-      className="no-print m-auto max-h-[88dvh] w-[calc(100%-1.5rem)] max-w-4xl flex-col overflow-hidden rounded-[1.75rem] border border-line bg-surface p-0 text-ink shadow-2xl shadow-neutral-950/30 open:flex"
+      className="no-print m-auto max-h-[88dvh] w-[calc(100%-1.5rem)] max-w-4xl flex-col overflow-hidden border border-line bg-surface p-0 text-ink open:flex"
     >
       <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-5">
         <div>
@@ -104,7 +104,7 @@ export function AiFriendlyInspectorModal({
               type="button"
               aria-pressed={tab === id}
               onClick={() => setTab(id)}
-              className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${
+              className={`inline-flex min-h-9 items-center gap-1.5  px-3 text-sm font-semibold ${
                 tab === id ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink'
               }`}
             >
@@ -117,7 +117,7 @@ export function AiFriendlyInspectorModal({
           <button
             type="button"
             onClick={() => download(llmsTxt, 'Pedro_Henrique_Lopes.md', 'text/markdown;charset=utf-8')}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line px-3 text-sm hover:border-ink"
+            className="inline-flex min-h-9 items-center gap-1.5  border border-line px-3 text-sm hover:border-ink"
           >
             <Download className="size-4" aria-hidden="true" />
             Baixar perfil (.md)
@@ -125,7 +125,7 @@ export function AiFriendlyInspectorModal({
           <button
             type="button"
             onClick={() => download(jsonLd, 'Pedro_Henrique_Lopes.json', 'application/json;charset=utf-8')}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line px-3 text-sm hover:border-ink"
+            className="inline-flex min-h-9 items-center gap-1.5  border border-line px-3 text-sm hover:border-ink"
           >
             <Download className="size-4" aria-hidden="true" />
             Baixar JSON-LD
@@ -140,7 +140,7 @@ export function AiFriendlyInspectorModal({
               <p className="text-[0.9375rem] text-ink-soft">Perfil em Markdown servido em /llms.txt para agentes de IA.</p>
               {copyButton(llmsTxt, 'Copiar Markdown')}
             </div>
-            <pre className="overflow-x-auto whitespace-pre-wrap rounded-2xl bg-ink p-5 font-mono text-[0.8125rem] leading-relaxed text-paper">
+            <pre className="overflow-x-auto whitespace-pre-wrap  bg-ink p-5 font-mono text-[0.8125rem] leading-relaxed text-paper">
               {llmsTxt}
             </pre>
           </>
@@ -154,7 +154,7 @@ export function AiFriendlyInspectorModal({
               </p>
               {copyButton(jsonLd, 'Copiar JSON-LD')}
             </div>
-            <pre className="overflow-x-auto rounded-2xl bg-ink p-5 font-mono text-[0.8125rem] leading-relaxed text-paper">
+            <pre className="overflow-x-auto  bg-ink p-5 font-mono text-[0.8125rem] leading-relaxed text-paper">
               {jsonLd}
             </pre>
           </>
@@ -162,7 +162,7 @@ export function AiFriendlyInspectorModal({
 
         {tab === 'guardrails' && (
           <>
-            <div className="space-y-3 rounded-2xl border border-line p-5">
+            <div className="space-y-3  border border-line p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="font-bold">Validação de entrada com Zod</h3>
@@ -172,7 +172,7 @@ export function AiFriendlyInspectorModal({
                   </p>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-sm ${
+                  className={`inline-flex items-center gap-1.5  px-3 py-1 font-mono text-sm ${
                     validation.valid ? 'bg-valid/15 text-valid' : 'bg-invalid/15 text-invalid'
                   }`}
                 >
@@ -190,7 +190,7 @@ export function AiFriendlyInspectorModal({
                     key={sample.label}
                     type="button"
                     onClick={() => setTestInput(sample.input)}
-                    className="min-h-8 rounded-full border border-line px-3 text-sm hover:border-ink"
+                    className="min-h-8  border border-line px-3 text-sm hover:border-ink"
                   >
                     {sample.label}
                   </button>
@@ -205,7 +205,7 @@ export function AiFriendlyInspectorModal({
                 autoComplete="off"
                 value={testInput}
                 onChange={(e) => setTestInput(e.target.value)}
-                className="min-h-11 w-full rounded-full border border-control bg-paper px-4 font-mono text-sm"
+                className="min-h-11 w-full  border border-control bg-paper px-4 font-mono text-sm"
               />
               <p className="font-mono text-sm text-ink-soft" aria-live="polite">
                 {validation.valid ? `Liberado (${validation.sanitized.length} caracteres).` : validation.error}
@@ -219,7 +219,7 @@ export function AiFriendlyInspectorModal({
               </div>
               {copyButton(systemPrompt, 'Copiar prompt')}
             </div>
-            <pre className="overflow-x-auto whitespace-pre-wrap rounded-2xl bg-ink p-5 font-mono text-[0.8125rem] leading-relaxed text-paper">
+            <pre className="overflow-x-auto whitespace-pre-wrap  bg-ink p-5 font-mono text-[0.8125rem] leading-relaxed text-paper">
               {systemPrompt}
             </pre>
           </>

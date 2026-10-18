@@ -29,15 +29,16 @@ export const STICKER_HEIGHT_OVER_WIDTH: Record<LidSlotId, number> = {
   nextjs: 1
 };
 
-/** Posição inicial na tampa, em % da largura (x, w) e da altura (y). */
+/** Initial band slots in % of width (x, w) and height (y). */
+// shortcut: 14% min width so 320px stays 44px; split the row if a sticker clips
 export const LID_LAYOUT: LidSlot[] = [
-  { id: 'morcega', x: 3, y: 12, w: 20, rotate: -5 },
-  { id: 'react', x: 83, y: 14, w: 11, rotate: 10 },
-  { id: 'banguela', x: 4, y: 58, w: 15, rotate: 7 },
-  { id: 'tomada', x: 36, y: 66, w: 22, rotate: 2 },
-  { id: 'd20', x: 64, y: 42, w: 13, rotate: 12 },
-  { id: 'typescript', x: 81, y: 54, w: 11, rotate: -8 },
-  { id: 'nextjs', x: 85, y: 76, w: 10, rotate: 6 }
+  { id: 'morcega', x: 2, y: 8, w: 22, rotate: -5 },
+  { id: 'react', x: 82, y: 6, w: 14, rotate: 10 },
+  { id: 'banguela', x: 3, y: 52, w: 18, rotate: 7 },
+  { id: 'tomada', x: 30, y: 58, w: 22, rotate: 2 },
+  { id: 'd20', x: 56, y: 36, w: 16, rotate: 12 },
+  { id: 'typescript', x: 78, y: 46, w: 14, rotate: -8 },
+  { id: 'nextjs', x: 82, y: 74, w: 14, rotate: 6 }
 ];
 
 /** Arrumar resets every sticker to page-load motion offsets. */

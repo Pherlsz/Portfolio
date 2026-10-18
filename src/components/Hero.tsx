@@ -11,42 +11,49 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
   const { profile } = DEFAULT_PORTFOLIO_DATA;
 
   return (
-    <section
-      id="inicio"
-      aria-labelledby="inicio-titulo"
-      className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 sm:gap-12 sm:px-8 sm:pb-20 sm:pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pb-28"
-    >
-      <div className="notebook-margin">
-        <p className="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-line bg-surface px-3 py-1">
-          <span className="size-2 shrink-0 rounded-full bg-status" aria-hidden="true" />
-          <span>{profile.status}</span>
-          <span className="hidden sm:inline" aria-hidden="true">·</span>
-          <span className="whitespace-nowrap basis-full sm:basis-auto">{profile.location}</span>
-        </p>
+    <section id="inicio" aria-labelledby="inicio-titulo">
+      <div className="name-band">
+        <div className="grid gap-6 px-5 py-6 sm:px-8 sm:py-8 lg:grid-cols-12 lg:items-end lg:gap-4 lg:py-10">
+          <div className="lg:col-span-5">
+            <h1 id="inicio-titulo" className="display-wide text-[clamp(2.1rem,8vw,4.2rem)] leading-[0.92] text-balance">
+              {profile.name.split(' ').map((word) => (
+                <span key={word} className="block">
+                  {word}{' '}
+                </span>
+              ))}
+            </h1>
+          </div>
+          <div className="lg:col-span-7">
+            <Suspense fallback={<div className="sticker-field aspect-[16/10] w-full" />}>
+              <StickerLid />
+            </Suspense>
+          </div>
+        </div>
+      </div>
 
-        <h1
-          id="inicio-titulo"
-          className="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]"
-        >
-          {profile.name.split(' ').map((word) => (
-            <span key={word} className="block">
-              {word}{' '}
-            </span>
-          ))}
-        </h1>
+      <div className="px-5 py-8 sm:px-8 sm:py-12">
+        <dl className="grid grid-cols-2 border-t border-line sm:grid-cols-3">
+          <div className="border-r border-line px-3 py-3 sm:px-4">
+            <dt className="eyebrow">Cargo</dt>
+            <dd className="mt-1 font-semibold leading-snug">{profile.jobTitle}</dd>
+          </div>
+          <div className="px-3 py-3 sm:border-r sm:border-line sm:px-4">
+            <dt className="eyebrow">Lugar</dt>
+            <dd className="mt-1 font-semibold leading-snug">{profile.location}</dd>
+          </div>
+          <div className="col-span-2 border-t border-line px-3 py-3 sm:col-span-1 sm:border-t-0 sm:px-4">
+            <dt className="eyebrow">Estado</dt>
+            <dd className="mt-1 font-semibold leading-snug">{profile.status}</dd>
+          </div>
+        </dl>
 
-        <p className="mt-5 font-mono text-[0.9375rem] text-ink-soft">
-          <span className="block">{profile.jobTitle}</span>
-          <span className="mt-1 block text-muted">React · Next.js · TypeScript</span>
-        </p>
-
-        <p className="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">
+        <p className="mt-8 max-w-xl text-[clamp(1.2rem,2.1vw,1.5rem)] font-semibold leading-snug text-pretty">
           {profile.headline}
         </p>
-        <p className="mt-4 max-w-xl text-ink-soft">
+        <p className="mt-4 max-w-xl text-ink-soft text-pretty">
           <Marked text={profile.summary} />
         </p>
-        <p className="mt-4 max-w-xl text-ink-soft">{profile.trustCopy}</p>
+        <p className="mt-4 max-w-xl text-ink-soft text-pretty">{profile.trustCopy}</p>
 
         <div className="mt-8 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
           <CTA
@@ -60,7 +67,7 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
             Ver CV
           </CTA>
           <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
-          <CTA variant="tertiary" href={`mailto:${profile.email}`} className="self-start sm:self-auto">
+          <CTA variant="tertiary" href={`mailto:${profile.email}`} className="min-h-11 self-start sm:self-auto">
             Falar por e-mail
           </CTA>
         </div>
@@ -86,16 +93,6 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
           </a>
         </div>
       </div>
-
-      <Suspense
-        fallback={
-          <div className="no-print">
-            <div className="notebook relative z-10 aspect-[16/10] w-full" />
-          </div>
-        }
-      >
-        <StickerLid />
-      </Suspense>
     </section>
   );
 }

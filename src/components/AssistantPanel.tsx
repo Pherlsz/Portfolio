@@ -63,7 +63,7 @@ function renderFormattedText(text: string) {
       }
       if (part.startsWith('`') && part.endsWith('`')) {
         return (
-          <code key={pIdx} className="rounded bg-paper px-1.5 py-0.5 font-mono text-[0.8125rem]">
+          <code key={pIdx} className="bg-paper px-1.5 py-0.5 font-mono text-[0.8125rem]">
             {part.slice(1, -1)}
           </code>
         );
@@ -328,7 +328,7 @@ export function AssistantPanel({
     .find((msg) => msg.role === 'model' && msg.id !== 'welcome')?.id;
 
   const tabClass = (active: boolean, compact = false) =>
-    `inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-semibold transition-colors ${
+    `inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap  px-3 text-sm font-semibold transition-colors ${
       compact ? 'short-mobile:min-h-8 short-mobile:gap-1 short-mobile:px-2 short-mobile:text-xs' : ''
     } ${active ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink'}`;
 
@@ -349,11 +349,10 @@ export function AssistantPanel({
           aria-haspopup="dialog"
           aria-expanded={false}
           aria-controls="assistente"
-          className="no-print fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-30 shadow-lg shadow-neutral-950/20"
+          className="no-print fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-30"
           icon={<Sparkles className="size-4" aria-hidden="true" />}
         >
-          <span className="sm:hidden">Perguntar</span>
-          <span className="hidden sm:inline">Pergunte sobre o Pedro</span>
+          Perguntar
         </CTA>
       )}
 
@@ -371,7 +370,7 @@ export function AssistantPanel({
         onClick={(event) => {
           if (event.target === dialogRef.current) onOpenChange(false);
         }}
-        className="no-print fixed inset-x-0 bottom-0 top-auto m-0 h-[86dvh] max-h-none w-full max-w-none flex-col overflow-hidden rounded-t-[1.75rem] border border-line bg-surface p-0 text-ink shadow-2xl shadow-neutral-950/30 open:flex short-mobile:inset-0 short-mobile:top-0 short-mobile:h-dvh short-mobile:rounded-none sm:inset-y-0 sm:left-auto sm:right-0 sm:h-dvh sm:max-w-md sm:rounded-none sm:rounded-l-[1.75rem]"
+        className="no-print fixed inset-x-0 bottom-0 top-auto m-0 h-[86dvh] max-h-none w-full max-w-none flex-col overflow-hidden border border-line bg-surface p-0 text-ink open:flex short-mobile:inset-0 short-mobile:top-0 short-mobile:h-dvh sm:inset-y-0 sm:left-auto sm:right-0 sm:h-dvh sm:max-w-md"
       >
         <h2 id="assistente-titulo" className="sr-only">
           Assistente do portfólio
@@ -408,7 +407,7 @@ export function AssistantPanel({
                 type="button"
                 onClick={clearChat}
                 aria-label="Limpar conversa"
-                className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm text-ink-soft hover:text-ink"
+                className="inline-flex min-h-9 shrink-0 items-center gap-1.5  px-3 text-sm text-ink-soft hover:text-ink"
               >
                 <RotateCcw className="size-4" aria-hidden="true" />
                 Limpar
@@ -437,7 +436,7 @@ export function AssistantPanel({
               type="button"
               onClick={clearChat}
               aria-label="Limpar conversa"
-              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full px-1.5 text-ink-soft hover:text-ink"
+              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center  px-1.5 text-ink-soft hover:text-ink"
             >
               <RotateCcw className="size-3.5" aria-hidden="true" />
             </button>
@@ -460,7 +459,7 @@ export function AssistantPanel({
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div
-                className={`group relative max-w-[90%] rounded-2xl px-4 py-3 text-[0.9375rem] leading-relaxed ${
+                className={`group relative max-w-[90%]  px-4 py-3 text-[0.9375rem] leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-ink text-paper'
                     : 'border border-line bg-paper pr-10 text-ink-soft'
@@ -473,7 +472,7 @@ export function AssistantPanel({
                     type="button"
                     onClick={() => copyMessage(msg.id, msg.text)}
                     aria-label="Copiar resposta"
-                    className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-lg border border-control bg-surface text-muted hover:text-ink"
+                    className="absolute right-2 top-2 inline-flex size-11 items-center justify-center border border-control bg-surface text-muted hover:text-ink"
                   >
                     {copiedId === msg.id ? (
                       <Check className="size-3.5" aria-hidden="true" />
@@ -490,7 +489,7 @@ export function AssistantPanel({
                       key={action.label}
                       type="button"
                       onClick={() => runAction(action)}
-                      className="inline-flex min-h-8 items-center gap-1 rounded-full border border-line px-3 text-sm hover:border-ink"
+                      className="inline-flex min-h-8 items-center gap-1  border border-line px-3 text-sm hover:border-ink"
                     >
                       {action.label}
                       <ArrowUpRight className="size-3.5" aria-hidden="true" />
@@ -506,7 +505,7 @@ export function AssistantPanel({
                       type="button"
                       onClick={() => sendFollowUp(followUp)}
                       disabled={isLoading}
-                      className="inline-flex min-h-8 items-center rounded-full border border-dashed border-control px-3 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
+                      className="inline-flex min-h-8 items-center  border border-dashed border-control px-3 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
                     >
                       {followUp}
                     </button>
@@ -549,7 +548,7 @@ export function AssistantPanel({
                     submitJobFollowUp(e);
                   }}
                   placeholder="Pergunte sobre esta vaga…"
-                  className="min-h-9 w-full rounded-full border border-control bg-paper px-3 text-[0.9375rem] placeholder:text-muted short-mobile:min-h-11 short-mobile:px-2.5 short-mobile:text-sm sm:min-h-11 sm:px-4"
+                  className="min-h-9 w-full  border border-control bg-paper px-3 text-[0.9375rem] placeholder:text-muted short-mobile:min-h-11 short-mobile:px-2.5 short-mobile:text-sm sm:min-h-11 sm:px-4"
                 />
                 <button
                   type="button"
@@ -570,7 +569,7 @@ export function AssistantPanel({
                 aria-expanded={false}
                 aria-label={`Vaga em análise. Editar descrição da vaga: ${jobPreview}`}
                 onClick={expandJobDescription}
-                className="mt-1.5 flex min-h-11 w-full flex-col justify-center rounded-2xl border border-control bg-paper px-3 py-2 text-left outline-none transition-colors hover:border-ink focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-surface short-mobile:mt-1 short-mobile:flex-row short-mobile:items-center short-mobile:gap-1.5 short-mobile:px-2.5 short-mobile:py-2 sm:mt-3 sm:px-4 sm:py-3"
+                className="mt-1.5 flex min-h-11 w-full flex-col justify-center  border border-control bg-paper px-3 py-2 text-left outline-none transition-colors hover:border-ink focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-surface short-mobile:mt-1 short-mobile:flex-row short-mobile:items-center short-mobile:gap-1.5 short-mobile:px-2.5 short-mobile:py-2 sm:mt-3 sm:px-4 sm:py-3"
               >
                 <span className="font-semibold text-ink short-mobile:shrink-0 short-mobile:text-sm">
                   Vaga em análise · Editar
@@ -598,14 +597,14 @@ export function AssistantPanel({
                     collapseJobDescription();
                   }}
                   placeholder="Cole aqui os requisitos da vaga…"
-                  className="mt-2 block max-h-[calc(8lh+2rem)] min-h-[calc(4lh+2rem)] w-full resize-y overflow-y-auto rounded-2xl border border-control bg-paper p-4 text-[0.9375rem] leading-relaxed placeholder:text-muted"
+                  className="mt-2 block max-h-[calc(8lh+2rem)] min-h-[calc(4lh+2rem)] w-full resize-y overflow-y-auto  border border-control bg-paper p-4 text-[0.9375rem] leading-relaxed placeholder:text-muted"
                 />
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                   {activeJob && (
                     <button
                       type="button"
                       onClick={collapseJobDescription}
-                      className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-line px-4 text-sm font-semibold text-ink-soft hover:border-ink hover:text-ink sm:w-auto"
+                      className="inline-flex min-h-11 w-full items-center justify-center  border border-line px-4 text-sm font-semibold text-ink-soft hover:border-ink hover:text-ink sm:w-auto"
                     >
                       Cancelar
                     </button>
@@ -633,7 +632,7 @@ export function AssistantPanel({
                   type="button"
                   onClick={() => send(presetChipText(id), 'chat', { presetId: id })}
                   disabled={isLoading}
-                  className="shrink-0 whitespace-nowrap rounded-full border border-line px-3 py-1.5 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
+                  className="shrink-0 whitespace-nowrap  border border-line px-3 py-1.5 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
                 >
                   {presetChipText(id)}
                 </button>
@@ -653,7 +652,7 @@ export function AssistantPanel({
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Pergunte sobre experiência, stack ou projetos…"
-                className="min-h-11 w-full rounded-full border border-control bg-paper px-4 text-[0.9375rem] placeholder:text-muted"
+                className="min-h-11 w-full  border border-control bg-paper px-4 text-[0.9375rem] placeholder:text-muted"
               />
               <button
                 type="submit"

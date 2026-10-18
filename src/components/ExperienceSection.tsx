@@ -17,9 +17,9 @@ function ExperienceItem({ experience }: { experience: Experience }) {
 
   return (
     <li className="grid gap-5 border-t border-line pt-8 lg:grid-cols-[13rem_1fr] lg:gap-10">
-      <div className="eyebrow space-y-1">
-        <p className="font-semibold text-ink">{formatPeriod(span.start, span.end)}</p>
-        <p>{formatDuration(span.start, span.end)}</p>
+      <div className="space-y-1 text-sm text-muted">
+        <p className="font-mono font-semibold text-ink">{formatPeriod(span.start, span.end)}</p>
+        <p className="font-mono">{formatDuration(span.start, span.end)}</p>
         <p>{experience.location}</p>
       </div>
 
@@ -28,20 +28,20 @@ function ExperienceItem({ experience }: { experience: Experience }) {
         open={open}
         onToggle={(event) => setOpen(event.currentTarget.open)}
       >
-        <summary className="flex cursor-pointer list-none items-start justify-between gap-4 rounded-xl outline-offset-4 [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-start justify-between gap-4 outline-offset-4 [&::-webkit-details-marker]:hidden">
           <div>
             <h3 className="display text-2xl sm:text-3xl">{experience.company}</h3>
             <ul className="mt-3 space-y-1">
               {experience.roles.map((role) => (
                 <li key={role.title} className="flex flex-wrap items-baseline gap-x-3">
                   <span className="font-semibold">{role.title}</span>
-                  <span className="eyebrow">{formatPeriod(role.start, role.end)}</span>
+                  <span className="font-mono text-sm text-muted">{formatPeriod(role.start, role.end)}</span>
                 </li>
               ))}
             </ul>
             <p className="mt-4 max-w-2xl text-ink-soft">{experience.summary}</p>
           </div>
-          <span className="experience-chevron mt-1 inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-line">
+          <span className="experience-chevron mt-1 inline-flex size-11 shrink-0 items-center justify-center border border-line">
             <ChevronDown className="size-4" aria-hidden="true" />
             <span className="sr-only">Ver ou ocultar detalhes de {experience.company}</span>
           </span>
@@ -49,9 +49,9 @@ function ExperienceItem({ experience }: { experience: Experience }) {
 
         <div className="mt-2">
           {metrics.length > 0 && (
-            <ul className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="mt-6 grid border-t border-line sm:grid-cols-2 xl:grid-cols-3">
               {metrics.map((h) => (
-                <li key={h.metric} className="rounded-2xl border border-line bg-surface p-5">
+                <li key={h.metric} className="border-b border-line px-0 py-4 sm:border-r sm:px-4 xl:last:border-r-0">
                   <p className="display text-xl">
                     <mark>{h.metric}</mark>
                   </p>

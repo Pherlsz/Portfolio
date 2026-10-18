@@ -432,7 +432,7 @@ function LidSticker({
       data-pressed={pressed ? 'true' : undefined}
       data-holo={holoActive ? 'true' : undefined}
       data-holo-state={holoActive ? 'idle' : undefined}
-      className="group pointer-events-auto absolute cursor-grab touch-none active:cursor-grabbing"
+      className="group pointer-events-auto absolute min-h-11 min-w-11 cursor-grab touch-none active:cursor-grabbing"
       style={{
         x,
         y,
@@ -481,10 +481,10 @@ export function StickerLid() {
   return (
     <MotionConfig reducedMotion="user">
     <div className="no-print">
-      <div className="notebook relative z-10 aspect-[16/10] w-full">
+      <div className="sticker-field relative z-10 aspect-[16/10] w-full">
         <div ref={lidRef} className="lid absolute inset-0">
           <ul
-            aria-label="Stickers colados na tampa do notebook"
+            aria-label="Stickers na faixa do nome"
             data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
           >
             {LID_LAYOUT.map((slot) => (
@@ -508,11 +508,11 @@ export function StickerLid() {
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <p id="tampa-ajuda" className="eyebrow">
+        <p id="tampa-ajuda" className="eyebrow text-on-band">
           Arraste os stickers ou use as setas. Clique no D20 para rolar.
         </p>
         <div className="flex gap-2">
-          <button type="button" onClick={shuffle} className="btn btn-ghost min-h-9 px-4 text-sm">
+          <button type="button" onClick={shuffle} className="btn btn-ghost min-h-11 border-on-band px-4 text-sm text-on-band">
             Embaralhar
           </button>
           <button
@@ -521,7 +521,7 @@ export function StickerLid() {
               setArrangement(createArrumarArrangement(Date.now()));
               setAnnouncement('Stickers no lugar original.');
             }}
-            className="btn btn-ghost min-h-9 px-4 text-sm"
+            className="btn btn-ghost min-h-11 border-on-band px-4 text-sm text-on-band"
           >
             Arrumar
           </button>

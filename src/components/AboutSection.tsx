@@ -30,7 +30,7 @@ export function AboutSection() {
           {interests.map((interest) => {
             const Icon = INTEREST_ICONS[interest.id];
             return (
-              <li key={interest.id} className="flex gap-4 rounded-2xl border border-line bg-surface p-5">
+              <li key={interest.id} className="flex gap-4 border-t border-line pt-4">
                 {Icon && <Icon className="mt-1 size-5 shrink-0" aria-hidden="true" />}
                 <div>
                   <h3 className="font-bold">{interest.title}</h3>
@@ -46,7 +46,7 @@ export function AboutSection() {
       <p className="mt-2 text-ink-soft">Clique em cada um para ver a reação.</p>
       <ul className="mt-8 grid gap-6 sm:grid-cols-3">
         {pets.map((pet) => (
-          <li key={pet.id} className="rounded-[1.75rem] border border-line bg-surface p-6 text-center">
+          <li key={pet.id} className="border-t border-line pt-5 text-center">
             <StaticSticker id={pet.id as StickerId} className="mx-auto w-full max-w-36 sm:max-w-40" />
             <h4 className="display mt-5 text-xl">{pet.name}</h4>
             <p className="mt-2 text-[0.9375rem] text-ink-soft">{pet.bio}</p>

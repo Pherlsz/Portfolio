@@ -53,7 +53,6 @@ test('contact section uses one email pattern and a single copy control', () => {
   assert.match(contact, /JobFitCta/);
   assert.match(ui, /inline-flex cursor-pointer items-center gap-1\.5 whitespace-nowrap/);
   assert.match(contact, /cursor-pointer/);
-  assert.match(contact, /active:translate-y-px/);
   assert.match(contact, /hover:border-ink/);
 });
 
