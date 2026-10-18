@@ -58,5 +58,12 @@ test('stickers stop drag on lost pointer capture', () => {
 
 test('stickers use numeric drag constraints from room()', () => {
   assert.match(stickersSrc, /roomToDragConstraints/);
+  assert.match(stickersSrc, /x\.get\(\)/);
   assert.doesNotMatch(stickersSrc, /dragConstraints=\{lidRef\}/);
+  assert.doesNotMatch(stickersSrc, /setDragConstraints/);
+});
+
+test('lid captions use pressed state on touch', () => {
+  assert.match(stickersSrc, /data-pressed/);
+  assert.match(stickersSrc, /resolveLidCaptionLayout/);
 });

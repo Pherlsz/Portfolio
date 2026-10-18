@@ -806,6 +806,10 @@
     transform: rotate(180deg);
   }
 
+  .lid li:has([data-pressed="true"]) {
+    z-index: 40;
+  }
+
   .lid li:hover,
   .lid li:has(:focus-visible),
   .lid li:has(:active) {
@@ -827,9 +831,7 @@
   .sticker-bubble {
     pointer-events: none;
     position: absolute;
-    left: 50%;
-    bottom: calc(100% + 0.25rem);
-    translate: -50% 0.25rem;
+    z-index: 2;
     white-space: nowrap;
     border-radius: 9999px;
     background-color: var(--ink);
@@ -842,94 +844,45 @@
     transition-duration: 150ms;
   }
 
+  .sticker-bubble[data-caption-edge="above"] {
+    bottom: calc(100% + 0.25rem);
+    top: auto;
+  }
+
+  .sticker-bubble[data-caption-edge="below"] {
+    top: calc(100% + 0.25rem);
+    bottom: auto;
+  }
+
+  .sticker-bubble[data-caption-align="center"] {
+    left: 50%;
+    right: auto;
+    translate: -50% 0.25rem;
+  }
+
+  .sticker-bubble[data-caption-align="start"] {
+    left: 0;
+    right: auto;
+    translate: 0 0.25rem;
+  }
+
+  .sticker-bubble[data-caption-align="end"] {
+    left: auto;
+    right: 0;
+    translate: 0 0.25rem;
+  }
+
   .group:hover .sticker-bubble,
   .group:focus-visible .sticker-bubble,
   .sticker-bubble[data-visible="true"] {
     opacity: 1;
-    translate: -50% 0;
+    translate: var(--caption-shift-x, 0) 0;
   }
 
-  @media (pointer: coarse) {
-    .sticker-bubble[data-caption-edge="below"] {
-      bottom: auto;
-      top: calc(100% + 0.25rem);
-      translate: -50% 0.25rem;
-    }
-
-    .sticker-bubble[data-caption-edge="above"] {
-      top: auto;
-      bottom: calc(100% + 0.25rem);
-      translate: -50% 0.25rem;
-    }
-
-    .sticker-bubble[data-caption-align="start"] {
-      left: 0;
-      right: auto;
-      translate: 0 0.25rem;
-    }
-
-    .sticker-bubble[data-caption-align="end"] {
-      left: auto;
-      right: 0;
-      translate: 0 0.25rem;
-    }
-
-    .sticker-bubble[data-caption-side="end"] {
-      left: 100%;
-      right: auto;
-      top: 50%;
-      bottom: auto;
-      margin-left: 0.25rem;
-      translate: 0 calc(-50% + 0.25rem);
-    }
-
-    .sticker-bubble[data-caption-side="start"] {
-      right: 100%;
-      left: auto;
-      top: 50%;
-      bottom: auto;
-      margin-right: 0.25rem;
-      translate: 0 calc(-50% + 0.25rem);
-    }
-
-    .lid button[data-sticker-id="morcega"] .sticker-bubble,
-    .lid button[data-sticker-id="banguela"] .sticker-bubble,
-    .lid button[data-sticker-id="tomada"] .sticker-bubble {
-      opacity: 1;
-    }
-
-    .group:hover .sticker-bubble[data-caption-align="end"],
-    .group:focus-visible .sticker-bubble[data-caption-align="end"],
-    .sticker-bubble[data-caption-align="end"][data-visible="true"] {
-      translate: 0 0;
-    }
-
-    .lid button[data-sticker-id="morcega"] .sticker-bubble[data-caption-side="end"],
-    .lid button[data-sticker-id="tomada"] .sticker-bubble[data-caption-side="end"] {
-      translate: 0 -50%;
-    }
-
-    .lid button[data-sticker-id="banguela"] .sticker-bubble[data-caption-edge="below"][data-caption-align="start"] {
-      translate: 0 0;
-    }
-
-    .group:hover .sticker-bubble[data-caption-edge="below"][data-caption-align="start"],
-    .group:focus-visible .sticker-bubble[data-caption-edge="below"][data-caption-align="start"],
-    .sticker-bubble[data-caption-edge="below"][data-caption-align="start"][data-visible="true"] {
-      translate: 0 0;
-    }
-
-    .group:hover .sticker-bubble[data-caption-side="end"],
-    .group:focus-visible .sticker-bubble[data-caption-side="end"],
-    .sticker-bubble[data-caption-side="end"][data-visible="true"] {
-      translate: 0 -50%;
-    }
-
-    .group:hover .sticker-bubble[data-caption-side="start"],
-    .group:focus-visible .sticker-bubble[data-caption-side="start"],
-    .sticker-bubble[data-caption-side="start"][data-visible="true"] {
-      translate: 0 -50%;
-    }
+  .group:hover .sticker-bubble[data-caption-align="center"],
+  .group:focus-visible .sticker-bubble[data-caption-align="center"],
+  .sticker-bubble[data-caption-align="center"][data-visible="true"] {
+    --caption-shift-x: -50%;
   }
 }
 

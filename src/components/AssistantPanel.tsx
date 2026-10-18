@@ -434,7 +434,7 @@ export function AssistantPanel({
               type="button"
               onClick={clearChat}
               aria-label="Limpar conversa"
-              className="inline-flex min-h-8 shrink-0 items-center rounded-full px-1.5 text-ink-soft hover:text-ink"
+              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full px-1.5 text-ink-soft hover:text-ink"
             >
               <RotateCcw className="size-3.5" aria-hidden="true" />
             </button>

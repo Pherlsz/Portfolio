@@ -12,6 +12,11 @@ export type AxisDragConstraints = {
   bottom: number;
 };
 
+export type MotionOffset = {
+  x: number;
+  y: number;
+};
+
 export const ZERO_DRAG_CONSTRAINTS: AxisDragConstraints = {
   left: 0,
   right: 0,
@@ -19,12 +24,12 @@ export const ZERO_DRAG_CONSTRAINTS: AxisDragConstraints = {
   bottom: 0
 };
 
-/** Motion dragConstraints object from the lid `room()` offsets at drag start. */
-export function roomToDragConstraints(space: RoomSpace): AxisDragConstraints {
+/** Motion dragConstraints min/max for x/y, relative to the current motion offset. */
+export function roomToDragConstraints(space: RoomSpace, offset: MotionOffset): AxisDragConstraints {
   return {
-    left: space.left,
-    right: space.right,
-    top: space.up,
-    bottom: space.down
+    left: offset.x + space.left,
+    right: offset.x + space.right,
+    top: offset.y + space.up,
+    bottom: offset.y + space.down
   };
 }
