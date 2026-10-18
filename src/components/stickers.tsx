@@ -331,12 +331,14 @@ function LidSticker({
   };
 
   const snapInsideLid = () => {
-    const space = room();
-    if (!space) return;
-    const { dx, dy } = correctionForRoom(space);
-    if (dx === 0 && dy === 0) return;
-    x.set(x.get() + dx);
-    y.set(y.get() + dy);
+    for (let pass = 0; pass < 6; pass += 1) {
+      const space = room();
+      if (!space) return;
+      const { dx, dy } = correctionForRoom(space);
+      if (dx === 0 && dy === 0) break;
+      x.set(x.get() + dx);
+      y.set(y.get() + dy);
+    }
     syncDragConstraints();
   };
 
