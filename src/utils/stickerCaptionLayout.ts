@@ -28,7 +28,8 @@ const LID_CAT_SLOTS: Record<LidCatId, StickerSlot> = {
 /** Fixed coarse-pointer caption layout for lid cats (avoids vertical stack collisions). */
 const LID_CAT_CAPTION_PLACEMENT: Record<LidCatId, StickerCaptionPlacement> = {
   morcega: { mode: 'beside', side: 'end' },
-  banguela: { mode: 'beside', side: 'end' },
+  /** Below art on the left — clear of Morcega (beside) and Tomada's tail (beside end). */
+  banguela: { mode: 'stack', edge: 'below', align: 'start' },
   tomada: { mode: 'beside', side: 'end' }
 };
 

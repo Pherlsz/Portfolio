@@ -7,7 +7,7 @@ import {
 
 test('lid cat captions use non-overlapping coarse layout', () => {
   assert.deepEqual(lidCatCaptionPlacement('morcega'), { mode: 'beside', side: 'end' });
-  assert.deepEqual(lidCatCaptionPlacement('banguela'), { mode: 'beside', side: 'end' });
+  assert.deepEqual(lidCatCaptionPlacement('banguela'), { mode: 'stack', edge: 'below', align: 'start' });
   assert.deepEqual(lidCatCaptionPlacement('tomada'), { mode: 'beside', side: 'end' });
 });
 

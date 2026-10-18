@@ -905,9 +905,18 @@
     }
 
     .lid button[data-sticker-id="morcega"] .sticker-bubble[data-caption-side="end"],
-    .lid button[data-sticker-id="banguela"] .sticker-bubble[data-caption-side="end"],
     .lid button[data-sticker-id="tomada"] .sticker-bubble[data-caption-side="end"] {
       translate: 0 -50%;
+    }
+
+    .lid button[data-sticker-id="banguela"] .sticker-bubble[data-caption-edge="below"][data-caption-align="start"] {
+      translate: 0 0;
+    }
+
+    .group:hover .sticker-bubble[data-caption-edge="below"][data-caption-align="start"],
+    .group:focus-visible .sticker-bubble[data-caption-edge="below"][data-caption-align="start"],
+    .sticker-bubble[data-caption-edge="below"][data-caption-align="start"][data-visible="true"] {
+      translate: 0 0;
     }
 
     .group:hover .sticker-bubble[data-caption-side="end"],
