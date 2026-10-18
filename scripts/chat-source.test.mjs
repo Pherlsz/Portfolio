@@ -85,6 +85,9 @@ test('every preset id has a non-empty distinct fallback', () => {
     assert.equal(seen.has(answer), false, `duplicate fallback for ${preset.id}`);
     seen.add(answer);
   }
+  const design = buildPresetFallback('design_system_wcag');
+  assert.doesNotMatch(design, /10\.000\+ usuários/i);
+  assert.doesNotMatch(design, /5\.000\+ registros/i);
 });
 
 test('preset chip uses dedicated fallback when AI is unavailable', async () => {

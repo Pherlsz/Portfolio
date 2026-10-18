@@ -15,7 +15,7 @@ import {
   truncateJobDescriptionPreview
 } from '../utils/jobDescriptionDisclosure';
 import { ChatResponseSchema, type ChatSource } from '../utils/chatResponseSchema';
-import { PRESET_QUESTIONS } from '../utils/presetQuestions';
+import { presetChipText, presetIdForChipText, SUGGESTED_PRESET_IDS } from '../utils/presetQuestions';
 import { AiReplyBadge } from './AiReplyBadge';
 
 export interface ChatAction {
@@ -246,7 +246,10 @@ export function AssistantPanel({
           message: check.sanitized,
           history,
           ...(opts?.job ? { job: opts.job } : {}),
-          ...(opts?.presetId ? { presetId: opts.presetId } : {})
+          ...(() => {
+            const presetId = opts?.presetId ?? presetIdForChipText(check.sanitized);
+            return presetId ? { presetId } : {};
+          })()
         })
       });
       const raw: unknown = await response.json();
@@ -622,15 +625,15 @@ export function AssistantPanel({
           <div className="shrink-0 border-t border-line p-4">
             {messages.length <= 1 && (
             <div className="flex gap-1.5 overflow-x-auto pb-3 [scrollbar-width:none]">
-              {PRESET_QUESTIONS.map((q) => (
+              {SUGGESTED_PRESET_IDS.map((id) => (
                 <button
-                  key={q.id}
+                  key={id}
                   type="button"
-                  onClick={() => send(q.text, 'chat', { presetId: q.id })}
+                  onClick={() => send(presetChipText(id), 'chat', { presetId: id })}
                   disabled={isLoading}
                   className="shrink-0 whitespace-nowrap rounded-full border border-line px-3 py-1.5 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
                 >
-                  {q.text}
+                  {presetChipText(id)}
                 </button>
               ))}
             </div>

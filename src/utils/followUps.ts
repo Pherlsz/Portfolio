@@ -1,5 +1,6 @@
 import type { PortfolioData } from '../data/portfolioData.ts';
 import { mentionsPersonalProject, type ChatMode } from './chatGuardrails.ts';
+import { presetChipText } from './presetQuestions.ts';
 
 function fold(text: string): string {
   return text
@@ -56,7 +57,10 @@ export function suggestFollowUps(input: {
     if (/hibrid/.test(fromJd) && !/porto alegre/.test(fromJd)) {
       chips.push('O híbrido é em Porto Alegre?');
     }
-    if (/llm|function calling|tool calling|inteligencia artificial/.test(fromJd) || /(?:^|[^a-z0-9+#])ia(?:[^a-z0-9+#]|$)/.test(fromJd)) {
+    if (
+      /llm|function calling|tool calling|inteligencia artificial/.test(fromJd) ||
+      /(?:^|[^a-z0-9+#])ia(?:[^a-z0-9+#]|$)/.test(fromJd)
+    ) {
       chips.push('A IA é function calling em fluxo real?');
     }
     if (isFollowUp) {
@@ -70,15 +74,23 @@ export function suggestFollowUps(input: {
   if (mentionsPersonalProject(asked, data) || /\bprojet/.test(q)) {
     chips.push('Qual a stack desse projeto?', 'Ele usa isso em produção?');
   } else if (/wcag|acessib|design system/.test(combined)) {
-    chips.push('Como testavam acessibilidade?', 'E a performance das listas na Atlas?');
+    chips.push(presetChipText('accessibility_testing'), presetChipText('atlas_list_performance'));
   } else if (/atlas|sign|plg|experi|carreira|trabalh/.test(combined)) {
-    chips.push('Como ficou o design system e a WCAG?', 'Como mediam performance no Atlas Sign?', 'O que ele fez com IA na Atlas?');
+    chips.push(
+      presetChipText('design_system_wcag'),
+      presetChipText('atlas_sign_performance'),
+      presetChipText('atlas_ai')
+    );
   } else if (/stack|tecnolog|skill/.test(combined)) {
-    chips.push('Qual o backend em produção?', 'E testes na Atlas?');
+    chips.push(presetChipText('production_backend'), presetChipText('atlas_testing'));
   } else if (/salar|remoto|hibrid|senioridade|pleno|pretens/.test(combined)) {
-    chips.push('Quer comparar o perfil com uma vaga?');
+    chips.push(presetChipText('compare_job_fit'));
   }
 
-  chips.push('Qual a principal experiência dele?', 'Resumo rápido para recrutador', 'Como ficou o design system e a WCAG?');
+  chips.push(
+    presetChipText('experience'),
+    presetChipText('recruiter_summary'),
+    presetChipText('design_system_wcag')
+  );
   return pick(...chips);
 }
