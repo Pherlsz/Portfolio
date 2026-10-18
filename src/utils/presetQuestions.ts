@@ -99,7 +99,7 @@ export function buildPresetFallback(id: PresetQuestionId, data: PortfolioData = 
       return `**Testes na ${atlas.company}**\n- Fluxos críticos de assinatura eletrônica (Atlas Sign, 10.000+ usuários) cobertos com **Vitest** e **React Testing Library**, com Error Boundaries na navegação.`;
     }
     case 'compare_job_fit': {
-      return `Use o modo **Fit com vaga** neste assistente: cole o anúncio e a análise compara os requisitos com a experiência do Pedro em produção.\n\nSenioridade: ${profile.seniority} · Formato: ${profile.workMode.toLowerCase()} · Pretensão: ${profile.salary.toLowerCase()}.`;
+      return `Use o modo **Fit com vaga** neste assistente: cole o anúncio e a análise compara os requisitos com a experiência do Pedro em produção.\n\nSenioridade: ${profile.seniority} · Formato: ${profile.workMode} · Pretensão: ${profile.salary}.`;
     }
   }
 }
