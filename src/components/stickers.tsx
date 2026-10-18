@@ -12,6 +12,7 @@ import { useStickerHoloPointer } from '../utils/holoPointer';
 import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
 import {
   createArrumarArrangement,
+  LID_ASPECT,
   LID_LAYOUT,
   type LidSlot
 } from '../utils/lidStickerSlots';
@@ -238,7 +239,7 @@ const SPRING = { type: 'spring', stiffness: 260, damping: 24 } as const;
 /** Centro do sticker no slot, em % da tampa. */
 function slotCenter(slot: Slot, id: StickerId) {
   const def = STICKERS[id];
-  const height = slot.w * (16 / 10) * (def.height / def.width);
+  const height = slot.w * LID_ASPECT * (def.height / def.width);
   return { x: slot.x + slot.w / 2, y: slot.y + height / 2 };
 }
 

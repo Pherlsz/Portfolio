@@ -865,6 +865,11 @@
     }
   }
 
+  .sticker-bubble[data-visible="true"] {
+    opacity: 1;
+    translate: -50% 0;
+  }
+
   @media (pointer: coarse) {
     .sticker-bubble {
       left: auto;
@@ -904,10 +909,6 @@
     .group:focus-visible .sticker-bubble {
       opacity: 0;
       translate: var(--caption-clamp-x, 0px) 0.25rem;
-    }
-
-    .sticker-bubble[data-visible="true"] {
-      opacity: 1;
     }
 
     .sticker-bubble[data-caption-align="center"][data-visible="true"] {
