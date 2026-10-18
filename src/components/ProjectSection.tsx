@@ -65,13 +65,6 @@ function FeaturedProjectLinkRow({ project }: { project: FeaturedProject }) {
 export function ProjectSection() {
   const { featuredProjects, project } = DEFAULT_PORTFOLIO_DATA;
   const featured = featuredProjects[0];
-  const demoBothLinks =
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('projectLinks') === 'both' &&
-    featured;
-  const featuredForLinks = demoBothLinks
-    ? { ...featured, href: 'https://pherls.dev' }
-    : featured;
 
   return (
     <section
@@ -112,7 +105,7 @@ export function ProjectSection() {
                     </span>
                   ))}
                 </div>
-                <FeaturedProjectLinkRow project={featuredForLinks ?? featured} />
+                <FeaturedProjectLinkRow project={featured} />
               </div>
             </div>
           </article>
