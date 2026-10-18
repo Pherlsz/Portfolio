@@ -876,6 +876,7 @@
   .group:focus-visible .sticker-bubble,
   .sticker-bubble[data-visible="true"] {
     opacity: 1;
+    pointer-events: auto;
     translate: var(--caption-shift-x, 0) 0;
   }
 
