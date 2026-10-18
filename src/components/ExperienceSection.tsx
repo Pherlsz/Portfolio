@@ -49,16 +49,16 @@ function ExperienceItem({ experience }: { experience: Experience }) {
 
         <div className="mt-2">
           {metrics.length > 0 && (
-            <ul className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {metrics.map((h) => (
-                <li key={h.metric} className="rounded-2xl border border-line bg-surface p-5">
-                  <p className="display text-xl">
-                    <mark>{h.metric}</mark>
-                  </p>
-                  <p className="mt-2 text-[0.9375rem] text-ink-soft">{h.text}</p>
-                </li>
+            <p className="experience-metrics">
+              {metrics.map((h, index) => (
+                <span key={h.metric}>
+                  {index > 0 ? '; ' : ''}
+                  <mark>{h.metric}</mark>
+                  {' — '}
+                  {h.text}
+                </span>
               ))}
-            </ul>
+            </p>
           )}
 
           {notes.length > 0 && (

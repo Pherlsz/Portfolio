@@ -29,11 +29,13 @@ test('CTA component declares primary, secondary and tertiary variants', () => {
   assert.match(cssSource, /\.cta-tertiary/);
 });
 
-test('Hero uses CTA hierarchy without ad-hoc btn-primary', () => {
-  assert.match(heroSource, /variant="primary"/);
-  assert.match(heroSource, /JobFitCta/);
-  assert.match(heroSource, /variant="tertiary"/);
+test('Hero index opens CV dialog and links to sections without pill CTAs', () => {
+  assert.match(heroSource, /onOpenCv/);
+  assert.match(heroSource, /aria-haspopup="dialog"/);
+  assert.match(heroSource, /#projeto/);
+  assert.match(heroSource, /#contato/);
   assert.doesNotMatch(heroSource, /btn-primary/);
+  assert.doesNotMatch(heroSource, /variant="primary"/);
 });
 
 test('indexable contato shell includes trustCopy', () => {
@@ -49,21 +51,19 @@ test('contact section uses one email pattern and a single copy control', () => {
   assert.match(contact, /mailto:\$\{profile\.email\}/);
   assert.match(contact, /CopyEmailButton/);
   assert.match(contact, /label="Copiar e-mail"/);
-  assert.match(contact, /variant="primary"/);
   assert.match(contact, /JobFitCta/);
   assert.match(ui, /inline-flex cursor-pointer items-center gap-1\.5 whitespace-nowrap/);
   assert.match(contact, /cursor-pointer/);
   assert.match(contact, /active:translate-y-px/);
-  assert.match(contact, /hover:border-ink/);
+  assert.match(contact, /text-link/);
 });
 
-test('section anchors clear the sticky header and the spy watches every nav target', () => {
+test('section anchors clear the sticky header and header lists every nav target', () => {
   const header = readFileSync(new URL('../src/components/SiteHeader.tsx', import.meta.url), 'utf8');
   const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
   assert.match(cssSource, /scroll-padding-top:\s*4\.25rem/);
   assert.match(cssSource, /\.d20-face[\s\S]*z-index:\s*2/);
   assert.match(cssSource, /\.d20-face[\s\S]*top:\s*52%/);
-  assert.match(header, /new IntersectionObserver/);
   assert.doesNotMatch(app, /scroll-mt-20/);
   for (const id of ['experiencia', 'projeto', 'formacao', 'sobre', 'contato']) {
     assert.match(header, new RegExp(`id: '${id}'`));
@@ -96,9 +96,10 @@ test('CV buttons open a preview dialog and the PDF download stays inside it', ()
   assert.match(cssSource, /cursor:\s*pointer/);
 });
 
-test('sticky header does not use solid primary CV button', () => {
+test('sticky header uses text links for CV and assistant', () => {
   assert.doesNotMatch(headerSource, /btn-primary/);
-  assert.match(headerSource, /variant="tertiary"/);
+  assert.match(headerSource, /text-link/);
+  assert.match(headerSource, /onOpenCv/);
 });
 
 test('profile marketing copy avoids senior self-declaration', () => {

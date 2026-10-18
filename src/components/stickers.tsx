@@ -457,10 +457,19 @@ function LidSticker({
   );
 }
 
-export function StickerLid() {
+/** Compact row layout (% of a shallow tray). LID_LAYOUT stays the source of truth for Arrumar. */
+const ROW_LAYOUT: LidSlot[] = [
+  { id: 'morcega', x: 1, y: 18, w: 22, rotate: -4 },
+  { id: 'banguela', x: 25, y: 14, w: 20, rotate: 6 },
+  { id: 'tomada', x: 47, y: 16, w: 22, rotate: 2 },
+  { id: 'd20', x: 72, y: 8, w: 20, rotate: 10 }
+];
+
+export function StickerLid({ variant = 'lid' }: { variant?: 'lid' | 'row' }) {
   const lidRef = useRef<HTMLDivElement>(null);
   const holo = useHoloRoulette();
-  const [order, setOrder] = useState<StickerId[]>(() => LID_LAYOUT.map((slot) => slot.id));
+  const displaySlots = variant === 'row' ? ROW_LAYOUT : LID_LAYOUT;
+  const [order, setOrder] = useState<StickerId[]>(() => displaySlots.map((slot) => slot.id));
   const [arrangement, setArrangement] = useState<Arrangement>(null);
   const [announcement, setAnnouncement] = useState('');
 
@@ -468,70 +477,94 @@ export function StickerLid() {
     setOrder((prev) => (prev[prev.length - 1] === id ? prev : [...prev.filter((i) => i !== id), id]));
 
   const shuffle = () => {
-    const slots = [...LID_LAYOUT];
+    const slots = [...displaySlots];
     for (let i = slots.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [slots[i], slots[j]] = [slots[j], slots[i]];
     }
-    const targets = Object.fromEntries(LID_LAYOUT.map((slot, i) => [slot.id, slots[i]])) as Record<StickerId, Slot>;
+    const targets = Object.fromEntries(
+      displaySlots.map((slot, i) => [slot.id, slots[i]])
+    ) as Record<StickerId, Slot>;
     setArrangement({ key: Date.now(), targets });
     setAnnouncement('Stickers embaralhados. Use Tab e as setas para mover cada um.');
   };
 
+  const trayClass =
+    variant === 'row'
+      ? 'sticker-row-tray relative z-10 aspect-[4/1] w-full max-w-lg'
+      : 'notebook relative z-10 aspect-[16/10] w-full';
+
   return (
     <MotionConfig reducedMotion="user">
-    <div className="no-print">
-      <div className="notebook relative z-10 aspect-[16/10] w-full">
-        <div ref={lidRef} className="lid absolute inset-0">
-          <ul
-            aria-label="Stickers colados na tampa do notebook"
-            data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
-          >
-            {LID_LAYOUT.map((slot) => (
-              <li
-                key={slot.id}
-                className="pointer-events-none absolute inset-0"
-                style={{ zIndex: order.indexOf(slot.id) + 1 }}
+      <div className="no-print">
+        <div className={trayClass}>
+          <div ref={lidRef} className="lid absolute inset-0">
+            <ul
+              aria-label={
+                variant === 'row'
+                  ? 'Stickers das gatas e do D20'
+                  : 'Stickers colados na tampa do notebook'
+              }
+              data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
+            >
+              {displaySlots.map((slot) => (
+                <li
+                  key={slot.id}
+                  className="pointer-events-none absolute inset-0"
+                  style={{ zIndex: order.indexOf(slot.id) + 1 }}
+                >
+                  <LidSticker
+                    slot={slot}
+                    lidRef={lidRef}
+                    arrangement={arrangement}
+                    holoActive={isStickerHoloActive(holo, slot.id)}
+                    onFront={() => bringToFront(slot.id)}
+                    onReact={setAnnouncement}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <p id="tampa-ajuda" className="eyebrow max-w-md">
+            Arraste os stickers ou use as setas. Clique no D20 para rolar.
+          </p>
+          {variant === 'lid' ? (
+            <div className="flex gap-2">
+              <button type="button" onClick={shuffle} className="text-link min-h-11 px-1 text-sm">
+                Embaralhar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setArrangement(createArrumarArrangement(Date.now()));
+                  setAnnouncement('Stickers no lugar original.');
+                }}
+                className="text-link min-h-11 px-1 text-sm"
               >
-                <LidSticker
-                  slot={slot}
-                  lidRef={lidRef}
-                  arrangement={arrangement}
-                  holoActive={isStickerHoloActive(holo, slot.id)}
-                  onFront={() => bringToFront(slot.id)}
-                  onReact={setAnnouncement}
-                />
-              </li>
-            ))}
-          </ul>
+                Arrumar
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setArrangement(createArrumarArrangement(Date.now()));
+                setAnnouncement('Stickers no lugar original.');
+              }}
+              className="text-link min-h-11 px-1 text-sm"
+            >
+              Arrumar
+            </button>
+          )}
         </div>
-      </div>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <p id="tampa-ajuda" className="eyebrow">
-          Arraste os stickers ou use as setas. Clique no D20 para rolar.
+        <p className="sr-only" aria-live="polite">
+          {announcement}
         </p>
-        <div className="flex gap-2">
-          <button type="button" onClick={shuffle} className="btn btn-ghost min-h-9 px-4 text-sm">
-            Embaralhar
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setArrangement(createArrumarArrangement(Date.now()));
-              setAnnouncement('Stickers no lugar original.');
-            }}
-            className="btn btn-ghost min-h-9 px-4 text-sm"
-          >
-            Arrumar
-          </button>
-        </div>
       </div>
-
-      <p className="sr-only" aria-live="polite">
-        {announcement}
-      </p>
-    </div>
     </MotionConfig>
   );
 }

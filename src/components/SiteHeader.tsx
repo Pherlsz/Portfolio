@@ -1,11 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { Menu, MessageSquare, Moon, Sun, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
-import { CTA } from './CTA';
 
 const NAV = [
-  { id: 'experiencia', label: 'Experiência' },
   { id: 'projeto', label: 'Projetos' },
+  { id: 'experiencia', label: 'Experiência' },
   { id: 'formacao', label: 'Formação' },
   { id: 'sobre', label: 'Sobre' },
   { id: 'contato', label: 'Contato' }
@@ -42,93 +40,13 @@ function useTheme() {
   return { theme, toggleTheme };
 }
 
-const SECTION_IDS = ['inicio', ...NAV.map((item) => item.id)];
-
-function headerOffsetPx(): number {
-  const header = document.querySelector('header');
-  return (header?.getBoundingClientRect().height ?? 64) + 1;
-}
-
-function scrollLinePx() {
-  const pad = Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop);
-  const header = headerOffsetPx();
-  return (Number.isFinite(pad) ? Math.max(pad, header) : header) + 12;
-}
-
-function useActiveSection() {
-  const [active, setActive] = useState<string | null>(null);
-  const raf = useRef<number | undefined>(undefined);
-
-  useEffect(() => {
-    let observer: IntersectionObserver | undefined;
-
-    const sync = () => {
-      const doc = document.documentElement;
-      const line = scrollLinePx();
-      const atBottom = window.innerHeight + window.scrollY >= doc.scrollHeight - 4;
-      let current: string | null = null;
-
-      for (const id of SECTION_IDS) {
-        const section = document.getElementById(id);
-        if (section && section.getBoundingClientRect().top <= line) current = id;
-      }
-
-      const lastId = SECTION_IDS[SECTION_IDS.length - 1];
-      const last = document.getElementById(lastId);
-      if (atBottom && last && last.getBoundingClientRect().top > line) current = lastId;
-
-      const next = current && current !== 'inicio' ? current : null;
-      setActive((prev) => (prev === next ? prev : next));
-    };
-
-    const connect = () => {
-      observer?.disconnect();
-      const offset = headerOffsetPx();
-      observer = new IntersectionObserver(sync, {
-        root: null,
-        rootMargin: `-${offset}px 0px -40% 0px`,
-        threshold: [0, 0.15, 0.4, 0.7, 1]
-      });
-      for (const id of SECTION_IDS) {
-        const section = document.getElementById(id);
-        if (section) observer.observe(section);
-      }
-      sync();
-    };
-
-    const onScrollOrResize = () => {
-      if (raf.current !== undefined) return;
-      raf.current = window.requestAnimationFrame(() => {
-        raf.current = undefined;
-        sync();
-      });
-    };
-
-    connect();
-    window.addEventListener('scroll', onScrollOrResize, { passive: true });
-    window.addEventListener('resize', connect);
-    window.addEventListener('hashchange', onScrollOrResize);
-    const root = document.getElementById('conteudo');
-    let mutations: MutationObserver | undefined;
-    if (root) {
-      mutations = new MutationObserver(() => {
-        connect();
-        if (SECTION_IDS.every((id) => document.getElementById(id))) mutations?.disconnect();
-      });
-      mutations.observe(root, { childList: true, subtree: true });
-    }
-
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener('scroll', onScrollOrResize);
-      window.removeEventListener('resize', connect);
-      window.removeEventListener('hashchange', onScrollOrResize);
-      mutations?.disconnect();
-      if (raf.current !== undefined) window.cancelAnimationFrame(raf.current);
-    };
-  }, []);
-
-  return active;
+function scrollToSection(id: string) {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ block: 'start' });
+      history.pushState(null, '', `#${id}`);
+    });
+  });
 }
 
 export function SiteHeader({
@@ -140,10 +58,7 @@ export function SiteHeader({
 }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const { theme, toggleTheme } = useTheme();
-  const active = useActiveSection();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -152,132 +67,64 @@ export function SiteHeader({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      setMenuOpen(false);
-      menuButtonRef.current?.focus();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [menuOpen]);
-
-  const navLinks = (onNavigate?: () => void) =>
-    NAV.map((item) => (
-      <li key={item.id}>
-        <a
-          href={`#${item.id}`}
-          onClick={(event) => {
-            event.preventDefault();
-            onNavigate?.();
-            const id = item.id;
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                document.getElementById(id)?.scrollIntoView({ block: 'start' });
-                history.pushState(null, '', `#${id}`);
-              });
-            });
-          }}
-          aria-current={active === item.id ? 'location' : undefined}
-          className="block rounded-full px-2 py-2 text-[0.9375rem] font-semibold text-ink-soft transition-colors hover:text-ink aria-[current=location]:bg-marker aria-[current=location]:text-on-marker lg:px-3"
-        >
-          {item.label}
-        </a>
-      </li>
-    ));
-
   return (
     <header
       className={`no-print sticky top-0 z-40 border-b transition-colors ${
-        scrolled || menuOpen ? 'border-line bg-paper/90 backdrop-blur-md' : 'border-transparent'
+        scrolled ? 'border-line bg-paper/95' : 'border-transparent bg-paper'
       }`}
     >
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-5 sm:px-8">
-        <a href="#inicio" className="display text-lg leading-none">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 sm:px-8">
+        <a href="#inicio" className="indice-serif text-base leading-none">
           {profile.shortName}
         </a>
 
-        <nav aria-label="Seções" className="ml-auto hidden md:block">
-          <ul className="flex items-center gap-1">{navLinks()}</ul>
+        <nav aria-label="Seções" className="order-3 w-full sm:order-none sm:w-auto sm:flex-1">
+          <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {NAV.map((item) => (
+              <li key={item.id}>
+                <a
+                  href={`#${item.id}`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    scrollToSection(item.id);
+                  }}
+                  className="text-link inline-flex min-h-11 items-center py-1 text-[0.9375rem]"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 md:ml-3">
+        <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1">
           <button
             type="button"
             onClick={onOpenAssistant}
             aria-haspopup="dialog"
             aria-controls="assistente"
-            className="btn btn-ghost hidden min-h-10 px-4 text-sm sm:inline-flex"
+            className="text-link min-h-11 py-2 text-[0.9375rem]"
           >
-            <MessageSquare className="size-4" aria-hidden="true" />
             Perguntar
           </button>
-          <CTA
-            variant="tertiary"
+          <button
+            type="button"
             onClick={onOpenCv}
             aria-haspopup="dialog"
             aria-controls="cv-preview"
-            className="hidden min-h-10 px-2 text-sm sm:inline-flex"
-            aria-label="Ver currículo"
+            className="text-link min-h-11 py-2 text-[0.9375rem]"
           >
             Ver CV
-          </CTA>
+          </button>
           <button
             type="button"
             onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
-            className="icon-btn size-10"
+            className="text-link min-h-11 py-2 text-[0.9375rem]"
           >
-            {theme === 'dark' ? (
-              <Sun className="size-4" aria-hidden="true" />
-            ) : (
-              <Moon className="size-4" aria-hidden="true" />
-            )}
-          </button>
-          <button
-            ref={menuButtonRef}
-            type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-expanded={menuOpen}
-            aria-controls="menu-mobile"
-            aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
-            className="icon-btn size-10 md:hidden"
-          >
-            {menuOpen ? <X className="size-4" aria-hidden="true" /> : <Menu className="size-4" aria-hidden="true" />}
+            {theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
           </button>
         </div>
       </div>
-
-      {menuOpen && (
-        <nav id="menu-mobile" aria-label="Seções" className="border-t border-line px-5 pb-5 pt-3 md:hidden">
-          <ul className="grid gap-1">{navLinks(() => setMenuOpen(false))}</ul>
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false);
-              onOpenAssistant();
-            }}
-            className="btn btn-ghost mt-4 w-full justify-center"
-          >
-            <MessageSquare className="size-4" aria-hidden="true" />
-            Perguntar
-          </button>
-          <CTA
-            variant="tertiary"
-            onClick={() => {
-              setMenuOpen(false);
-              onOpenCv();
-            }}
-            aria-haspopup="dialog"
-            aria-controls="cv-preview"
-            className="mt-4 w-full justify-center text-sm"
-            aria-label="Ver currículo"
-          >
-            Ver CV
-          </CTA>
-        </nav>
-      )}
     </header>
   );
 }

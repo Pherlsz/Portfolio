@@ -1,101 +1,171 @@
 import { lazy, Suspense } from 'react';
-import { FileText, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
-import { CTA } from './CTA';
-import { JobFitCta } from './JobFitCta';
 import { Marked } from './ui';
 
 const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
-export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
+type IndiceEntry =
+  | { num: string; label: string; summary: string; href: string }
+  | { num: string; label: string; summary: string; action: 'cv' };
+
+function buildIndiceEntries(): IndiceEntry[] {
+  const { profile, featuredProjects, experiences, education } = DEFAULT_PORTFOLIO_DATA;
+  const featured = featuredProjects[0];
+  const primaryJob = experiences[0];
+  const degree = education[0];
+
+  return [
+    {
+      num: '01',
+      label: 'Projetos',
+      summary: featured?.tagline ?? DEFAULT_PORTFOLIO_DATA.project.tagline,
+      href: '#projeto'
+    },
+    {
+      num: '02',
+      label: 'Experiência',
+      summary: primaryJob?.summary ?? '',
+      href: '#experiencia'
+    },
+    {
+      num: '03',
+      label: 'Formação',
+      summary: degree ? `${degree.course} — ${degree.school}` : '',
+      href: '#formacao'
+    },
+    {
+      num: '04',
+      label: 'CV',
+      summary: profile.trustCopy,
+      action: 'cv'
+    },
+    {
+      num: '05',
+      label: 'Contato',
+      summary: `${profile.workMode}. Pretensão salarial ${profile.salary.toLowerCase()}.`,
+      href: '#contato'
+    }
+  ];
+}
+
+const INDICE_ENTRIES = buildIndiceEntries();
+
+function scrollToHash(href: string) {
+  const id = href.replace(/^#/, '');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ block: 'start' });
+      history.pushState(null, '', href);
+    });
+  });
+}
+
+export function Hero({
+  onOpenCv,
+  onOpenAssistant
+}: {
+  onOpenJobFit?: () => void;
+  onOpenCv: () => void;
+  onOpenAssistant?: () => void;
+}) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
 
   return (
     <section
       id="inicio"
       aria-labelledby="inicio-titulo"
-      className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 sm:gap-12 sm:px-8 sm:pb-20 sm:pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pb-28"
+      className="mx-auto max-w-6xl px-5 pb-12 pt-6 sm:px-8 sm:pb-16 sm:pt-10 lg:grid lg:grid-cols-[minmax(0,0.34fr)_minmax(0,0.66fr)] lg:items-start lg:gap-14 lg:pb-20"
     >
-      <div className="notebook-margin">
-        <p className="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-line bg-surface px-3 py-1">
-          <span className="size-2 shrink-0 rounded-full bg-status" aria-hidden="true" />
-          <span>{profile.status}</span>
-          <span className="hidden sm:inline" aria-hidden="true">·</span>
-          <span className="whitespace-nowrap basis-full sm:basis-auto">{profile.location}</span>
-        </p>
-
-        <h1
-          id="inicio-titulo"
-          className="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]"
-        >
-          {profile.name.split(' ').map((word) => (
-            <span key={word} className="block">
-              {word}{' '}
-            </span>
-          ))}
+      <div className="lg:sticky lg:top-[4.5rem] lg:self-start">
+        <h1 id="inicio-titulo" className="indice-serif text-[clamp(1.75rem,5vw,2.35rem)] leading-tight">
+          {profile.name}
         </h1>
-
-        <p className="mt-5 font-mono text-[0.9375rem] text-ink-soft">
+        <p className="mt-3 font-mono text-[0.9375rem] text-ink-soft">
           <span className="block">{profile.jobTitle}</span>
-          <span className="mt-1 block text-muted">React · Next.js · TypeScript</span>
+          <span className="mt-1 block text-muted">{profile.location}</span>
         </p>
 
-        <p className="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">
-          {profile.headline}
-        </p>
-        <p className="mt-4 max-w-xl text-ink-soft">
+        <p className="mt-6 max-w-prose text-ink-soft">
           <Marked text={profile.summary} />
         </p>
-        <p className="mt-4 max-w-xl text-ink-soft">{profile.trustCopy}</p>
 
-        <div className="mt-8 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
-          <CTA
-            variant="primary"
-            onClick={onOpenCv}
-            aria-haspopup="dialog"
-            aria-controls="cv-preview"
-            className="w-full sm:w-auto"
-            icon={<FileText className="size-4" aria-hidden="true" />}
-          >
-            Ver CV
-          </CTA>
-          <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
-          <CTA variant="tertiary" href={`mailto:${profile.email}`} className="self-start sm:self-auto">
-            Falar por e-mail
-          </CTA>
-        </div>
+        <nav aria-label="Índice" className="mt-8">
+          <ol className="space-y-0">
+            {INDICE_ENTRIES.map((entry) => (
+              <li key={entry.num} className="border-t border-line first:border-t-0">
+                {'action' in entry && entry.action === 'cv' ? (
+                  <button
+                    type="button"
+                    onClick={onOpenCv}
+                    aria-haspopup="dialog"
+                    aria-controls="cv-preview"
+                    className="indice-entry group w-full text-left"
+                  >
+                    <IndiceEntryInner entry={entry} />
+                  </button>
+                ) : (
+                  <a
+                    href={'href' in entry ? entry.href : '#'}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      if ('href' in entry) scrollToHash(entry.href);
+                    }}
+                    className="indice-entry group block"
+                  >
+                    <IndiceEntryInner entry={entry} />
+                  </a>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
 
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          <a
-            href={profile.linkedin}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
-            className="icon-btn"
-          >
-            <Linkedin className="size-4" aria-hidden="true" />
-          </a>
-          <a
-            href={profile.github}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Perfil no GitHub de Pedro Henrique Lopes"
-            className="icon-btn"
-          >
-            <Github className="size-4" aria-hidden="true" />
-          </a>
-        </div>
+        {onOpenAssistant ? (
+          <p className="mt-6">
+            <button type="button" onClick={onOpenAssistant} className="text-link min-h-11 py-2">
+              Perguntar
+            </button>
+          </p>
+        ) : null}
+
+        <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2 font-mono text-sm">
+          <li>
+            <a href={profile.linkedin} target="_blank" rel="noreferrer" className="text-link min-h-11 inline-flex items-center py-2">
+              LinkedIn
+            </a>
+          </li>
+          <li>
+            <a href={profile.github} target="_blank" rel="noreferrer" className="text-link min-h-11 inline-flex items-center py-2">
+              GitHub
+            </a>
+          </li>
+          <li>
+            <a href={`mailto:${profile.email}`} translate="no" className="text-link min-h-11 inline-flex items-center py-2">
+              E-mail
+            </a>
+          </li>
+        </ul>
       </div>
 
-      <Suspense
-        fallback={
-          <div className="no-print">
-            <div className="notebook relative z-10 aspect-[16/10] w-full" />
-          </div>
-        }
-      >
-        <StickerLid />
-      </Suspense>
+      <div className="mt-10 lg:mt-0">
+        <Suspense fallback={<div className="no-print h-24" aria-hidden="true" />}>
+          <StickerLid variant="row" />
+        </Suspense>
+      </div>
     </section>
+  );
+}
+
+function IndiceEntryInner({ entry }: { entry: IndiceEntry }) {
+  return (
+    <span className="flex min-h-11 flex-col gap-1 py-3 sm:min-h-[2.75rem] sm:flex-row sm:items-baseline sm:gap-4 sm:py-4">
+      <span className="flex shrink-0 items-baseline gap-3 sm:w-[7.5rem]">
+        <span className="font-mono text-sm text-stamp tabular-nums">{entry.num}</span>
+        <span className="indice-serif text-lg font-semibold text-ink group-hover:text-stamp group-focus-visible:text-stamp">
+          {entry.label}
+        </span>
+      </span>
+      <span className="text-[0.9375rem] leading-snug text-muted sm:flex-1">{entry.summary}</span>
+    </span>
   );
 }

@@ -63,18 +63,18 @@ export default function App() {
 
       <main id="conteudo" tabIndex={-1} className="divide-y divide-line">
         <Hero
-          onOpenJobFit={() => {
-            setAssistantMode('jobfit');
+          onOpenCv={() => setCvOpen(true)}
+          onOpenAssistant={() => {
+            setAssistantMode('chat');
             setAssistantOpen(true);
           }}
-          onOpenCv={() => setCvOpen(true)}
         />
-        <ExperienceSection />
         <div id="projeto">
           <Suspense fallback={<div className="min-h-[28rem]" />}>
             <ProjectSection />
           </Suspense>
         </div>
+        <ExperienceSection />
         <div id="formacao">
           <Suspense fallback={<div className="min-h-[32rem]" />}>
             <CredentialsSection />

@@ -1,7 +1,5 @@
-import { ArrowUpRight, Github } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA, type FeaturedProject } from '../data/portfolioData';
 import { featuredProjectLinks } from '../utils/featuredProjectLinks';
-import { CTA } from './CTA';
 import { SectionHeading } from './ui';
 
 function GymkhanaCorePoster() {
@@ -28,34 +26,30 @@ function FeaturedProjectLinkRow({ project }: { project: FeaturedProject }) {
   const links = featuredProjectLinks(project);
 
   return (
-    <div className="flex min-h-11 flex-wrap items-center gap-2">
+    <div className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2">
       {links.map((link) =>
         link.kind === 'repo' ? (
-          <CTA
+          <a
             key={link.kind}
-            variant="secondary"
             href={link.href}
             target="_blank"
             rel="noreferrer"
             aria-label={`Código no GitHub: ${project.name}`}
-            className="min-h-11 px-4"
-            icon={<Github className="size-4" aria-hidden="true" />}
+            className="text-link inline-flex min-h-11 items-center py-2"
           >
             Código no GitHub
-          </CTA>
+          </a>
         ) : (
-          <CTA
+          <a
             key={link.kind}
-            variant="secondary"
             href={link.href}
             target="_blank"
             rel="noreferrer"
             aria-label={`Ver app: ${project.name}`}
-            className="min-h-11 px-4"
-            icon={<ArrowUpRight className="size-4" aria-hidden="true" />}
+            className="text-link inline-flex min-h-11 items-center py-2"
           >
             Ver app
-          </CTA>
+          </a>
         )
       )}
     </div>
@@ -76,7 +70,7 @@ export function ProjectSection() {
       {featured && (
         <>
           <h3 className="display text-xl">Em destaque</h3>
-          <article className="mt-4 grid overflow-hidden rounded-[1.75rem] border border-line bg-surface lg:grid-cols-2">
+          <article className="mt-4 grid border border-line lg:grid-cols-2">
             <img
               src={featured.image}
               alt=""
@@ -113,7 +107,7 @@ export function ProjectSection() {
       )}
 
       <h3 className="display mt-14 text-xl">Outros projetos</h3>
-      <article className="mt-4 overflow-hidden rounded-[1.75rem] border border-line bg-surface sm:grid sm:grid-cols-[minmax(0,16rem)_1fr]">
+      <article className="mt-4 border border-line sm:grid sm:grid-cols-[minmax(0,16rem)_1fr]">
         <GymkhanaCorePoster />
         <div className="flex flex-col justify-between gap-5 p-5 sm:p-6">
           <div>
@@ -122,17 +116,15 @@ export function ProjectSection() {
             <p className="mt-2 text-[0.9375rem] text-ink-soft">{project.tagline}</p>
           </div>
           <div className="flex min-h-11 flex-wrap items-center gap-2">
-            <CTA
-              variant="secondary"
+            <a
               href={project.repoUrl}
               target="_blank"
               rel="noreferrer"
               aria-label={`Código no GitHub: ${project.name}`}
-              className="min-h-11 px-4"
-              icon={<Github className="size-4" aria-hidden="true" />}
+              className="text-link inline-flex min-h-11 items-center py-2"
             >
               Código no GitHub
-            </CTA>
+            </a>
           </div>
         </div>
       </article>

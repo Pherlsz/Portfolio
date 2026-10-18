@@ -1,5 +1,4 @@
 import type { MouseEvent } from 'react';
-import { CTA } from './CTA';
 
 type JobFitCtaProps = {
   onOpenJobFit: () => void;
@@ -18,8 +17,8 @@ export function JobFitCta({ onOpenJobFit, className }: JobFitCtaProps) {
   };
 
   return (
-    <CTA variant="secondary" href="#experiencia" className={className} onClick={onClick}>
+    <a href="#experiencia" className={className ?? 'text-link min-h-11 py-2'} onClick={onClick}>
       Ver fit com a vaga
-    </CTA>
+    </a>
   );
 }

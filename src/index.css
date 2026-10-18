@@ -87,8 +87,10 @@
   --color-status: var(--status);
   --color-valid: var(--valid);
   --color-invalid: var(--invalid);
+  --color-stamp: var(--stamp);
 
   --font-display: "Archivo Variable", "Archivo", system-ui, sans-serif;
+  --font-serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
   --font-sans: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
   --font-mono: "Atkinson Hyperlegible Mono Variable", ui-monospace, monospace;
 }
@@ -109,7 +111,7 @@
   :root {
     color-scheme: light;
     --neutral-0: #ffffff;
-    --neutral-50: #f7f7f8;
+    --neutral-50: #f4f1ea;
     --neutral-200: #dedfe3;
     --neutral-300: #c7cad1;
     --neutral-400: #9ba0ab;
@@ -118,7 +120,7 @@
     --neutral-700: #3c4048;
     --neutral-800: #2a2d32;
     --neutral-900: #1e2024;
-    --neutral-950: #17181b;
+    --neutral-950: #1c1915;
     --yellow-400: #ffd60a;
     --yellow-500: #f2c94c;
     --yellow-700: #a35700;
@@ -128,42 +130,44 @@
     --rose-400: #fb7185;
     --rose-700: #be123c;
 
-    --paper: var(--neutral-50);
+    --paper: #f4f1ea;
     --surface: var(--neutral-0);
-    --line: var(--neutral-200);
-    --control: var(--neutral-500);
-    --ink: var(--neutral-950);
-    --ink-soft: var(--neutral-700);
-    --muted: var(--neutral-600);
-    --marker: var(--yellow-400);
-    --on-marker: var(--neutral-950);
-    --mark: var(--yellow-700);
+    --line: #ddd8ce;
+    --control: #5c564c;
+    --ink: #1c1915;
+    --ink-soft: #3f3a34;
+    --muted: #5c564c;
+    --stamp: #8c2f2f;
+    --marker: var(--stamp);
+    --on-marker: var(--neutral-0);
+    --mark: var(--stamp);
     --poster: var(--neutral-950);
     --poster-ink: var(--neutral-50);
     --status: var(--green-600);
     --valid: var(--green-600);
     --invalid: var(--rose-700);
-    --focus: var(--ink);
+    --focus: var(--stamp);
 
-    --cta-bg: var(--neutral-950);
-    --cta-fg: var(--neutral-50);
-    --cta-fg-secondary: var(--neutral-950);
-    --cta-border: var(--neutral-700);
-    --focus-ring: var(--neutral-700);
+    --cta-bg: var(--ink);
+    --cta-fg: var(--paper);
+    --cta-fg-secondary: var(--ink);
+    --cta-border: var(--ink-soft);
+    --focus-ring: var(--stamp);
   }
 
   html.dark {
     color-scheme: dark;
-    --paper: var(--neutral-950);
-    --surface: var(--neutral-900);
-    --line: var(--neutral-800);
-    --control: var(--neutral-500);
-    --ink: var(--neutral-50);
-    --ink-soft: var(--neutral-300);
-    --muted: var(--neutral-400);
-    --marker: var(--yellow-400);
+    --paper: #141210;
+    --surface: #1e1b17;
+    --line: #3a3530;
+    --control: #9a9288;
+    --ink: #f4f1ea;
+    --ink-soft: #d8d2c8;
+    --muted: #a39b90;
+    --stamp: #e07a7a;
+    --marker: var(--stamp);
     --on-marker: var(--neutral-950);
-    --mark: var(--yellow-400);
+    --mark: var(--stamp);
     --poster: var(--neutral-950);
     --poster-ink: var(--neutral-50);
     --status: var(--green-400);
@@ -171,11 +175,11 @@
     --invalid: var(--rose-400);
     --focus: var(--ink);
 
-    --cta-bg: var(--yellow-400);
-    --cta-fg: var(--neutral-950);
-    --cta-fg-secondary: var(--neutral-50);
-    --cta-border: var(--neutral-300);
-    --focus-ring: var(--yellow-400);
+    --cta-bg: var(--ink);
+    --cta-fg: var(--paper);
+    --cta-fg-secondary: var(--ink);
+    --cta-border: var(--line);
+    --focus-ring: var(--stamp);
   }
 
   html {
@@ -243,10 +247,15 @@
 }
 
 @utility display {
-  font-family: var(--font-display);
-  font-stretch: 108%;
-  font-weight: 760;
-  letter-spacing: -0.02em;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+@utility indice-serif {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 @utility eyebrow {
@@ -428,6 +437,63 @@
     text-decoration-thickness: 3px;
   }
 
+  .text-link {
+    cursor: pointer;
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--stamp);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    transition-property: color, text-decoration-color, text-decoration-thickness;
+    transition-duration: 150ms;
+  }
+
+  .text-link:hover {
+    color: var(--stamp);
+    text-decoration-thickness: 2px;
+  }
+
+  .text-link:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+
+  .indice-entry {
+    cursor: pointer;
+    border-radius: 0.25rem;
+    transition: background-color 150ms;
+  }
+
+  .indice-entry:hover,
+  .indice-entry:focus-visible {
+    background-color: color-mix(in srgb, var(--stamp) 6%, transparent);
+  }
+
+  .indice-entry:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .sticker-row-tray {
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--paper) 92%, var(--line));
+  }
+
+  .experience-metrics {
+    margin-top: 1.5rem;
+    max-width: 42rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .experience-metrics mark {
+    font-weight: 600;
+  }
+
   .field-label {
     display: block;
     margin-bottom: 0.4rem;
@@ -563,9 +629,20 @@
   }
 
   [data-holo='true'][data-holo-state='idle'] {
-    animation: holo-idle-orbit var(--holo-idle-duration) ease-in-out infinite;
+    animation: none;
     --holo-tilt-max: 0deg;
-    --holo-ink: 0.9;
+    --holo-ink: 1;
+  }
+
+  [data-holo='true']:not(:hover):not([data-holo-state='tilt']):not([data-pressed='true']) .holo-foil,
+  [data-holo='true']:not(:hover):not([data-holo-state='tilt']):not([data-pressed='true']) .holo-sheen,
+  [data-holo='true']:not(:hover):not([data-holo-state='tilt']):not([data-pressed='true']) .holo-edge,
+  [data-holo='true']:not(:hover):not([data-holo-state='tilt']):not([data-pressed='true']) .holo-sparkle {
+    opacity: 0;
+  }
+
+  [data-holo='true']:not(:hover):not([data-holo-state='tilt']):not([data-pressed='true']) .sticker-face-host {
+    filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.2)) drop-shadow(0 8px 12px rgb(0 0 0 / 0.16));
   }
 
   [data-holo='true'][data-holo-state='tilt'],

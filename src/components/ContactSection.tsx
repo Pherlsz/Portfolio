@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react';
-import { FileText, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
@@ -41,7 +40,7 @@ function ContactForm({ email }: { email: string }) {
     <form
       onSubmit={onSubmit}
       aria-busy={status === 'sending'}
-      className="rounded-[1.75rem] border border-line bg-surface p-5 sm:p-6"
+      className="border border-line p-5 sm:p-6"
     >
       <p className="font-bold">Ou escreva sua mensagem</p>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -113,7 +112,7 @@ export function ContactSection({
       <p className="eyebrow">Vamos conversar?</p>
       <div className="mt-3 grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start">
         <div>
-          <h2 id="contato-titulo" className="display-wide text-[clamp(2.4rem,7vw,5rem)] leading-[0.9]">
+          <h2 id="contato-titulo" className="indice-serif text-[clamp(1.75rem,4vw,2.5rem)] leading-tight">
             Entre em contato
           </h2>
           <p className="mt-5 max-w-md text-lg text-ink-soft">{profile.trustCopy}</p>
@@ -122,45 +121,43 @@ export function ContactSection({
           </p>
 
           <div className="mt-8 flex max-w-xl flex-col gap-5">
-            <div className="flex flex-wrap items-center gap-3">
-              <CTA
-                variant="primary"
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <button
+                type="button"
                 onClick={onOpenCv}
                 aria-haspopup="dialog"
                 aria-controls="cv-preview"
-                className="w-full sm:w-auto"
-                icon={<FileText className="size-4" aria-hidden="true" />}
+                className="text-link min-h-11 py-2"
               >
                 Ver CV
-              </CTA>
-              <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
+              </button>
+              <JobFitCta onOpenJobFit={onOpenJobFit} className="text-link min-h-11 py-2" />
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <a
                 href={`mailto:${profile.email}`}
                 translate="no"
-                className="text-lg font-semibold underline decoration-marker decoration-2 underline-offset-4"
+                className="text-link min-h-11 inline-flex items-center py-2 text-lg"
               >
                 {profile.email}
               </a>
               <CopyEmailButton
                 email={profile.email}
                 label="Copiar e-mail"
-                className="h-9 cursor-pointer rounded-full border border-line px-3 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-ink hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[outline-color:var(--focus-ring)] active:translate-y-px"
+                className="text-link min-h-11 cursor-pointer py-2 text-sm active:translate-y-px"
               />
             </div>
 
-            <ul className="flex flex-wrap gap-2">
+            <ul className="flex flex-wrap gap-x-4 gap-y-2">
               <li>
                 <a
                   href={profile.linkedin}
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
-                  className="btn btn-ghost"
+                  className="text-link inline-flex min-h-11 items-center py-2"
                 >
-                  <Linkedin className="size-4" aria-hidden="true" />
                   LinkedIn
                 </a>
               </li>
@@ -170,9 +167,8 @@ export function ContactSection({
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Perfil no GitHub de Pedro Henrique Lopes"
-                  className="btn btn-ghost"
+                  className="text-link inline-flex min-h-11 items-center py-2"
                 >
-                  <Github className="size-4" aria-hidden="true" />
                   GitHub
                 </a>
               </li>
