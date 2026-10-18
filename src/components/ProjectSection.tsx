@@ -37,7 +37,7 @@ function FeaturedProjectLinkRow({ project }: { project: FeaturedProject }) {
             href={link.href}
             target="_blank"
             rel="noreferrer"
-            aria-label={`Ver código-fonte de ${project.name} no GitHub`}
+            aria-label={`Código no GitHub: ${project.name}`}
             className="min-h-11 px-4"
             icon={<Github className="size-4" aria-hidden="true" />}
           >
@@ -50,7 +50,7 @@ function FeaturedProjectLinkRow({ project }: { project: FeaturedProject }) {
             href={link.href}
             target="_blank"
             rel="noreferrer"
-            aria-label={`Abrir ${project.name}`}
+            aria-label={`Ver app: ${project.name}`}
             className="min-h-11 px-4"
             icon={<ArrowUpRight className="size-4" aria-hidden="true" />}
           >

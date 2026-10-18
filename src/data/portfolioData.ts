@@ -45,9 +45,9 @@ export interface FeaturedProject {
   name: string;
   kicker: string;
   tagline: string;
-  /** App em produção. Omita quando não houver site público. */
+  /** Live app URL. Omit when there is no public site. */
   href?: string;
-  /** Repositório no GitHub. Omita quando o código não for público. */
+  /** GitHub repository URL. Omit when the code is not public. */
   repoUrl?: string;
   access: 'public' | 'restricted';
   stack: string[];
