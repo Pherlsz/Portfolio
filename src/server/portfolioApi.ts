@@ -15,6 +15,7 @@ import {
   plainText,
   skillNames
 } from '../data/portfolioData.ts';
+import { featuredProjectPrimaryUrl } from '../utils/featuredProjectLinks.ts';
 import { buildJobFitReply } from '../utils/jobFit.ts';
 import {
   buildTokenEfficientSystemPrompt,
@@ -149,7 +150,13 @@ function buildLocalFallback(query: string, mode: 'chat' | 'jobfit'): string {
     return `**Design system e WCAG**\n- ${ds?.text ?? 'Design system modular em conformidade com WCAG 2.1 AA.'}\n- Também estabilizou listagens com 5.000+ registros (TanStack Virtual) e cobriu fluxos críticos com Vitest e React Testing Library.`;
   }
   if (q.includes('projet') || mentionsPersonalProject(query, DEFAULT_PORTFOLIO_DATA)) {
-    const featured = featuredProjects.map((item) => `- **${item.name}**: ${item.tagline} (${item.repoUrl ?? item.href})`).join('\n');
+    const featured = featuredProjects
+      .map((item) => {
+        const url = featuredProjectPrimaryUrl(item);
+        const suffix = url ? ` (${url})` : '';
+        return `- **${item.name}**: ${item.tagline}${suffix}`;
+      })
+      .join('\n');
     return `Ferramentas em destaque:\n${featured}\n\nOutro projeto: **${project.name}** (${project.language}, ${project.version}): ${project.tagline}\nCódigo: ${project.repoUrl}`;
   }
   if (
