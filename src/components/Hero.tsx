@@ -34,7 +34,8 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
         </h1>
 
         <p className="mt-5 font-mono text-[0.9375rem] text-ink-soft">
-          {profile.role} · React · Next.js · TypeScript
+          <span className="block">{profile.jobTitle}</span>
+          <span className="mt-1 block text-muted">React · Next.js · TypeScript</span>
         </p>
 
         <p className="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">

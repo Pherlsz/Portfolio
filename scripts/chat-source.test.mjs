@@ -8,6 +8,7 @@ import { DEFAULT_PORTFOLIO_DATA } from '../src/data/portfolioData.ts';
 import {
   PRESET_QUESTIONS,
   PresetQuestionIdSchema,
+  SUGGESTED_PRESET_IDS,
   buildPresetFallback,
   presetChipText,
   presetIdForChipText
@@ -200,6 +201,18 @@ const EXPECTED_PRESET_IDS = Object.freeze([
   'compare_job_fit'
 ]);
 
+/** Must match free-text chips in src/utils/followUps.ts (jobfit ~54-71, chat ~77). */
+const FREE_TEXT_CHIPS = Object.freeze([
+  'E se a vaga for sênior?',
+  'A vaga pede testes automatizados?',
+  'O híbrido é em Porto Alegre?',
+  'A IA é function calling em fluxo real?',
+  'Quais perguntas eu faço na entrevista?',
+  'Resume em 5 linhas para colar no LinkedIn.',
+  'Qual a stack desse projeto?',
+  'Ele usa isso em produção?'
+]);
+
 const stackFollowUpInput = () => ({
   mode: 'chat',
   asked: presetChipText('stack'),
@@ -208,17 +221,29 @@ const stackFollowUpInput = () => ({
 });
 
 function assertChipsMapToExpectedPresetsOrFreeText(chips) {
-  const known = new Set(EXPECTED_PRESET_IDS);
+  const knownPresets = new Set(EXPECTED_PRESET_IDS);
+  const knownFreeText = new Set(FREE_TEXT_CHIPS);
   for (const chip of chips) {
     const presetId = presetIdForChipText(chip);
-    if (presetId === undefined) continue;
-    assert.ok(known.has(presetId), `chip "${chip}" maps to unexpected preset id: ${presetId}`);
+    if (presetId !== undefined) {
+      assert.ok(knownPresets.has(presetId), `chip "${chip}" maps to unexpected preset id: ${presetId}`);
+      assert.ok(
+        buildPresetFallback(presetId).trim().length > 0,
+        `preset ${presetId} has no fallback text`
+      );
+      continue;
+    }
     assert.ok(
-      buildPresetFallback(presetId).trim().length > 0,
-      `preset ${presetId} has no fallback text`
+      knownFreeText.has(chip),
+      `chip "${chip}" is not a preset chip text nor listed in FREE_TEXT_CHIPS`
     );
   }
 }
+
+test('initial assistant preset chips map to expected presets', () => {
+  const chips = SUGGESTED_PRESET_IDS.map((id) => presetChipText(id));
+  assertChipsMapToExpectedPresetsOrFreeText(chips);
+});
 
 test('preset ids match independent expected list and each has fallback', () => {
   assert.equal(PRESET_QUESTIONS.length, EXPECTED_PRESET_IDS.length);

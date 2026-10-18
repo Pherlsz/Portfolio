@@ -300,7 +300,7 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
       <section id="inicio" class="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
         <p class="eyebrow">${escHtml(profile.status)} · ${escHtml(profile.location)}</p>
         <h1 id="inicio-titulo" class="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]">${name}</h1>
-        <p class="mt-5 font-mono text-[0.9375rem] text-ink-soft">${escHtml(profile.role)} · React · Next.js · TypeScript</p>
+        <p class="mt-5 font-mono text-[0.9375rem] text-ink-soft"><span class="block">${escHtml(profile.jobTitle)}</span><span class="mt-1 block text-muted">React · Next.js · TypeScript</span></p>
         <p class="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">${escHtml(profile.headline)}</p>
         <p class="mt-4 max-w-xl text-ink-soft">${escHtml(plainText(profile.summary))}</p>
         <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1">

@@ -69,5 +69,5 @@ export function buildLocalFallback(
       .map((e) => `- **${e.company}**: ${formatRoleTimeline(e)}`)
       .join('\n')}`;
   }
-  return `**${profile.name}** é ${profile.jobTitle} no ${profile.location}. ${plainText(profile.summary)} Status: ${profile.status.toLowerCase()}.`;
+  return `**${profile.name}** é ${profile.jobTitle} em ${profile.location}. ${plainText(profile.summary)} Status: ${profile.status.toLowerCase()}.`;
 }
