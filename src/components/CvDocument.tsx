@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { DEFAULT_PORTFOLIO_DATA, experienceSpan, formatPeriod, plainText, skillNames } from '../data/portfolioData';
+import { featuredProjectPrimaryUrl } from '../utils/featuredProjectLinks';
 
 const shortUrl = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 
@@ -75,15 +76,18 @@ export function CvDocument() {
 
       <CvSection title="Projetos">
         <ul className="space-y-2">
-          {featuredProjects.map((item) => (
+          {featuredProjects.map((item) => {
+            const primary = featuredProjectPrimaryUrl(item);
+            return (
             <li key={item.id} className="break-inside-avoid">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
                 <h3 className="text-[11pt] font-bold">{item.name}</h3>
-                <p className="font-mono text-[9pt]">{shortUrl(item.repoUrl ?? item.href)}</p>
+                {primary ? <p className="font-mono text-[9pt]">{shortUrl(primary)}</p> : null}
               </div>
               <p>{item.tagline}</p>
             </li>
-          ))}
+            );
+          })}
           <li className="break-inside-avoid">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
               <h3 className="text-[11pt] font-bold">

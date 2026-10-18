@@ -1,5 +1,6 @@
 import { ArrowUpRight, Github } from 'lucide-react';
-import { DEFAULT_PORTFOLIO_DATA, featuredProjectUrl } from '../data/portfolioData';
+import { DEFAULT_PORTFOLIO_DATA, type FeaturedProject } from '../data/portfolioData';
+import { featuredProjectLinks } from '../utils/featuredProjectLinks';
 import { CTA } from './CTA';
 import { SectionHeading } from './ui';
 
@@ -23,6 +24,44 @@ function GymkhanaCorePoster() {
   );
 }
 
+function FeaturedProjectLinkRow({ project }: { project: FeaturedProject }) {
+  const links = featuredProjectLinks(project);
+
+  return (
+    <div className="flex min-h-11 flex-wrap items-center gap-2">
+      {links.map((link) =>
+        link.kind === 'repo' ? (
+          <CTA
+            key={link.kind}
+            variant="secondary"
+            href={link.href}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Código no GitHub: ${project.name}`}
+            className="min-h-11 px-4"
+            icon={<Github className="size-4" aria-hidden="true" />}
+          >
+            Código no GitHub
+          </CTA>
+        ) : (
+          <CTA
+            key={link.kind}
+            variant="secondary"
+            href={link.href}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Ver app: ${project.name}`}
+            className="min-h-11 px-4"
+            icon={<ArrowUpRight className="size-4" aria-hidden="true" />}
+          >
+            Ver app
+          </CTA>
+        )
+      )}
+    </div>
+  );
+}
+
 export function ProjectSection() {
   const { featuredProjects, project } = DEFAULT_PORTFOLIO_DATA;
   const featured = featuredProjects[0];
@@ -37,17 +76,7 @@ export function ProjectSection() {
       {featured && (
         <>
           <h3 className="display text-xl">Em destaque</h3>
-          <a
-            href={featuredProjectUrl(featured)}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={
-              featured.repoUrl
-                ? `Ver código-fonte de ${featured.name} no GitHub`
-                : `Abrir ${featured.name}`
-            }
-            className="group mt-4 grid overflow-hidden rounded-[1.75rem] border border-line bg-surface lg:grid-cols-2"
-          >
+          <article className="mt-4 grid overflow-hidden rounded-[1.75rem] border border-line bg-surface lg:grid-cols-2">
             <img
               src={featured.image}
               alt=""
@@ -63,25 +92,23 @@ export function ProjectSection() {
                 <h4 className="display mt-1 text-2xl">{featured.name}</h4>
                 <p className="mt-2 text-[0.9375rem] text-ink-soft">{featured.tagline}</p>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {featured.access === 'restricted' && !featured.repoUrl && (
-                  <span className="rounded-full border border-line px-2.5 py-0.5 font-mono text-[0.7rem] uppercase tracking-wide text-ink-soft">
-                    Acesso restrito
-                  </span>
-                )}
-                {featured.stack.map((tech) => (
-                  <span key={tech} className="font-mono text-[0.7rem] text-muted">
-                    {tech}
-                  </span>
-                ))}
-                {featured.repoUrl ? (
-                  <Github className="ml-auto size-4 text-muted transition group-hover:text-ink" aria-hidden="true" />
-                ) : (
-                  <ArrowUpRight className="ml-auto size-4 text-muted transition group-hover:text-ink" aria-hidden="true" />
-                )}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  {featured.access === 'restricted' && !featured.repoUrl && !featured.href && (
+                    <span className="rounded-full border border-line px-2.5 py-0.5 font-mono text-[0.7rem] uppercase tracking-wide text-ink-soft">
+                      Acesso restrito
+                    </span>
+                  )}
+                  {featured.stack.map((tech) => (
+                    <span key={tech} className="font-mono text-[0.7rem] text-muted">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+                <FeaturedProjectLinkRow project={featured} />
               </div>
             </div>
-          </a>
+          </article>
         </>
       )}
 
