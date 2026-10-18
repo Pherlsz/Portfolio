@@ -8,7 +8,7 @@ function GymkhanaCorePoster() {
   return (
     <div className="relative isolate flex aspect-[16/10] flex-col justify-between overflow-hidden bg-poster p-5 text-poster-ink">
       <div className="flex items-start justify-between gap-4">
-        <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-marker">Biblioteca</p>
+        <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-poster-ink/75">Biblioteca</p>
         <p className="font-mono text-[0.7rem] text-poster-ink/80">{project.version}</p>
       </div>
       <p className="display-wide text-[1.55rem] uppercase leading-[0.86]">

@@ -83,7 +83,7 @@ export function CopyEmailButton({
     <button
       type="button"
       onClick={copy}
-      aria-label={copied ? 'E-mail copiado' : `Copiar ${email}`}
+      aria-label={label ? (copied ? 'E-mail copiado' : label) : copied ? 'E-mail copiado' : `Copiar ${email}`}
       className={['inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap', className].filter(Boolean).join(' ')}
     >
       {copied ? (

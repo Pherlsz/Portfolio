@@ -426,7 +426,7 @@ function LidSticker({
         onReact(`${def.caption}: ${react()}`);
       }}
       onKeyDown={nudge}
-      aria-label={def.label}
+      aria-label={`${def.caption}. ${def.label}`}
       aria-describedby="tampa-ajuda"
       data-sticker-id={slot.id}
       data-pressed={pressed ? 'true' : undefined}
