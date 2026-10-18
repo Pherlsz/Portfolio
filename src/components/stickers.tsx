@@ -16,7 +16,10 @@ import {
   ZERO_DRAG_CONSTRAINTS,
   type AxisDragConstraints
 } from '../utils/stickerDragConstraints';
-import { stickerCaptionAlign, stickerCaptionEdge } from '../utils/stickerCaptionLayout';
+import {
+  lidCaptionPlacementForSticker,
+  type StickerCaptionPlacement
+} from '../utils/stickerCaptionLayout';
 
 export type StickerId =
   | 'morcega'
@@ -167,8 +170,7 @@ function StickerArt({
   showCaption = true,
   eager = false,
   holoFoil = false,
-  captionAlign = 'start',
-  captionEdge = 'below'
+  captionPlacement = { mode: 'stack', edge: 'below', align: 'start' }
 }: {
   id: StickerId;
   reaction: Reaction | null;
@@ -177,17 +179,19 @@ function StickerArt({
   eager?: boolean;
   /** Lid-only holographic foil layers (masked to sticker art). */
   holoFoil?: boolean;
-  captionAlign?: 'start' | 'end';
-  captionEdge?: 'above' | 'below';
+  captionPlacement?: StickerCaptionPlacement;
 }) {
   const def = STICKERS[id];
+  const captionAttrs =
+    captionPlacement.mode === 'beside'
+      ? { 'data-caption-side': captionPlacement.side }
+      : { 'data-caption-edge': captionPlacement.edge, 'data-caption-align': captionPlacement.align };
   return (
     <>
       {(showCaption || reaction) && (
         <span
           className="sticker-bubble"
-          data-caption-align={captionAlign}
-          data-caption-edge={captionEdge}
+          {...captionAttrs}
           data-visible={reaction ? 'true' : undefined}
           aria-hidden="true"
         >
@@ -395,8 +399,7 @@ function LidSticker({
         face={face}
         eager
         holoFoil={holoActive}
-        captionAlign={stickerCaptionAlign(slot)}
-        captionEdge={stickerCaptionEdge(slot)}
+        captionPlacement={lidCaptionPlacementForSticker(slot.id, slot)}
       />
     </motion.button>
   );
