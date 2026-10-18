@@ -461,7 +461,9 @@ export function AssistantPanel({
             <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div
                 className={`group relative max-w-[90%] rounded-2xl px-4 py-3 text-[0.9375rem] leading-relaxed ${
-                  msg.role === 'user' ? 'bg-ink text-paper' : 'border border-line bg-paper text-ink-soft'
+                  msg.role === 'user'
+                    ? 'bg-ink text-paper'
+                    : 'border border-line bg-paper pr-10 text-ink-soft sm:pr-4'
                 }`}
               >
                 {msg.role === 'model' && msg.source === 'ai' && <AiReplyBadge />}
