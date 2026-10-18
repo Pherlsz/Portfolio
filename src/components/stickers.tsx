@@ -16,6 +16,7 @@ import {
   ZERO_DRAG_CONSTRAINTS,
   type AxisDragConstraints
 } from '../utils/stickerDragConstraints';
+import { stickerCaptionAlign, stickerCaptionEdge } from '../utils/stickerCaptionLayout';
 
 export type StickerId =
   | 'morcega'
@@ -165,7 +166,9 @@ function StickerArt({
   face,
   showCaption = true,
   eager = false,
-  holoFoil = false
+  holoFoil = false,
+  captionAlign = 'start',
+  captionEdge = 'below'
 }: {
   id: StickerId;
   reaction: Reaction | null;
@@ -174,12 +177,20 @@ function StickerArt({
   eager?: boolean;
   /** Lid-only holographic foil layers (masked to sticker art). */
   holoFoil?: boolean;
+  captionAlign?: 'start' | 'end';
+  captionEdge?: 'above' | 'below';
 }) {
   const def = STICKERS[id];
   return (
     <>
       {(showCaption || reaction) && (
-        <span className="sticker-bubble" data-visible={reaction ? 'true' : undefined} aria-hidden="true">
+        <span
+          className="sticker-bubble"
+          data-caption-align={captionAlign}
+          data-caption-edge={captionEdge}
+          data-visible={reaction ? 'true' : undefined}
+          aria-hidden="true"
+        >
           {reaction?.text ?? def.caption}
         </span>
       )}
@@ -378,7 +389,15 @@ function LidSticker({
         ...(maskUrl ? ({ '--holo-mask': `url("${maskUrl}")` } as CSSProperties) : undefined)
       }}
     >
-      <StickerArt id={slot.id} reaction={reaction} face={face} eager holoFoil={holoActive} />
+      <StickerArt
+        id={slot.id}
+        reaction={reaction}
+        face={face}
+        eager
+        holoFoil={holoActive}
+        captionAlign={stickerCaptionAlign(slot)}
+        captionEdge={stickerCaptionEdge(slot)}
+      />
     </motion.button>
   );
 }

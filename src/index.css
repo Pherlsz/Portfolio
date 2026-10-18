@@ -850,16 +850,52 @@
   }
 
   @media (pointer: coarse) {
-    .sticker-bubble {
+    .sticker-bubble[data-caption-edge="below"] {
       bottom: auto;
       top: calc(100% + 0.25rem);
       translate: -50% 0.25rem;
     }
 
-    .group:hover .sticker-bubble,
-    .group:focus-visible .sticker-bubble,
-    .sticker-bubble[data-visible="true"] {
-      translate: -50% 0;
+    .sticker-bubble[data-caption-edge="above"] {
+      top: auto;
+      bottom: calc(100% + 0.25rem);
+      translate: -50% 0.25rem;
+    }
+
+    .sticker-bubble[data-caption-align="start"] {
+      left: 0;
+      right: auto;
+      translate: 0 0.25rem;
+    }
+
+    .sticker-bubble[data-caption-align="end"] {
+      left: auto;
+      right: 0;
+      translate: 0 0.25rem;
+    }
+
+    .lid button[data-sticker-id="morcega"] .sticker-bubble,
+    .lid button[data-sticker-id="banguela"] .sticker-bubble,
+    .lid button[data-sticker-id="tomada"] .sticker-bubble {
+      opacity: 1;
+    }
+
+    .group:hover .sticker-bubble[data-caption-align="start"],
+    .group:focus-visible .sticker-bubble[data-caption-align="start"],
+    .sticker-bubble[data-caption-align="start"][data-visible="true"],
+    .lid button[data-sticker-id="morcega"] .sticker-bubble[data-caption-align="start"],
+    .lid button[data-sticker-id="banguela"] .sticker-bubble[data-caption-align="start"],
+    .lid button[data-sticker-id="tomada"] .sticker-bubble[data-caption-align="start"] {
+      translate: 0 0;
+    }
+
+    .group:hover .sticker-bubble[data-caption-align="end"],
+    .group:focus-visible .sticker-bubble[data-caption-align="end"],
+    .sticker-bubble[data-caption-align="end"][data-visible="true"],
+    .lid button[data-sticker-id="morcega"] .sticker-bubble[data-caption-align="end"],
+    .lid button[data-sticker-id="banguela"] .sticker-bubble[data-caption-align="end"],
+    .lid button[data-sticker-id="tomada"] .sticker-bubble[data-caption-align="end"] {
+      translate: 0 0;
     }
   }
 }
