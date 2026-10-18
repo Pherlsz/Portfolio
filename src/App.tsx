@@ -45,11 +45,11 @@ export default function App() {
     <>
       <nav aria-label="Atalhos" className="skip-nav">
         <a
-          href="#conteudo"
+          href="#inicio"
           className="skip-link"
           onClick={(event) => {
             event.preventDefault();
-            document.getElementById('conteudo')?.focus();
+            document.getElementById('inicio')?.focus();
           }}
         >
           Pular para o conteúdo
@@ -62,10 +62,7 @@ export default function App() {
       <div className="lg:grid lg:grid-cols-[minmax(17.5rem,23rem)_minmax(0,1fr)]">
         <header className="border-b border-line px-5 pb-8 pt-[max(1rem,env(safe-area-inset-top))] sm:px-8 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:py-8">
           <SiteHeader onOpenAssistant={() => openAssistant('chat')} onOpenCv={() => setCvOpen(true)} />
-          <Hero
-            onOpenCv={() => setCvOpen(true)}
-            onOpenJobFit={() => openAssistant('jobfit')}
-          />
+          <Hero onOpenCv={() => setCvOpen(true)} />
         </header>
 
         <div className="min-w-0">

@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
@@ -36,12 +36,6 @@ function ContactForm({ email }: { email: string }) {
     }
   };
 
-  const onMessageKey = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key !== 'Enter' || !(event.metaKey || event.ctrlKey)) return;
-    event.preventDefault();
-    event.currentTarget.form?.requestSubmit();
-  };
-
   return (
     <form onSubmit={onSubmit} aria-busy={status === 'sending'} className="max-w-prose border-t border-line pt-6">
       <p className="font-semibold">Ou escreva sua mensagem</p>
@@ -54,7 +48,7 @@ function ContactForm({ email }: { email: string }) {
             type="text"
             required
             autoComplete="name"
-            placeholder="Seu nome…"
+            placeholder="Seu nome"
             className="field"
           />
         </label>
@@ -67,7 +61,7 @@ function ContactForm({ email }: { email: string }) {
             required
             autoComplete="email"
             spellCheck={false}
-            placeholder="nome@dominio.com…"
+            placeholder="nome@dominio.com"
             className="field"
           />
         </label>
@@ -79,9 +73,8 @@ function ContactForm({ email }: { email: string }) {
           name="message"
           required
           rows={5}
-          placeholder="Sobre o que você quer conversar?…"
+          placeholder="Sobre o que você quer conversar?"
           className="field field-area"
-          onKeyDown={onMessageKey}
         />
       </label>
       <CTA type="submit" variant="primary" className="mt-5" disabled={status === 'sending'}>
@@ -129,7 +122,11 @@ export function ContactSection({
         </p>
 
         <p className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1">
-          <a href={`mailto:${profile.email}`} translate="no" className="link text-lg font-semibold">
+          <a
+            href={`mailto:${profile.email}`}
+            translate="no"
+            className="link inline-flex min-h-11 items-center text-lg font-semibold"
+          >
             {profile.email}
           </a>
           <CopyEmailButton email={profile.email} label="Copiar e-mail" className="link cursor-pointer" />
@@ -141,7 +138,7 @@ export function ContactSection({
             target="_blank"
             rel="noreferrer"
             aria-label="Perfil no LinkedIn de Pedro Henrique Lopes"
-            className="link"
+            className="link inline-flex min-h-11 items-center"
           >
             LinkedIn
           </a>
@@ -150,7 +147,7 @@ export function ContactSection({
             target="_blank"
             rel="noreferrer"
             aria-label="Perfil no GitHub de Pedro Henrique Lopes"
-            className="link"
+            className="link inline-flex min-h-11 items-center"
           >
             GitHub
           </a>

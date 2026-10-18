@@ -1,16 +1,6 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "Archivo Variable";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 100 900;
-  font-stretch: 62% 125%;
-  src: url("@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2") format("woff2-variations");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
   font-family: "Atkinson Hyperlegible Next Variable";
   font-style: normal;
   font-display: swap;
@@ -55,21 +45,11 @@
   --color-neutral-0: var(--neutral-0);
   --color-neutral-50: var(--neutral-50);
   --color-neutral-200: var(--neutral-200);
-  --color-neutral-300: var(--neutral-300);
-  --color-neutral-400: var(--neutral-400);
   --color-neutral-500: var(--neutral-500);
   --color-neutral-600: var(--neutral-600);
   --color-neutral-700: var(--neutral-700);
-  --color-neutral-800: var(--neutral-800);
-  --color-neutral-900: var(--neutral-900);
   --color-neutral-950: var(--neutral-950);
-  --color-yellow-400: var(--yellow-400);
-  --color-yellow-500: var(--yellow-500);
-  --color-yellow-700: var(--yellow-700);
-  --color-yellow-800: var(--yellow-800);
-  --color-green-400: var(--green-400);
   --color-green-600: var(--green-600);
-  --color-rose-400: var(--rose-400);
   --color-rose-700: var(--rose-700);
 
   --color-paper: var(--paper);
@@ -113,27 +93,17 @@
     --neutral-0: #ffffff;
     --neutral-50: #f4f1ea;
     --neutral-200: #cfc8bb;
-    --neutral-300: #c7cad1;
-    --neutral-400: #9ba0ab;
     --neutral-500: #727988;
     --neutral-600: #5c564c;
     --neutral-700: #5c564c;
-    --neutral-800: #2a2d32;
-    --neutral-900: #1e2024;
     --neutral-950: #1c1915;
-    --yellow-400: #8c2f2f;
-    --yellow-500: #8c2f2f;
-    --yellow-700: #8c2f2f;
-    --yellow-800: #8c2f2f;
-    --green-400: #d4cdc2;
     --green-600: #5c564c;
-    --rose-400: #e8a3a3;
     --rose-700: #8c2f2f;
 
     --paper: #f4f1ea;
     --surface: #f4f1ea;
     --line: #cfc8bb;
-    --control: #cfc8bb;
+    --control: #5c564c;
     --ink: #1c1915;
     --ink-soft: #5c564c;
     --muted: #5c564c;
@@ -160,7 +130,7 @@
     --paper: #1c1915;
     --surface: #1c1915;
     --line: #3f3a34;
-    --control: #3f3a34;
+    --control: #d4cdc2;
     --ink: #f4f1ea;
     --ink-soft: #d4cdc2;
     --muted: #d4cdc2;
@@ -744,11 +714,7 @@
   }
 
   .experience-chevron {
-    transition: transform 150ms;
-  }
-
-  .experience-details[open] .experience-chevron {
-    transform: rotate(180deg);
+    transition: none;
   }
 
   .lid li:has([data-pressed="true"]) {

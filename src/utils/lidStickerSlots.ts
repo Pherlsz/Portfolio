@@ -31,11 +31,11 @@ export const STICKER_HEIGHT_OVER_WIDTH: Record<LidSlotId, number> = {
 
 /** Posição inicial na tampa, em % da largura (x, w) e da altura (y). */
 export const LID_LAYOUT: LidSlot[] = [
-  { id: 'morcega', x: 1, y: 10, w: 13, rotate: -4 },
-  { id: 'banguela', x: 16, y: 16, w: 13, rotate: 5 },
-  { id: 'tomada', x: 31, y: 12, w: 13, rotate: 2 },
-  { id: 'd20', x: 47, y: 8, w: 11, rotate: 7 },
-  { id: 'typescript', x: 63, y: 22, w: 9, rotate: -5 },
+  { id: 'morcega', x: 1, y: 4, w: 16, rotate: -4 },
+  { id: 'banguela', x: 18, y: 12, w: 16, rotate: 5 },
+  { id: 'tomada', x: 35, y: 8, w: 16, rotate: 2 },
+  { id: 'd20', x: 52, y: 8, w: 11, rotate: 7 },
+  { id: 'typescript', x: 64, y: 22, w: 9, rotate: -5 },
   { id: 'react', x: 75, y: 20, w: 9, rotate: 6 },
   { id: 'nextjs', x: 87, y: 24, w: 9, rotate: 3 }
 ];

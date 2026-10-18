@@ -3,24 +3,24 @@ import { DEFAULT_PORTFOLIO_DATA, plainText } from '../data/portfolioData';
 
 const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
-export function Hero({ onOpenCv }: { onOpenJobFit?: () => void; onOpenCv: () => void }) {
+export function Hero({ onOpenCv }: { onOpenCv: () => void }) {
   const { profile, featuredProjects, experiences, education } = DEFAULT_PORTFOLIO_DATA;
   const featured = featuredProjects[0];
   const firstJob = experiences[0];
   const degree = education[0];
 
   return (
-    <div id="inicio" className="flex min-h-0 flex-1 flex-col">
+    <div id="inicio" tabIndex={-1} className="flex min-h-0 flex-1 flex-col outline-none">
       <h1 id="inicio-titulo" className="display mt-5 text-[1.75rem] leading-tight text-balance lg:text-[2rem]">
         {profile.name}
       </h1>
       <p className="mt-3 max-w-prose text-pretty text-[0.9375rem] leading-snug">{profile.headline}</p>
-      // shortcut: clamp summary so 01–05 stay on the first 360 screen, drop the clamp if the rail grows
+      {/* shortcut: clamp summary so 01–05 stay on the first 360 screen, drop the clamp if the rail grows */}
       <p className="mt-2 line-clamp-2 max-w-prose text-pretty text-[0.9375rem] leading-snug text-ink-soft">
         {plainText(profile.summary)}
       </p>
 
-      // shortcut: native hash links with no scroll spy, restore a spy if a covering sticky bar returns
+      {/* shortcut: native hash links with no scroll spy, restore a spy if a covering sticky bar returns */}
       <nav aria-label="Índice" className="mt-6">
         <ol>
           <li className="border-t border-line">
