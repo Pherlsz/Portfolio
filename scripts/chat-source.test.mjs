@@ -9,8 +9,10 @@ import {
   PRESET_QUESTIONS,
   PresetQuestionIdSchema,
   buildPresetFallback,
-  presetChipText
+  presetChipText,
+  presetIdForChipText
 } from '../src/utils/presetQuestions.ts';
+import { buildLocalFallback } from '../src/utils/localChatFallback.ts';
 
 const originalFetch = globalThis.fetch;
 
@@ -99,9 +101,6 @@ test('every preset id has a non-empty distinct fallback', () => {
     assert.equal(seen.has(answer), false, `duplicate fallback for ${preset.id}`);
     seen.add(answer);
   }
-  const design = buildPresetFallback('design_system_wcag');
-  assert.doesNotMatch(design, /10\.000\+ usuários/i);
-  assert.doesNotMatch(design, /5\.000\+ registros/i);
 });
 
 test('preset fallbacks share no normalized sentence or bullet', () => {
@@ -132,6 +131,20 @@ test('preset chip uses dedicated fallback when AI is unavailable', async () => {
   });
   assert.equal(data.source, 'local');
   assert.equal(data.reply, buildPresetFallback(PRESET_QUESTIONS[0].id));
+});
+
+test('removed preset id experience falls back to keyword matcher with 200', async () => {
+  const data = await chatJson({
+    mode: 'chat',
+    message: 'Conte a experiência profissional',
+    presetId: 'experience',
+    history: []
+  });
+  const parsed = ChatResponseSchema.safeParse(data);
+  assert.equal(parsed.success, true);
+  assert.equal(parsed.data.source, 'local');
+  assert.ok(parsed.data.reply.includes('Pedro') || parsed.data.reply.includes('Atlas'));
+  assert.notEqual(data.reply, buildPresetFallback('recruiter_summary'));
 });
 
 test('unknown preset id does not crash and falls back to keyword matcher', async () => {
@@ -185,9 +198,25 @@ const stackFollowUpInput = () => ({
   data: DEFAULT_PORTFOLIO_DATA
 });
 
-test('stack question follow-ups can suggest production_backend chip', () => {
+test('stack question follow-ups suggest only valid presets or free-text chips', () => {
   const chips = suggestFollowUps(stackFollowUpInput());
-  assert.ok(chips.includes(presetChipText('production_backend')));
+  const removedPresetIds = new Set([
+    'experience',
+    'design_system_wcag',
+    'accessibility_testing',
+    'atlas_list_performance',
+    'atlas_sign_performance',
+    'production_backend',
+    'atlas_testing'
+  ]);
+  for (const chip of chips) {
+    const presetId = presetIdForChipText(chip);
+    if (presetId !== undefined) {
+      assert.equal(PresetQuestionIdSchema.safeParse(presetId).success, true, chip);
+      assert.equal(removedPresetIds.has(presetId), false, chip);
+    }
+  }
+  assert.ok(chips.some((c) => presetIdForChipText(c) === 'atlas_ai' || c.includes('IA')));
 });
 
 test('availability follow-up suggests compare_job_fit chip', () => {
@@ -197,7 +226,54 @@ test('availability follow-up suggests compare_job_fit chip', () => {
   assert.ok(chips.includes(presetChipText('compare_job_fit')));
 });
 
-test('stack question follow-ups can suggest atlas_testing chip', () => {
-  const chips = suggestFollowUps(stackFollowUpInput());
-  assert.ok(chips.includes(presetChipText('atlas_testing')));
+test('Gymkhana local fallback lists repo only without vercel or undefined', () => {
+  const reply = buildLocalFallback('Fale do projeto Gymkhana Database', 'chat');
+  assert.match(reply, /Gymkhana Database/);
+  assert.match(reply, /github\.com\/Pherlsz\/Gymkhana-Database/);
+  assert.doesNotMatch(reply, /vercel/i);
+  assert.doesNotMatch(reply, /undefined/);
+});
+
+test('every suggestFollowUps chip maps to a preset or free text across modes', () => {
+  const removedPresetIds = new Set([
+    'experience',
+    'design_system_wcag',
+    'accessibility_testing',
+    'atlas_list_performance',
+    'atlas_sign_performance',
+    'production_backend',
+    'atlas_testing'
+  ]);
+  const scenarios = [
+    stackFollowUpInput(),
+    {
+      mode: 'chat',
+      asked: presetChipText('recruiter_summary'),
+      reply: buildPresetFallback('recruiter_summary'),
+      data: DEFAULT_PORTFOLIO_DATA
+    },
+    {
+      mode: 'chat',
+      asked: 'Gymkhana',
+      reply: buildLocalFallback('Gymkhana', 'chat'),
+      data: DEFAULT_PORTFOLIO_DATA
+    },
+    {
+      mode: 'jobfit',
+      asked: 'Vaga React',
+      reply: 'Fit parcial.',
+      job: 'React TypeScript remoto',
+      data: DEFAULT_PORTFOLIO_DATA
+    }
+  ];
+  for (const input of scenarios) {
+    const chips = suggestFollowUps(input);
+    for (const chip of chips) {
+      const presetId = presetIdForChipText(chip);
+      if (presetId !== undefined) {
+        assert.equal(PresetQuestionIdSchema.safeParse(presetId).success, true);
+        assert.equal(removedPresetIds.has(presetId), false, `${chip} in ${input.asked}`);
+      }
+    }
+  }
 });

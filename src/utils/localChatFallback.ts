@@ -9,6 +9,14 @@ import {
 } from '../data/portfolioData.ts';
 import { buildJobFitReply } from './jobFit.ts';
 import { mentionsPersonalProject } from './chatGuardrails.ts';
+import { featuredProjectLinks, type FeaturedProjectLinkFields } from './featuredProjectLinks.ts';
+
+function featuredProjectChatSuffix(project: FeaturedProjectLinkFields): string {
+  const links = featuredProjectLinks(project);
+  const repo = links.find((link) => link.kind === 'repo');
+  const url = repo?.href ?? links.find((link) => link.kind === 'site')?.href;
+  return url ? ` (${url})` : '';
+}
 
 export function buildLocalFallback(
   query: string,
@@ -32,7 +40,7 @@ export function buildLocalFallback(
   }
   if (q.includes('projet') || mentionsPersonalProject(query, data)) {
     const featured = featuredProjects
-      .map((item) => `- **${item.name}**: ${item.tagline} (${item.repoUrl ?? item.href})`)
+      .map((item) => `- **${item.name}**: ${item.tagline}${featuredProjectChatSuffix(item)}`)
       .join('\n');
     return `Ferramentas em destaque:\n${featured}\n\nOutro projeto: **${project.name}** (${project.language}, ${project.version}): ${project.tagline}\nCódigo: ${project.repoUrl}`;
   }

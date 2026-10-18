@@ -1,6 +1,6 @@
 import type { PortfolioData } from '../data/portfolioData.ts';
 import { mentionsPersonalProject, type ChatMode } from './chatGuardrails.ts';
-import { presetChipText } from './presetQuestions.ts';
+import { presetChipText, type PresetQuestionId } from './presetQuestions.ts';
 
 function fold(text: string): string {
   return text
@@ -26,6 +26,10 @@ function alreadyAsked(asked: string, chip: string): boolean {
   const c = fold(chip);
   if (!a || !c) return false;
   return a.includes(c.slice(0, 22)) || c.includes(a.slice(0, 22));
+}
+
+function presetChips(...ids: PresetQuestionId[]): string[] {
+  return ids.map((id) => presetChipText(id));
 }
 
 export function suggestFollowUps(input: {
@@ -72,27 +76,20 @@ export function suggestFollowUps(input: {
   if (mentionsPersonalProject(asked, data) || /\bprojet/.test(q)) {
     chips.push('Qual a stack desse projeto?', 'Ele usa isso em produção?');
   } else if (/stack|tecnolog|skill/.test(q)) {
-    chips.push(presetChipText('production_backend'), presetChipText('atlas_testing'));
+    chips.push(...presetChips('atlas_ai', 'compare_job_fit', 'recruiter_summary'));
   } else if (/salar|remoto|hibrid|senioridade|pleno|pretens/.test(q)) {
     chips.push(presetChipText('compare_job_fit'));
-  } else if (/wcag|acessib|design system/.test(q) || /wcag|acessib|design system/.test(replyAndJob)) {
-    chips.push(presetChipText('accessibility_testing'), presetChipText('atlas_list_performance'));
-  } else if (/atlas|sign|plg|experi|carreira|trabalh/.test(q) || /atlas|sign|plg|experi|carreira|trabalh/.test(replyAndJob)) {
-    chips.push(
-      presetChipText('design_system_wcag'),
-      presetChipText('atlas_sign_performance'),
-      presetChipText('atlas_ai')
-    );
+  } else if (
+    /wcag|acessib|design system|atlas|sign|plg|experi|carreira|trabalh|ia\b/.test(q) ||
+    /wcag|acessib|design system|atlas|sign|plg|experi|carreira|trabalh/.test(replyAndJob)
+  ) {
+    chips.push(...presetChips('atlas_ai', 'stack', 'recruiter_summary'));
   } else if (/stack|tecnolog|skill/.test(replyAndJob)) {
-    chips.push(presetChipText('production_backend'), presetChipText('atlas_testing'));
+    chips.push(...presetChips('atlas_ai', 'compare_job_fit'));
   } else if (/salar|remoto|hibrid|senioridade|pleno|pretens/.test(replyAndJob)) {
     chips.push(presetChipText('compare_job_fit'));
   }
 
-  chips.push(
-    presetChipText('experience'),
-    presetChipText('recruiter_summary'),
-    presetChipText('design_system_wcag')
-  );
+  chips.push(...presetChips('recruiter_summary', 'stack', 'atlas_ai', 'compare_job_fit'));
   return pick(...chips);
 }
