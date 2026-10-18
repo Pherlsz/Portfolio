@@ -507,6 +507,12 @@
     background: transparent;
   }
 
+  @media (pointer: coarse) {
+    .lid {
+      overflow: hidden;
+    }
+  }
+
   .sticker-face-host {
     container-type: inline-size;
   }

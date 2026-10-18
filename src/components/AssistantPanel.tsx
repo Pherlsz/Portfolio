@@ -127,6 +127,19 @@ export function AssistantPanel({
     if (open) endRef.current?.scrollIntoView({ block: 'end' });
   }, [messages, isLoading, open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const { documentElement: html, body } = document;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+    };
+  }, [open]);
+
   const runAction = (action: ChatAction) => {
     if (action.type === 'export_cv') {
       onOpenChange(false);
@@ -322,7 +335,7 @@ export function AssistantPanel({
           )}
         </div>
 
-        <div role="log" aria-live="polite" className="flex-1 space-y-4 overflow-y-auto overscroll-contain p-5">
+        <div role="log" aria-live="polite" className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-5">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div
@@ -383,7 +396,10 @@ export function AssistantPanel({
         </div>
 
         {mode === 'jobfit' ? (
-          <form onSubmit={submitJob} className="shrink-0 border-t border-line p-4">
+          <form
+            onSubmit={submitJob}
+            className="min-h-0 max-h-[45%] shrink-0 overflow-y-auto overscroll-contain border-t border-line p-4 sm:max-h-none sm:overflow-visible"
+          >
             <p className="text-[0.9375rem] text-ink-soft">
               {activeJob
                 ? 'Pergunte sobre a vaga em análise ou cole outra descrição para substituir.'

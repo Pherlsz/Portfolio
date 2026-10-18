@@ -308,7 +308,7 @@ function LidSticker({
       type="button"
       drag
       dragConstraints={lidRef}
-      dragElastic={0.08}
+      dragElastic={0}
       dragMomentum={false}
       whileDrag={{ scale: 1.08 }}
       onPointerDown={onFront}
