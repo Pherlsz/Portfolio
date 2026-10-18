@@ -83,7 +83,12 @@ const HistorySchema = z
   .default([]);
 
 export const ChatRequestSchema = z.discriminatedUnion('mode', [
-  z.object({ mode: z.literal('chat'), message: QuestionSchema, history: HistorySchema }),
+  z.object({
+    mode: z.literal('chat'),
+    message: QuestionSchema,
+    history: HistorySchema,
+    presetId: z.string().trim().max(40).optional()
+  }),
   z.object({
     mode: z.literal('jobfit'),
     message: z.string().trim().min(1).max(JOB_DESCRIPTION_LIMIT),
