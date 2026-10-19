@@ -16,7 +16,7 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
       <div className="name-band">
         <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-8 lg:py-10">
           <div className="relative min-h-[22rem] sm:min-h-[24rem] lg:min-h-[26rem]">
-            <div id="hero-identity" className="relative z-[2] w-fit max-w-[10.75rem] sm:max-w-none">
+            <div id="hero-identity" className="relative z-[2] w-fit">
               <h1
                 id="inicio-titulo"
                 className="display-wide text-[clamp(2.15rem,9vw,4.4rem)] leading-[0.9] text-on-band"

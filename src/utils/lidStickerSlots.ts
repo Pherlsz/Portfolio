@@ -324,14 +324,11 @@ export function nudgeConflicts(
     else rest.push({ last, box });
   }
   for (const item of rest) {
-    keep.push(
-      nearestPlace(item.last, item.box, playable, forbidden, keep) ?? {
-        ...item.box,
-        x: item.last?.x ?? playable.x,
-        y: item.last?.y ?? playable.y,
-        rotate: item.last?.rotate ?? 0
-      }
-    );
+    const moved =
+      nearestPlace(item.last, item.box, playable, forbidden, keep) ??
+      fallbackPlace(item.box, playable, forbidden, keep) ??
+      evenGrid([item.box], playable)[0];
+    if (moved) keep.push(moved);
   }
   return orderSlots(keep);
 }
