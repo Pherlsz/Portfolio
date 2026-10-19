@@ -46,7 +46,7 @@ function pickFollowUps(asked: string, candidates: string[]): string[] {
 }
 
 /** Full unsliced chip list before dedupe, alreadyAsked filter, and slice(0, 3). */
-export function followUpCandidates(input: FollowUpInput): string[] {
+function followUpCandidates(input: FollowUpInput): string[] {
   const { mode, asked, reply, job, isFollowUp, data } = input;
   const q = fold(asked);
   const replyAndJob = `${fold(reply)} ${fold(job ?? '')}`;
