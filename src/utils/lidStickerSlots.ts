@@ -63,9 +63,9 @@ const FALLBACK_ROTATE: Record<LidSlotId, number> = {
   nextjs: 5
 };
 
-export const MIN_HIT = 44;
+const MIN_HIT = 44;
 export const TEXT_PAD = 12;
-export const STICKER_GAP = 8;
+const STICKER_GAP = 8;
 const EDGE = 14;
 const TRIES = 48;
 const GRID = 6;

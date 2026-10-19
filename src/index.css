@@ -555,17 +555,6 @@
     border-color: var(--invalid);
   }
 
-  .field-error {
-    display: none;
-    margin-top: 0.35rem;
-    font-size: 0.8125rem;
-    color: var(--invalid);
-  }
-
-  .field:user-invalid + .field-error {
-    display: block;
-  }
-
   .field-area {
     min-height: 6.5rem;
     max-height: 16rem;
@@ -933,10 +922,6 @@
     color: var(--yellow-500);
     text-shadow: 0 1px 0 var(--yellow-800);
     user-select: none;
-  }
-
-  .notebook-margin {
-    position: relative;
   }
 
   .experience-chevron {
