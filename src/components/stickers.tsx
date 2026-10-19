@@ -478,6 +478,7 @@ function foldDrag(slots: ScatterSlot[], offsets: Partial<Record<StickerId, { x: 
 export function StickerLid() {
   const lidRef = useRef<HTMLDivElement>(null);
   const widthRef = useRef(0);
+  const heightRef = useRef(0);
   const offsetsRef = useRef<Partial<Record<StickerId, { x: number; y: number }>>>({});
   const holo = useHoloRoulette();
   const [slots, setSlots] = useState<ScatterSlot[]>([]);
@@ -507,12 +508,19 @@ export function StickerLid() {
       if (field.width < 2 || field.height < 2) return;
       const widthChanged = Math.abs(field.width - widthRef.current) >= 0.5 || widthRef.current === 0;
       if (reason === 'width' && !widthChanged) return;
+      const prevW = widthRef.current || field.width;
+      const prevH = heightRef.current || field.height;
       widthRef.current = field.width;
+      heightRef.current = field.height;
       const playable = playableRect(field.width, field.height);
       const forbidden = measureForbidden(field);
       setSlots((prev) => {
-        const folded = tagFracs(foldDrag(prev, offsetsRef.current), field.width, field.height);
+        const offsets = offsetsRef.current;
         offsetsRef.current = {};
+        const dragged = foldDrag(prev, offsets);
+        const folded = Object.values(offsets).some((offset) => offset && (offset.x !== 0 || offset.y !== 0))
+          ? tagFracs(dragged, prevW, prevH)
+          : dragged;
         if (folded.length === 0) {
           return scatterStickers(
             playable,
