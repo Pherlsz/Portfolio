@@ -1,11 +1,9 @@
-import { lazy, Suspense } from 'react';
 import { FileText, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
+import { StickerLid } from './stickers';
 import { Marked } from './ui';
-
-const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
 export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
@@ -13,8 +11,8 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
   return (
     <section id="inicio" aria-labelledby="inicio-titulo">
       <div className="name-band">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-8 sm:py-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-center lg:gap-10 lg:py-10">
-          <div className="min-w-0">
+        <div className="relative mx-auto min-h-[18.5rem] max-w-6xl px-4 py-6 sm:min-h-[20rem] sm:px-8 sm:py-8 lg:min-h-[22.5rem] lg:py-10">
+          <div id="hero-identity" className="relative z-[2] w-fit max-w-[11.5rem] sm:max-w-none">
             <h1
               id="inicio-titulo"
               className="display-wide text-[clamp(2.15rem,9vw,4.4rem)] leading-[0.9] text-on-band"
@@ -28,9 +26,10 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
             <p className="mt-4 text-[0.9375rem] font-semibold text-on-band">{profile.jobTitle}</p>
             <p className="mt-1 text-[0.9375rem] text-on-band">{profile.location}</p>
           </div>
-          <Suspense fallback={<div className="sticker-field aspect-[16/10] w-full" />}>
-            <StickerLid />
-          </Suspense>
+          <StickerLid />
+          <p id="tampa-ajuda" className="relative z-[2] mt-10 max-w-xl text-sm text-on-band">
+            Arraste os stickers ou use as setas. Clique no D20 para rolar.
+          </p>
         </div>
       </div>
 

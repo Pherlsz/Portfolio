@@ -18,10 +18,14 @@ import { HoloSparkleCanvas } from './HoloSparkleCanvas';
 import { useStickerHoloPointer } from '../utils/holoPointer';
 import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
 import {
-  createArrumarArrangement,
-  LID_ASPECT,
-  LID_LAYOUT,
-  type LidSlot
+  localPadded,
+  playableRect,
+  relocateOutOfBounds,
+  scatterStickers,
+  stickerBox,
+  STICKER_ORDER,
+  type LidSlotId,
+  type ScatterSlot
 } from '../utils/lidStickerSlots';
 import {
   resolveLidCaptionLayout,
@@ -33,14 +37,7 @@ import {
   type AxisDragConstraints
 } from '../utils/stickerDragConstraints';
 
-export type StickerId =
-  | 'morcega'
-  | 'banguela'
-  | 'tomada'
-  | 'd20'
-  | 'typescript'
-  | 'react'
-  | 'nextjs';
+export type StickerId = LidSlotId;
 
 interface StickerDef {
   label: string;
@@ -123,8 +120,6 @@ const STICKERS: Record<StickerId, StickerDef> = {
     react: () => 'app/'
   }
 };
-
-type Slot = LidSlot & { id: StickerId };
 
 const DEFAULT_CAPTION_LAYOUT: LidCaptionLayout = { edge: 'above', align: 'center', shiftX: 0 };
 
@@ -238,17 +233,7 @@ export function StaticSticker({ id, className = '' }: { id: StickerId; className
   );
 }
 
-/** null volta cada sticker ao lugar original; senão cada um vai para o lugar sorteado. */
-type Arrangement = { key: number; targets: Record<StickerId, Slot> | null } | null;
-
 const SPRING = { type: 'spring', stiffness: 260, damping: 24 } as const;
-
-/** Centro do sticker no slot, em % da tampa. */
-function slotCenter(slot: Slot, id: StickerId) {
-  const def = STICKERS[id];
-  const height = slot.w * LID_ASPECT * (def.height / def.width);
-  return { x: slot.x + slot.w / 2, y: slot.y + height / 2 };
-}
 
 function applyAxisConstraints(
   constraints: AxisDragConstraints,
@@ -267,14 +252,12 @@ function applyAxisConstraints(
 function LidSticker({
   slot,
   lidRef,
-  arrangement,
   holoActive,
   onFront,
   onReact
 }: {
-  slot: Slot;
+  slot: ScatterSlot;
   lidRef: RefObject<HTMLDivElement | null>;
-  arrangement: Arrangement;
   holoActive: boolean;
   onFront: () => void;
   onReact: (message: string) => void;
@@ -295,6 +278,13 @@ function LidSticker({
   const reduceMotion = useReducedMotion() === true;
   const baseRotate = useRef(slot.rotate);
   useStickerHoloPointer(ref, holoActive);
+
+  useLayoutEffect(() => {
+    x.set(0);
+    y.set(0);
+    rotate.set(slot.rotate);
+    baseRotate.current = slot.rotate;
+  }, [slot.x, slot.y, slot.rotate, rotate, x, y]);
 
   const room = () => {
     const lid = lidRef.current?.getBoundingClientRect();
@@ -341,7 +331,7 @@ function LidSticker({
     measure();
     const frame = requestAnimationFrame(measure);
     return () => cancelAnimationFrame(frame);
-  }, [pressed, reaction, arrangement, lidRef]);
+  }, [pressed, reaction, lidRef]);
 
   useEffect(() => {
     const node = ref.current;
@@ -356,28 +346,6 @@ function LidSticker({
       node.removeEventListener('pointercancel', stopDrag);
     };
   }, [dragControls]);
-
-  useEffect(() => {
-    if (!arrangement) return;
-    const target = arrangement.targets?.[slot.id];
-    const lid = lidRef.current?.getBoundingClientRect();
-    const space = room();
-    if (!target || !lid || !space) {
-      void Promise.all([animate(x, 0, SPRING), animate(y, 0, SPRING), animate(rotate, slot.rotate, SPRING)]);
-      return;
-    }
-    const from = slotCenter(slot, slot.id);
-    const to = slotCenter(target, slot.id);
-    const constraints = roomToDragConstraints(space, { x: x.get(), y: y.get() });
-    const deltaX = ((to.x - from.x) / 100) * lid.width;
-    const deltaY = ((to.y - from.y) / 100) * lid.height;
-    const clamped = applyAxisConstraints(constraints, { x: x.get(), y: y.get() }, deltaX, deltaY);
-    void Promise.all([
-      animate(x, clamped.x, SPRING),
-      animate(y, clamped.y, SPRING),
-      animate(rotate, target.rotate, SPRING)
-    ]);
-  }, [arrangement]);
 
   const nudge = (event: KeyboardEvent<HTMLButtonElement>) => {
     const step = event.shiftKey ? 48 : 16;
@@ -452,63 +420,98 @@ function LidSticker({
       data-pressed={pressed ? 'true' : undefined}
       data-holo={holoActive ? 'true' : undefined}
       data-holo-state={holoActive ? 'idle' : undefined}
-      // shortcut: logo stickers stay smaller than 44px on the fenced lid slots; resize slots when that file is free
-      className="group pointer-events-auto absolute cursor-grab touch-none active:cursor-grabbing"
+      className="group pointer-events-auto absolute flex cursor-grab touch-none items-center justify-center active:cursor-grabbing"
       style={{
         x,
         y,
         rotate,
-        left: `${slot.x}%`,
-        top: `${slot.y}%`,
-        width: `${slot.w}%`,
+        left: slot.x,
+        top: slot.y,
+        width: slot.w,
+        height: slot.h,
         ...holoVars
       }}
     >
-      <StickerArt
-        id={slot.id}
-        reaction={reaction}
-        face={face}
-        eager
-        holoFoil={holoActive}
-        captionLayout={captionLayout}
-        captionVisible={pressed}
-        bubbleRef={bubbleRef}
-      />
+      <span className="block" style={{ width: slot.artW }}>
+        <StickerArt
+          id={slot.id}
+          reaction={reaction}
+          face={face}
+          eager
+          holoFoil={holoActive}
+          captionLayout={captionLayout}
+          captionVisible={pressed}
+          bubbleRef={bubbleRef}
+        />
+      </span>
     </motion.button>
   );
 }
 
+function measureForbidden(field: DOMRectReadOnly) {
+  return [
+    localPadded(field, document.querySelector('header')),
+    localPadded(field, document.getElementById('hero-identity')),
+    localPadded(field, document.getElementById('tampa-ajuda'))
+  ].filter((rect): rect is NonNullable<typeof rect> => rect !== null);
+}
+
 export function StickerLid() {
   const lidRef = useRef<HTMLDivElement>(null);
+  const booted = useRef(false);
   const holo = useHoloRoulette();
-  const [order, setOrder] = useState<StickerId[]>(() => LID_LAYOUT.map((slot) => slot.id));
-  const [arrangement, setArrangement] = useState<Arrangement>(null);
+  const [slots, setSlots] = useState<ScatterSlot[]>([]);
+  const [order, setOrder] = useState<StickerId[]>(STICKER_ORDER);
   const [announcement, setAnnouncement] = useState('');
 
   const bringToFront = (id: StickerId) =>
     setOrder((prev) => (prev[prev.length - 1] === id ? prev : [...prev.filter((i) => i !== id), id]));
 
-  const shuffle = () => {
-    const slots = [...LID_LAYOUT];
-    for (let i = slots.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [slots[i], slots[j]] = [slots[j], slots[i]];
-    }
-    const targets = Object.fromEntries(LID_LAYOUT.map((slot, i) => [slot.id, slots[i]])) as Record<StickerId, Slot>;
-    setArrangement({ key: Date.now(), targets });
-    setAnnouncement('Stickers embaralhados. Use Tab e as setas para mover cada um.');
-  };
+  useLayoutEffect(() => {
+    const place = () => {
+      const lid = lidRef.current;
+      if (!lid) return;
+      const field = lid.getBoundingClientRect();
+      if (field.width < 2 || field.height < 2) return;
+      const playable = playableRect(field, window.innerWidth, window.innerHeight);
+      const forbidden = measureForbidden(field);
+      setSlots((prev) => {
+        if (!booted.current || prev.length === 0) {
+          booted.current = true;
+          return scatterStickers(
+            playable,
+            STICKER_ORDER.map((id) => stickerBox(id, field.width)),
+            forbidden
+          );
+        }
+        const next = relocateOutOfBounds(prev, playable, forbidden);
+        const same =
+          next.length === prev.length &&
+          next.every((slot, i) => slot.x === prev[i]?.x && slot.y === prev[i]?.y && slot.id === prev[i]?.id);
+        return same ? prev : next;
+      });
+    };
+
+    place();
+    const node = lidRef.current;
+    const observer = new ResizeObserver(place);
+    if (node) observer.observe(node);
+    window.addEventListener('resize', place);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', place);
+    };
+  }, []);
 
   return (
     <MotionConfig reducedMotion="user">
-    <div className="no-print">
-      <div className="sticker-field relative z-10 aspect-[16/10] w-full">
+      <div className="pointer-events-none absolute inset-0 z-[1] no-print">
         <div ref={lidRef} className="lid absolute inset-0">
           <ul
             aria-label="Stickers: Morcega, Banguela, Tomada e D20"
             data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
           >
-            {LID_LAYOUT.map((slot) => (
+            {slots.map((slot) => (
               <li
                 key={slot.id}
                 className="pointer-events-none absolute inset-0"
@@ -517,7 +520,6 @@ export function StickerLid() {
                 <LidSticker
                   slot={slot}
                   lidRef={lidRef}
-                  arrangement={arrangement}
                   holoActive={isStickerHoloActive(holo, slot.id)}
                   onFront={() => bringToFront(slot.id)}
                   onReact={setAnnouncement}
@@ -526,33 +528,10 @@ export function StickerLid() {
             ))}
           </ul>
         </div>
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <p id="tampa-ajuda" className="text-sm text-on-band">
-          Arraste os stickers ou use as setas. Clique no D20 para rolar.
+        <p className="sr-only" aria-live="polite">
+          {announcement}
         </p>
-        <div className="flex gap-2">
-          <button type="button" onClick={shuffle} className="btn btn-ghost px-4 text-sm">
-            Embaralhar
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setArrangement(createArrumarArrangement(Date.now()));
-              setAnnouncement('Stickers no lugar original.');
-            }}
-            className="btn btn-ghost px-4 text-sm"
-          >
-            Arrumar
-          </button>
-        </div>
       </div>
-
-      <p className="sr-only" aria-live="polite">
-        {announcement}
-      </p>
-    </div>
     </MotionConfig>
   );
 }

@@ -229,9 +229,10 @@ export function SiteHeader({
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-2 sm:gap-2 sm:px-8">
         <a
           href="#inicio"
-          className="display hidden min-h-11 min-w-0 items-center truncate px-2 text-[0.9375rem] leading-none md:inline-flex"
+          className="display inline-flex min-h-11 min-w-0 max-w-[4.75rem] items-center truncate px-2 text-[0.9375rem] leading-none sm:max-w-none"
         >
-          {profile.shortName}
+          <span className="sm:hidden">{profile.shortName.split(' ')[0]}</span>
+          <span className="hidden sm:inline">{profile.shortName}</span>
         </a>
 
         <nav aria-label="Seções" className="site-nav min-w-0 flex-1">
@@ -266,7 +267,7 @@ export function SiteHeader({
             aria-controls="atalhos"
             aria-expanded={jumpOpen}
             aria-label={`Abrir atalhos, ${modKey} K`}
-            className="btn btn-ghost min-h-11 px-2 font-mono text-sm sm:px-3"
+            className="jump-trigger btn btn-ghost min-h-11 px-2 font-mono text-sm sm:px-3"
           >
             <kbd className="font-mono">{modKey}&nbsp;K</kbd>
           </button>

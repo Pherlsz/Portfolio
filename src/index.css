@@ -153,8 +153,8 @@
     --valid: #34d399;
     --invalid: #fb7185;
     --focus: var(--ink);
-    --band: #e7f25a;
-    --on-band: #111111;
+    --band: #1c1c16;
+    --on-band: #f4f4f1;
 
     --cta-bg: #e7f25a;
     --cta-fg: #111111;
@@ -587,6 +587,15 @@
     color: var(--on-band);
   }
 
+  html.dark .name-band {
+    box-shadow: inset 0 -3px 0 var(--marker);
+  }
+
+  html.dark .name-band :focus-visible {
+    outline-color: #e7f25a;
+    box-shadow: 0 0 0 3px #111111;
+  }
+
   .sticker-field {
     position: relative;
   }
@@ -602,7 +611,6 @@
     color: var(--ink-soft);
     transition-property: color, text-decoration-color;
     transition-duration: 160ms;
-    transition-delay: 150ms;
     transition-timing-function: var(--ease-out);
   }
 
@@ -613,8 +621,10 @@
     text-underline-offset: 0.22em;
   }
 
-  .site-nav-link:focus-visible {
-    transition-delay: 0s;
+  @media (hover: none) and (pointer: coarse) {
+    .jump-trigger {
+      display: none;
+    }
   }
 
   .jump-item {
