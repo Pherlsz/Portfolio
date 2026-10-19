@@ -81,6 +81,16 @@ test('lid rasters exist; unused sticker webps are not shipped', () => {
   assert.deepEqual(svgs.sort(), ['nextjs.svg', 'react.svg', 'typescript.svg']);
 });
 
+test('d20 face overlay sits above sticker art and parses the roll', () => {
+  assert.match(stickersSrc, /id === 'd20' && \(/);
+  assert.match(stickersSrc, /className="d20-face"/);
+  assert.match(stickersSrc, /if \(id === 'd20'\) setFace\(parseD20Face\(text\)\)/);
+  const faceBlock = cssSrc.slice(cssSrc.indexOf('.d20-face {'), cssSrc.indexOf('.notebook-margin'));
+  assert.match(faceBlock, /z-index: 2/);
+  assert.match(faceBlock, /28cqw/);
+  assert.match(faceBlock, /--yellow-500/);
+});
+
 test('unused notebook-seal sticker is not in the repo', () => {
   const name = ['lid', 'seal'].join('-');
   assert.doesNotMatch(stickersSrc, new RegExp(name));

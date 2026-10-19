@@ -10,7 +10,7 @@ function GymkhanaCorePoster() {
   return (
     <div className="relative isolate flex aspect-[16/10] flex-col justify-between overflow-hidden bg-poster p-5 text-poster-ink">
       <div className="flex items-start justify-between gap-4">
-        <p className="font-mono text-[0.7rem] text-poster-ink/80">Biblioteca</p>
+        <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-marker">Biblioteca</p>
         <p className="font-mono text-[0.7rem] text-poster-ink/80">{project.version}</p>
       </div>
       <p className="display-wide text-[1.55rem] uppercase leading-[0.86]">
@@ -76,7 +76,7 @@ export function ProjectSection() {
       {featured && (
         <>
           <h3 className="display text-xl">Em destaque</h3>
-          <article className="mt-4 grid lg:grid-cols-2">
+          <article className="mt-4 grid overflow-hidden rounded-[1.75rem] border border-line bg-surface lg:grid-cols-2">
             <img
               src={featured.image}
               alt=""
@@ -84,9 +84,9 @@ export function ProjectSection() {
               height={540}
               loading="lazy"
               decoding="async"
-              className="-mx-5 aspect-[16/10] h-full w-[calc(100%+2.5rem)] max-w-none object-cover object-left-top sm:-mx-8 sm:w-[calc(100%+4rem)] lg:mx-0 lg:w-full"
+              className="aspect-[16/10] h-full w-full object-cover object-left-top"
             />
-            <div className="flex flex-col justify-between gap-5 border-t border-line py-5 lg:border-l lg:border-t-0 lg:px-6">
+            <div className="flex flex-col justify-between gap-5 p-5 sm:p-6">
               <div>
                 <p className="eyebrow">{featured.kicker}</p>
                 <h4 className="display mt-1 text-2xl">{featured.name}</h4>
@@ -95,7 +95,7 @@ export function ProjectSection() {
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                   {featured.access === 'restricted' && !featured.repoUrl && !featured.href && (
-                    <span className="font-mono text-[0.7rem] text-ink-soft">
+                    <span className="rounded-full border border-line px-2.5 py-0.5 font-mono text-[0.7rem] uppercase tracking-wide text-ink-soft">
                       Acesso restrito
                     </span>
                   )}
@@ -113,9 +113,9 @@ export function ProjectSection() {
       )}
 
       <h3 className="display mt-14 text-xl">Outros projetos</h3>
-      <article className="mt-4 border-t border-line sm:grid sm:grid-cols-[minmax(0,16rem)_1fr]">
+      <article className="mt-4 overflow-hidden rounded-[1.75rem] border border-line bg-surface sm:grid sm:grid-cols-[minmax(0,16rem)_1fr]">
         <GymkhanaCorePoster />
-        <div className="flex flex-col justify-between gap-5 py-5 sm:border-l sm:border-line sm:px-6">
+        <div className="flex flex-col justify-between gap-5 p-5 sm:p-6">
           <div>
             <p className="eyebrow">Biblioteca em Go</p>
             <h4 className="display mt-1 text-2xl">{project.name}</h4>

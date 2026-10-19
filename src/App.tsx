@@ -53,7 +53,6 @@ export default function App() {
           Abrir assistente
         </button>
       </nav>
-      <div className="sheet">
       <SiteHeader
         onOpenAssistant={() => {
           setAssistantMode('chat');
@@ -100,7 +99,6 @@ export default function App() {
       </main>
 
       <SiteFooter onOpenInspector={() => setInspectorOpen(true)} />
-      </div>
 
       {assistantOpen ? (
         <Suspense fallback={null}>

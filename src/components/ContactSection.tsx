@@ -41,7 +41,7 @@ function ContactForm({ email }: { email: string }) {
     <form
       onSubmit={onSubmit}
       aria-busy={status === 'sending'}
-      className="border-t border-line pt-5 sm:pt-6"
+      className="rounded-[1.75rem] border border-line bg-surface p-5 sm:p-6"
     >
       <p className="font-bold">Ou escreva sua mensagem</p>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -52,7 +52,7 @@ function ContactForm({ email }: { email: string }) {
             type="text"
             required
             autoComplete="name"
-            placeholder="Seu nome…"
+            placeholder="Seu nome"
             className="field"
           />
         </label>
@@ -64,7 +64,7 @@ function ContactForm({ email }: { email: string }) {
             required
             autoComplete="email"
             spellCheck={false}
-            placeholder="nome@dominio.com…"
+            placeholder="nome@dominio.com"
             className="field"
           />
         </label>
@@ -75,7 +75,7 @@ function ContactForm({ email }: { email: string }) {
           name="message"
           required
           rows={5}
-          placeholder="Sobre o que você quer conversar…"
+          placeholder="Sobre o que você quer conversar?"
           className="field field-area"
         />
       </label>
@@ -140,14 +140,14 @@ export function ContactSection({
               <a
                 href={`mailto:${profile.email}`}
                 translate="no"
-                className="inline-flex min-h-11 items-center text-lg font-semibold underline decoration-mark decoration-2 underline-offset-4"
+                className="text-lg font-semibold underline decoration-marker decoration-2 underline-offset-4"
               >
                 {profile.email}
               </a>
               <CopyEmailButton
                 email={profile.email}
                 label="Copiar e-mail"
-                className="min-h-11 cursor-pointer border border-control px-3 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[outline-color:var(--focus-ring)] active:scale-[0.97]"
+                className="h-9 cursor-pointer rounded-full border border-line px-3 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-ink hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[outline-color:var(--focus-ring)] active:translate-y-px"
               />
             </div>
 

@@ -49,7 +49,7 @@ export function SkillBadge({ name }: { name: string }) {
   const fill = !icon || icon.hex === '000000' ? 'currentColor' : `#${icon.hex}`;
 
   return (
-    <li className="inline-flex min-h-11 items-center gap-2 border-b border-line px-1 py-2 text-[0.9375rem]">
+    <li className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[0.9375rem]">
       {name === 'Vitest' ? (
         <VitestMark />
       ) : icon ? (
@@ -121,7 +121,7 @@ export function CertBadge({ cert }: { cert: Certification }) {
   );
 
   return (
-    <li className="overflow-hidden border border-line">
+    <li className="overflow-hidden rounded-2xl border border-line bg-surface">
       {cert.href ? (
         <a href={cert.href} target="_blank" rel="noreferrer" className="block hover:bg-paper/60">
           {inner}

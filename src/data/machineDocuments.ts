@@ -297,18 +297,13 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
   ].join('');
 
   return `<main id="conteudo">
-      <section id="inicio">
-        <div class="name-band px-5 py-8 sm:px-8">
-          <h1 id="inicio-titulo" class="display-wide text-[clamp(2.1rem,8vw,4.2rem)] leading-[0.92]">${name}</h1>
-        </div>
-        <dl class="grid grid-cols-2 border-t border-line px-5 sm:grid-cols-3 sm:px-8">
-          <div class="border-r border-line px-3 py-3"><dt class="eyebrow">Cargo</dt><dd class="mt-1 font-semibold">${escHtml(profile.jobTitle)}</dd></div>
-          <div class="px-3 py-3 sm:border-r sm:border-line"><dt class="eyebrow">Lugar</dt><dd class="mt-1 font-semibold">${escHtml(profile.location)}</dd></div>
-          <div class="col-span-2 border-t border-line px-3 py-3 sm:col-span-1 sm:border-t-0"><dt class="eyebrow">Estado</dt><dd class="mt-1 font-semibold">${escHtml(profile.status)}</dd></div>
-        </dl>
-        <p class="mt-7 max-w-xl px-5 text-[clamp(1.2rem,2.1vw,1.5rem)] font-semibold leading-snug sm:px-8">${escHtml(profile.headline)}</p>
-        <p class="mt-4 max-w-xl px-5 text-ink-soft sm:px-8">${escHtml(plainText(profile.summary))}</p>
-        <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1 px-5 sm:px-8">
+      <section id="inicio" class="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
+        <p class="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1">${escHtml(profile.status)}<span class="hidden sm:inline" aria-hidden="true">·</span><span class="whitespace-nowrap basis-full sm:basis-auto">${escHtml(profile.location)}</span></p>
+        <h1 id="inicio-titulo" class="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]">${name}</h1>
+        <p class="mt-5 font-mono text-[0.9375rem] text-ink-soft"><span class="block">${escHtml(profile.jobTitle)}</span><span class="mt-1 block text-muted">React · Next.js · TypeScript</span></p>
+        <p class="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">${escHtml(profile.headline)}</p>
+        <p class="mt-4 max-w-xl text-ink-soft">${escHtml(plainText(profile.summary))}</p>
+        <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1">
           <a class="link" href="${escHtml(profile.cvUrl)}">Baixar CV (PDF)</a>
           <a class="link" href="mailto:${escHtml(profile.email)}">${escHtml(profile.email)}</a>
           <a class="link" href="${escHtml(profile.linkedin)}">LinkedIn</a>
