@@ -21,7 +21,7 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
       if (!ok) return;
       setEmailCopied(true);
       window.clearTimeout(emailCopiedTimer.current);
-      emailCopiedTimer.current = window.setTimeout(() => setEmailCopied(false), 2000);
+      emailCopiedTimer.current = window.setTimeout(() => setEmailCopied(false), 4000);
     });
   };
 
@@ -81,12 +81,12 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
             Ver CV
           </CTA>
           <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
-          <span className="flex flex-col self-start sm:self-auto">
+          <span className="flex max-w-[16rem] flex-col self-start sm:self-auto">
             <CTA variant="tertiary" href={`mailto:${profile.email}`} onClick={copyHeroEmail}>
               Falar por e-mail
             </CTA>
             <span className="mt-1 min-h-[1.25rem] text-sm text-ink-soft" aria-live="polite">
-              {emailCopied ? 'E-mail copiado' : ''}
+              {emailCopied ? 'Se o app de e-mail não abrir, o endereço já está copiado.' : ''}
             </span>
           </span>
         </div>
