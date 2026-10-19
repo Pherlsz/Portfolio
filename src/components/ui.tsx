@@ -22,12 +22,12 @@ export function SectionHeading({
   intro?: string;
 }) {
   return (
-    <header className="mb-10 max-w-3xl sm:mb-14">
+    <header className="mb-8 max-w-[70ch]">
       <p className="eyebrow">{eyebrow}</p>
-      <h2 id={id} className="display mt-2 text-[clamp(2rem,4.2vw,3rem)] leading-[1.02]">
+      <h2 id={id} className="display mt-2 text-xl leading-snug">
         {title}
       </h2>
-      {intro && <p className="mt-4 text-lg text-ink-soft">{intro}</p>}
+      {intro && <p className="mt-3 text-pretty text-ink-soft">{intro}</p>}
     </header>
   );
 }

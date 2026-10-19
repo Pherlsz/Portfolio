@@ -481,10 +481,10 @@ export function StickerLid() {
   return (
     <MotionConfig reducedMotion="user">
     <div className="no-print">
-      <div className="notebook relative z-10 aspect-[16/10] w-full">
+      <div className="sticker-frame relative z-10 aspect-[3.6/1] w-full">
         <div ref={lidRef} className="lid absolute inset-0">
           <ul
-            aria-label="Stickers colados na tampa do notebook"
+            aria-label="Stickers: Morcega, Banguela, Tomada e D20"
             data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
           >
             {LID_LAYOUT.map((slot) => (
@@ -512,7 +512,7 @@ export function StickerLid() {
           Arraste os stickers ou use as setas. Clique no D20 para rolar.
         </p>
         <div className="flex gap-2">
-          <button type="button" onClick={shuffle} className="btn btn-ghost min-h-9 px-4 text-sm">
+          <button type="button" onClick={shuffle} className="btn btn-ghost px-4 text-sm">
             Embaralhar
           </button>
           <button
@@ -521,7 +521,7 @@ export function StickerLid() {
               setArrangement(createArrumarArrangement(Date.now()));
               setAnnouncement('Stickers no lugar original.');
             }}
-            className="btn btn-ghost min-h-9 px-4 text-sm"
+            className="btn btn-ghost px-4 text-sm"
           >
             Arrumar
           </button>

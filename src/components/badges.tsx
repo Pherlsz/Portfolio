@@ -1,66 +1,4 @@
-import {
-  siDocker,
-  siDotnet,
-  siGithubactions,
-  siGo,
-  siNextdotjs,
-  siNodedotjs,
-  siPython,
-  siReact,
-  siReactquery,
-  siRedux,
-  siTailwindcss,
-  siTypescript
-} from 'simple-icons';
 import type { Certification } from '../data/portfolioData';
-
-const SKILL_ICONS: Record<string, { path: string; hex: string }> = {
-  TypeScript: siTypescript,
-  React: siReact,
-  'Next.js': siNextdotjs,
-  'Tailwind CSS': siTailwindcss,
-  'TanStack Query': siReactquery,
-  Redux: siRedux,
-  Python: siPython,
-  Go: siGo,
-  'Node.js': siNodedotjs,
-  '.NET': siDotnet,
-  Docker: siDocker,
-  'GitHub Actions': siGithubactions
-};
-
-function VitestMark() {
-  return (
-    <svg viewBox="0 0 32 32" className="size-4 shrink-0" aria-hidden="true">
-      <path
-        fill="#729b1b"
-        d="M21.088 8.304 12.064 24.464a4 4 0 0 1-6.928 0L.112 13.088A4 4 0 0 1 3.576 7h6.848a4 4 0 0 1 3.464 2l1.2 2.08 2.496-4.32a4 4 0 0 1 3.504-2z"
-      />
-      <path
-        fill="#fcc72b"
-        d="m31.888 13.088-5.024 8.704a4 4 0 0 1-5.48 1.216 4 4 0 0 1-1.216-5.472l5.024-8.704A4 4 0 0 1 28.656 7h.008a4 4 0 0 1 3.224 6.088z"
-      />
-    </svg>
-  );
-}
-
-export function SkillBadge({ name }: { name: string }) {
-  const icon = SKILL_ICONS[name];
-  const fill = !icon || icon.hex === '000000' ? 'currentColor' : `#${icon.hex}`;
-
-  return (
-    <li className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[0.9375rem]">
-      {name === 'Vitest' ? (
-        <VitestMark />
-      ) : icon ? (
-        <svg viewBox="0 0 24 24" className="size-3.5 shrink-0" aria-hidden="true">
-          <path d={icon.path} fill={fill} />
-        </svg>
-      ) : null}
-      {name}
-    </li>
-  );
-}
 
 function certParts(cert: Certification) {
   const cut = cert.name.indexOf(': ');
@@ -75,7 +13,7 @@ export function CertBadge({ cert }: { cert: Certification }) {
   const { series, title } = certParts(cert);
   const isHex = badge.shape === 'hexagon';
   const inner = (
-    <div className="flex items-center gap-3 p-3.5">
+    <div className="flex min-h-11 items-center gap-3 p-3.5">
       {cert.image ? (
         <img
           src={cert.image}
@@ -121,7 +59,7 @@ export function CertBadge({ cert }: { cert: Certification }) {
   );
 
   return (
-    <li className="overflow-hidden rounded-2xl border border-line bg-surface">
+    <li className="overflow-hidden border border-line">
       {cert.href ? (
         <a href={cert.href} target="_blank" rel="noreferrer" className="block hover:bg-paper/60">
           {inner}

@@ -64,7 +64,7 @@ export function AiFriendlyInspectorModal({
     <button
       type="button"
       onClick={() => copy(text)}
-      className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border border-line px-3 text-sm hover:border-ink"
+      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 border border-line px-3 text-sm hover:border-ink"
     >
       {copied ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
       {copied ? 'Copiado' : label}
@@ -79,7 +79,7 @@ export function AiFriendlyInspectorModal({
       onClick={(event) => {
         if (event.target === dialogRef.current) onClose();
       }}
-      className="no-print m-auto max-h-[88dvh] w-[calc(100%-1.5rem)] max-w-4xl flex-col overflow-hidden rounded-[1.75rem] border border-line bg-surface p-0 text-ink shadow-2xl shadow-neutral-950/30 open:flex"
+      className="inspector-dialog no-print m-auto max-h-[88dvh] w-[calc(100%-1.5rem)] max-w-4xl flex-col overflow-hidden border border-line bg-paper p-0 text-ink open:flex"
     >
       <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-5">
         <div>
@@ -91,7 +91,7 @@ export function AiFriendlyInspectorModal({
             agentes de IA, o JSON-LD para buscadores e o prompt do assistente.
           </p>
         </div>
-        <button type="button" onClick={onClose} aria-label="Fechar" className="icon-btn size-10 shrink-0">
+        <button type="button" onClick={onClose} aria-label="Fechar" className="icon-btn shrink-0">
           <X className="size-4" aria-hidden="true" />
         </button>
       </div>
@@ -104,7 +104,7 @@ export function AiFriendlyInspectorModal({
               type="button"
               aria-pressed={tab === id}
               onClick={() => setTab(id)}
-              className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${
+              className={`inline-flex min-h-11 items-center gap-1.5 px-3 text-sm font-semibold ${
                 tab === id ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink'
               }`}
             >
@@ -117,7 +117,7 @@ export function AiFriendlyInspectorModal({
           <button
             type="button"
             onClick={() => download(llmsTxt, 'Pedro_Henrique_Lopes.md', 'text/markdown;charset=utf-8')}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line px-3 text-sm hover:border-ink"
+            className="inline-flex min-h-11 items-center gap-1.5 border border-line px-3 text-sm hover:border-ink"
           >
             <Download className="size-4" aria-hidden="true" />
             Baixar perfil (.md)
@@ -125,7 +125,7 @@ export function AiFriendlyInspectorModal({
           <button
             type="button"
             onClick={() => download(jsonLd, 'Pedro_Henrique_Lopes.json', 'application/json;charset=utf-8')}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line px-3 text-sm hover:border-ink"
+            className="inline-flex min-h-11 items-center gap-1.5 border border-line px-3 text-sm hover:border-ink"
           >
             <Download className="size-4" aria-hidden="true" />
             Baixar JSON-LD
@@ -190,7 +190,7 @@ export function AiFriendlyInspectorModal({
                     key={sample.label}
                     type="button"
                     onClick={() => setTestInput(sample.input)}
-                    className="min-h-8 rounded-full border border-line px-3 text-sm hover:border-ink"
+                    className="min-h-11 border border-line px-3 text-sm hover:border-ink"
                   >
                     {sample.label}
                   </button>
@@ -205,7 +205,7 @@ export function AiFriendlyInspectorModal({
                 autoComplete="off"
                 value={testInput}
                 onChange={(e) => setTestInput(e.target.value)}
-                className="min-h-11 w-full rounded-full border border-control bg-paper px-4 font-mono text-sm"
+                className="min-h-11 w-full border border-control bg-paper px-4 font-mono text-sm"
               />
               <p className="font-mono text-sm text-ink-soft" aria-live="polite">
                 {validation.valid ? `Liberado (${validation.sanitized.length} caracteres).` : validation.error}

@@ -83,7 +83,7 @@ export interface SkillGroup {
 }
 
 export interface Pet {
-  id: string;
+  id: 'morcega' | 'banguela' | 'tomada';
   name: string;
   kind: 'gata' | 'gato';
   bio: string;

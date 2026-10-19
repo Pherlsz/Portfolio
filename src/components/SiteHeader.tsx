@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Menu, MessageSquare, Moon, Sun, X } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 
@@ -13,8 +13,7 @@ const NAV = [
 
 function syncThemeColor() {
   const root = getComputedStyle(document.documentElement);
-  const dark = document.documentElement.classList.contains('dark');
-  const hex = root.getPropertyValue(dark ? '--neutral-950' : '--neutral-50').trim();
+  const hex = root.getPropertyValue('--paper').trim();
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', hex);
 }
 
@@ -46,7 +45,7 @@ const SECTION_IDS = ['inicio', ...NAV.map((item) => item.id)];
 
 function headerOffsetPx(): number {
   const header = document.querySelector('header');
-  return (header?.getBoundingClientRect().height ?? 64) + 1;
+  return (header?.getBoundingClientRect().height ?? 56) + 1;
 }
 
 function scrollLinePx() {
@@ -131,6 +130,20 @@ function useActiveSection() {
   return active;
 }
 
+function isTypingTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  return target.isContentEditable;
+}
+
+function focusSection(id: string) {
+  const node = document.getElementById(id);
+  node?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  node?.focus();
+  history.pushState(null, '', `#${id}`);
+}
+
 export function SiteHeader({
   onOpenAssistant,
   onOpenCv
@@ -141,76 +154,100 @@ export function SiteHeader({
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const { theme, toggleTheme } = useTheme();
   const active = useActiveSection();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const jumpRef = useRef<HTMLButtonElement>(null);
+  const jumpDialogRef = useRef<HTMLDialogElement>(null);
+  const [jumpOpen, setJumpOpen] = useState(false);
+  const [modKey, setModKey] = useState('Ctrl');
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    setModKey(/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl');
   }, []);
 
+  const goProjetos = () => {
+    setJumpOpen(false);
+    focusSection('projeto');
+  };
+  const goCv = () => {
+    setJumpOpen(false);
+    onOpenCv();
+  };
+  const goContato = () => {
+    setJumpOpen(false);
+    focusSection('contato');
+  };
+
   useEffect(() => {
-    if (!menuOpen) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      setMenuOpen(false);
-      menuButtonRef.current?.focus();
+      if (isTypingTarget(event.target)) return;
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setJumpOpen((open) => !open);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [menuOpen]);
+  }, []);
 
-  const navLinks = (onNavigate?: () => void) =>
-    NAV.map((item) => (
-      <li key={item.id}>
-        <a
-          href={`#${item.id}`}
-          onClick={(event) => {
-            event.preventDefault();
-            onNavigate?.();
-            const id = item.id;
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                document.getElementById(id)?.scrollIntoView({ block: 'start' });
-                history.pushState(null, '', `#${id}`);
-              });
-            });
-          }}
-          aria-current={active === item.id ? 'location' : undefined}
-          className="block rounded-full px-2 py-2 text-[0.9375rem] font-semibold text-ink-soft transition-colors hover:text-ink aria-[current=location]:bg-marker aria-[current=location]:text-on-marker lg:px-3"
-        >
-          {item.label}
-        </a>
-      </li>
-    ));
+  useEffect(() => {
+    const dialog = jumpDialogRef.current;
+    if (!dialog) return;
+    if (jumpOpen && !dialog.open) {
+      dialog.showModal();
+    }
+    if (!jumpOpen && dialog.open) dialog.close();
+  }, [jumpOpen]);
+
+  useEffect(() => {
+    if (!jumpOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (isTypingTarget(event.target)) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key === 'p') {
+        event.preventDefault();
+        goProjetos();
+      } else if (key === 'c') {
+        event.preventDefault();
+        goCv();
+      } else if (key === 't') {
+        event.preventDefault();
+        goContato();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [jumpOpen, onOpenCv]);
 
   return (
-    <header
-      className={`no-print sticky top-0 z-40 border-b transition-colors ${
-        scrolled || menuOpen ? 'border-line bg-paper/90 backdrop-blur-md' : 'border-transparent'
-      }`}
-    >
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-5 sm:px-8">
-        <a href="#inicio" className="display text-lg leading-none">
+    <header className="no-print sticky top-0 z-40 border-b border-line bg-paper" data-section={active ?? undefined}>
+      <div className="mx-auto flex h-14 max-w-[calc(36ch+70ch+4rem)] items-center gap-2 px-4">
+        <a
+          href="#inicio"
+          className="hidden min-h-11 min-w-0 items-center truncate text-[0.9375rem] font-bold md:inline-flex"
+        >
           {profile.shortName}
         </a>
 
-        <nav aria-label="Seções" className="ml-auto hidden md:block">
-          <ul className="flex items-center gap-1">{navLinks()}</ul>
-        </nav>
-
-        <div className="ml-auto flex items-center gap-2 md:ml-3">
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            ref={jumpRef}
+            type="button"
+            onClick={() => setJumpOpen(true)}
+            aria-haspopup="dialog"
+            aria-controls="atalhos"
+            aria-expanded={jumpOpen}
+            aria-label={`Abrir atalhos, ${modKey} K`}
+            className="btn btn-ghost min-h-11 px-3 text-sm"
+          >
+            <kbd className="font-mono">{modKey}&nbsp;K</kbd>
+          </button>
           <button
             type="button"
             onClick={onOpenAssistant}
             aria-haspopup="dialog"
             aria-controls="assistente"
-            className="btn btn-ghost hidden min-h-10 px-4 text-sm sm:inline-flex"
+            className="btn btn-ghost min-h-11 px-3 text-sm"
           >
-            <MessageSquare className="size-4" aria-hidden="true" />
             Perguntar
           </button>
           <CTA
@@ -218,7 +255,7 @@ export function SiteHeader({
             onClick={onOpenCv}
             aria-haspopup="dialog"
             aria-controls="cv-preview"
-            className="hidden min-h-10 px-2 text-sm sm:inline-flex"
+            className="hidden min-h-11 px-2 text-sm lg:inline-flex"
             aria-label="Ver currículo"
           >
             Ver CV
@@ -227,7 +264,7 @@ export function SiteHeader({
             type="button"
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
-            className="icon-btn size-10"
+            className="icon-btn"
           >
             {theme === 'dark' ? (
               <Sun className="size-4" aria-hidden="true" />
@@ -235,49 +272,44 @@ export function SiteHeader({
               <Moon className="size-4" aria-hidden="true" />
             )}
           </button>
-          <button
-            ref={menuButtonRef}
-            type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-expanded={menuOpen}
-            aria-controls="menu-mobile"
-            aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
-            className="icon-btn size-10 md:hidden"
-          >
-            {menuOpen ? <X className="size-4" aria-hidden="true" /> : <Menu className="size-4" aria-hidden="true" />}
-          </button>
         </div>
       </div>
 
-      {menuOpen && (
-        <nav id="menu-mobile" aria-label="Seções" className="border-t border-line px-5 pb-5 pt-3 md:hidden">
-          <ul className="grid gap-1">{navLinks(() => setMenuOpen(false))}</ul>
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false);
-              onOpenAssistant();
-            }}
-            className="btn btn-ghost mt-4 w-full justify-center"
-          >
-            <MessageSquare className="size-4" aria-hidden="true" />
-            Perguntar
-          </button>
-          <CTA
-            variant="tertiary"
-            onClick={() => {
-              setMenuOpen(false);
-              onOpenCv();
-            }}
-            aria-haspopup="dialog"
-            aria-controls="cv-preview"
-            className="mt-4 w-full justify-center text-sm"
-            aria-label="Ver currículo"
-          >
-            Ver CV
-          </CTA>
-        </nav>
-      )}
+      <dialog
+        ref={jumpDialogRef}
+        id="atalhos"
+        aria-labelledby="atalhos-titulo"
+        onClose={() => setJumpOpen(false)}
+        onClick={(event) => {
+          if (event.target === jumpDialogRef.current) setJumpOpen(false);
+        }}
+        className="jump-dialog no-print"
+      >
+        <h2 id="atalhos-titulo" className="display text-base">
+          Ir para
+        </h2>
+        <p className="mt-1 text-sm text-muted">Letras só com este diálogo aberto.</p>
+        <ul className="mt-3">
+          <li>
+            <button type="button" onClick={goProjetos} className="flex min-h-11 w-full items-center justify-between gap-4 px-1 text-left">
+              <span>Projetos</span>
+              <kbd className="text-muted">P</kbd>
+            </button>
+          </li>
+          <li>
+            <button type="button" onClick={goCv} className="flex min-h-11 w-full items-center justify-between gap-4 px-1 text-left">
+              <span>CV</span>
+              <kbd className="text-muted">C</kbd>
+            </button>
+          </li>
+          <li>
+            <button type="button" onClick={goContato} className="flex min-h-11 w-full items-center justify-between gap-4 px-1 text-left">
+              <span>Contato</span>
+              <kbd className="text-muted">T</kbd>
+            </button>
+          </li>
+        </ul>
+      </dialog>
     </header>
   );
 }
