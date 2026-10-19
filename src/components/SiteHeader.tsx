@@ -132,13 +132,6 @@ function useActiveSection() {
   return active;
 }
 
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) return false;
-  const tag = target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
-  return target.isContentEditable;
-}
-
 function focusSection(id: string) {
   const node = document.getElementById(id);
   node?.scrollIntoView({ block: 'start', behavior: 'instant' });
@@ -156,67 +149,6 @@ export function SiteHeader({
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const { theme, toggleTheme } = useTheme();
   const active = useActiveSection();
-  const jumpDialogRef = useRef<HTMLDialogElement>(null);
-  const [jumpOpen, setJumpOpen] = useState(false);
-  const [modKey] = useState(() => (/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'));
-
-  const closeJump = () => {
-    jumpDialogRef.current?.close();
-    setJumpOpen(false);
-  };
-
-  const goProjetos = () => {
-    closeJump();
-    focusSection('projeto');
-  };
-  const goCv = () => {
-    closeJump();
-    onOpenCv();
-  };
-  const goContato = () => {
-    closeJump();
-    focusSection('contato');
-  };
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (isTypingTarget(event.target)) return;
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        setJumpOpen((open) => !open);
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
-  useEffect(() => {
-    const dialog = jumpDialogRef.current;
-    if (!dialog) return;
-    if (jumpOpen && !dialog.open) dialog.showModal();
-    if (!jumpOpen && dialog.open) dialog.close();
-  }, [jumpOpen]);
-
-  useEffect(() => {
-    if (!jumpOpen) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (isTypingTarget(event.target)) return;
-      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
-      const key = event.key.toLowerCase();
-      if (key === 'p') {
-        event.preventDefault();
-        goProjetos();
-      } else if (key === 'c') {
-        event.preventDefault();
-        goCv();
-      } else if (key === 't') {
-        event.preventDefault();
-        goContato();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [jumpOpen, onOpenCv]);
 
   return (
     <header className="no-print sticky top-0 z-40 border-b border-line bg-paper">
@@ -255,17 +187,6 @@ export function SiteHeader({
         <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
-            onClick={() => setJumpOpen(true)}
-            aria-haspopup="dialog"
-            aria-controls="atalhos"
-            aria-expanded={jumpOpen}
-            aria-label={`Abrir atalhos, ${modKey} K`}
-            className="jump-trigger btn btn-ghost min-h-11 px-2 text-sm tracking-normal sm:px-3"
-          >
-            {modKey === '⌘' ? '⌘K' : 'Ctrl K'}
-          </button>
-          <button
-            type="button"
             onClick={onOpenAssistant}
             aria-haspopup="dialog"
             aria-controls="assistente"
@@ -297,41 +218,6 @@ export function SiteHeader({
         </div>
       </div>
 
-      <dialog
-        ref={jumpDialogRef}
-        id="atalhos"
-        aria-labelledby="atalhos-titulo"
-        onClose={() => setJumpOpen(false)}
-        onClick={(event) => {
-          if (event.target === jumpDialogRef.current) setJumpOpen(false);
-        }}
-        className="jump-dialog no-print"
-      >
-        <h2 id="atalhos-titulo" className="display text-base">
-          Ir para
-        </h2>
-        <p className="mt-1 text-sm text-muted">Letras só com este diálogo aberto.</p>
-        <ul className="mt-3">
-          <li>
-            <button type="button" onClick={goProjetos} className="jump-item">
-              <span>Projetos</span>
-              <kbd>P</kbd>
-            </button>
-          </li>
-          <li>
-            <button type="button" onClick={goCv} className="jump-item">
-              <span>CV</span>
-              <kbd>C</kbd>
-            </button>
-          </li>
-          <li>
-            <button type="button" onClick={goContato} className="jump-item">
-              <span>Contato</span>
-              <kbd>T</kbd>
-            </button>
-          </li>
-        </ul>
-      </dialog>
     </header>
   );
 }

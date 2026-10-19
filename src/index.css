@@ -276,15 +276,13 @@
 @layer components {
   dialog.cv-preview:not([open]),
   dialog.assistant-dialog:not([open]),
-  dialog.inspector-dialog:not([open]),
-  dialog.jump-dialog:not([open]) {
+  dialog.inspector-dialog:not([open]) {
     display: none;
   }
 
   dialog.cv-preview,
   dialog.assistant-dialog,
-  dialog.inspector-dialog,
-  dialog.jump-dialog {
+  dialog.inspector-dialog {
     background: var(--surface);
     color: var(--ink);
     opacity: 0;
@@ -298,8 +296,7 @@
 
   dialog.cv-preview[open],
   dialog.assistant-dialog[open],
-  dialog.inspector-dialog[open],
-  dialog.jump-dialog[open] {
+  dialog.inspector-dialog[open] {
     opacity: 1;
     transform: scale(1);
     transition-duration: 200ms;
@@ -308,8 +305,7 @@
   @starting-style {
     dialog.cv-preview[open],
     dialog.assistant-dialog[open],
-    dialog.inspector-dialog[open],
-    dialog.jump-dialog[open] {
+    dialog.inspector-dialog[open] {
       opacity: 0;
       transform: scale(0.95);
     }
@@ -340,24 +336,13 @@
     }
   }
 
-  dialog.jump-dialog[open] {
-    width: min(22rem, calc(100% - 1.5rem));
-    margin: auto;
-    padding: 1rem;
-    border: 1px solid var(--line);
-    background: var(--paper);
-    color: var(--ink);
-  }
-
   @media (prefers-reduced-motion: reduce) {
     dialog.cv-preview,
     dialog.assistant-dialog,
     dialog.inspector-dialog,
-    dialog.jump-dialog,
     dialog.cv-preview[open],
     dialog.assistant-dialog[open],
-    dialog.inspector-dialog[open],
-    dialog.jump-dialog[open] {
+    dialog.inspector-dialog[open] {
       opacity: 1;
       transform: none;
       transition: none;
@@ -627,32 +612,6 @@
     color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 0.22em;
-  }
-
-  @media (hover: none) and (pointer: coarse), (max-width: 639px) {
-    .jump-trigger {
-      display: none;
-    }
-  }
-
-  .jump-item {
-    display: flex;
-    min-height: 2.75rem;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding-inline: 0.25rem;
-    text-align: left;
-  }
-
-  .jump-item kbd {
-    font-family: var(--font-mono);
-    color: var(--muted);
-  }
-
-  .jump-item:active {
-    transform: scale(0.97);
   }
 
   .lid {
