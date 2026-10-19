@@ -106,8 +106,3 @@ export function featuredProjectLlmsMdItems(project: FeaturedProjectLinkFields, m
   if (site) items.push(mdItem('App', site));
   return items;
 }
-
-/** Serializes link fields for tests and guards against empty output. */
-export function serializeFeaturedProjectLinks(project: FeaturedProjectLinkFields): string[] {
-  return featuredProjectLinks(project).map((link) => link.href);
-}

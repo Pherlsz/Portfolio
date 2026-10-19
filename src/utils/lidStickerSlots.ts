@@ -18,17 +18,6 @@ export type LidSlot = {
 /** Largura / altura da tampa unibody (aspect-ratio 16/10). */
 export const LID_ASPECT = 16 / 10;
 
-/** height / width of each sticker asset (matches public/stickers). */
-export const STICKER_HEIGHT_OVER_WIDTH: Record<LidSlotId, number> = {
-  morcega: 320 / 290,
-  banguela: 290 / 320,
-  tomada: 295 / 320,
-  d20: 320 / 268,
-  typescript: 1,
-  react: 1,
-  nextjs: 1
-};
-
 /** Posição inicial na tampa, em % da largura (x, w) e da altura (y). */
 export const LID_LAYOUT: LidSlot[] = [
   { id: 'morcega', x: 3, y: 12, w: 20, rotate: -5 },
