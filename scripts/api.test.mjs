@@ -28,8 +28,7 @@ function contactRequest(body) {
 async function chatJson(body, env = {}) {
   const response = await handlePortfolioRequest(chatRequest(body), env);
   assert.equal(response?.status, 200);
-  const json = await response.json();
-  return json;
+  return response.json();
 }
 
 const VALID_CONTACT = {
@@ -181,8 +180,10 @@ test('chat guardrail prompt-injection returns blockedByZod local', async () => {
 });
 
 test('Gemini HTTP error fallback is tagged local', async () => {
+  const geminiCalls = [];
   globalThis.fetch = async (url) => {
     if (String(url).includes('generativelanguage.googleapis.com')) {
+      geminiCalls.push(String(url));
       return new Response('upstream error', { status: 500 });
     }
     return originalFetch(url);
@@ -193,5 +194,6 @@ test('Gemini HTTP error fallback is tagged local', async () => {
     { GEMINI_API_KEY: 'test-key' }
   );
   assert.equal(data.source, 'local');
+  assert.ok(geminiCalls.length >= 1);
   assert.ok(data.reply.length > 0);
 });
