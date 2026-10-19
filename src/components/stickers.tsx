@@ -491,12 +491,13 @@ export function StickerLid() {
   };
 
   useLayoutEffect(() => {
-    const place = (force = false) => {
+    const place = (reason: 'init' | 'width' | 'text') => {
       const lid = lidRef.current;
       if (!lid) return;
       const field = lid.getBoundingClientRect();
       if (field.width < 2 || field.height < 2) return;
-      if (!force && Math.abs(field.width - widthRef.current) < 0.5 && widthRef.current !== 0) return;
+      const widthChanged = Math.abs(field.width - widthRef.current) >= 0.5 || widthRef.current === 0;
+      if (reason === 'width' && !widthChanged) return;
       widthRef.current = field.width;
       const playable = playableRect(field.width, field.height);
       const forbidden = measureForbidden(field);
@@ -514,11 +515,18 @@ export function StickerLid() {
       });
     };
 
-    place(true);
-    const node = lidRef.current;
-    const observer = new ResizeObserver(() => place());
-    if (node) observer.observe(node);
-    return () => observer.disconnect();
+    place('init');
+    const fieldNode = lidRef.current;
+    const identity = document.getElementById('hero-identity');
+    const fieldWatch = new ResizeObserver(() => place('width'));
+    const textWatch = new ResizeObserver(() => place('text'));
+    if (fieldNode) fieldWatch.observe(fieldNode);
+    if (identity) textWatch.observe(identity);
+    void document.fonts.ready.then(() => place('text'));
+    return () => {
+      fieldWatch.disconnect();
+      textWatch.disconnect();
+    };
   }, []);
 
   return (
