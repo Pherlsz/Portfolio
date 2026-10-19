@@ -2,10 +2,9 @@ import { lazy, Suspense, useState } from 'react';
 import { DEFAULT_PORTFOLIO_DATA } from './data/portfolioData';
 import type { ChatMode } from './utils/chatGuardrails';
 import { ExperienceSection } from './components/ExperienceSection';
-import { Hero, IdentityColumn } from './components/Hero';
+import { Hero } from './components/Hero';
 import { SiteFooter } from './components/SiteFooter';
 import { SiteHeader } from './components/SiteHeader';
-const StickerLid = lazy(() => import('./components/stickers').then((module) => ({ default: module.StickerLid })));
 
 const ProjectSection = lazy(() =>
   import('./components/ProjectSection').then((module) => ({ default: module.ProjectSection }))
@@ -37,18 +36,6 @@ export default function App() {
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
 
-  const assistant = assistantOpen ? (
-    <Suspense fallback={null}>
-      <AssistantPanel
-        open={assistantOpen}
-        mode={assistantMode}
-        onOpenChange={setAssistantOpen}
-        onModeChange={setAssistantMode}
-        onOpenCv={() => setCvOpen(true)}
-      />
-    </Suspense>
-  ) : null;
-
   return (
     <>
       <nav aria-label="Atalhos" className="skip-nav">
@@ -74,60 +61,56 @@ export default function App() {
         onOpenCv={() => setCvOpen(true)}
       />
 
-      <div className="mx-auto grid max-w-[calc(36ch+70ch+4rem)] px-4 pb-16 pt-6 lg:grid-cols-[minmax(18rem,36ch)_minmax(0,70ch)] lg:gap-x-16 lg:gap-y-10">
-        <div className="contents lg:sticky lg:top-[4.25rem] lg:col-start-1 lg:row-span-2 lg:flex lg:flex-col lg:gap-8 lg:self-start">
-          <IdentityColumn onOpenCv={() => setCvOpen(true)} />
-          <div className="order-3 mt-8 lg:order-none lg:mt-0">
-            <Suspense fallback={<div className="sticker-frame aspect-[3.6/1] w-full" />}>
-              <StickerLid />
-            </Suspense>
-          </div>
+      <main id="conteudo" tabIndex={-1} className="divide-y divide-line">
+        <Hero
+          onOpenJobFit={() => {
+            setAssistantMode('jobfit');
+            setAssistantOpen(true);
+          }}
+          onOpenCv={() => setCvOpen(true)}
+        />
+        <ExperienceSection />
+        <div id="projeto">
+          <Suspense fallback={<div className="min-h-[28rem]" />}>
+            <ProjectSection />
+          </Suspense>
         </div>
-
-        <main id="conteudo" tabIndex={-1} className="order-2 min-w-0 lg:col-start-2">
-          {assistant}
-          <Hero
-            onOpenJobFit={() => {
-              setAssistantMode('jobfit');
-              setAssistantOpen(true);
-            }}
-            onOpenCv={() => setCvOpen(true)}
-          />
-        </main>
-
-        <div className="order-4 min-w-0 lg:col-start-2">
-          <ExperienceSection />
-          <div id="projeto" tabIndex={-1}>
-            <Suspense fallback={<div className="min-h-[12rem]" />}>
-              <ProjectSection />
-            </Suspense>
-          </div>
-          <div id="formacao" tabIndex={-1}>
-            <Suspense fallback={<div className="min-h-[12rem]" />}>
-              <CredentialsSection />
-            </Suspense>
-          </div>
-          <div id="sobre" tabIndex={-1}>
-            <Suspense fallback={<div className="min-h-[12rem]" />}>
-              <AboutSection />
-            </Suspense>
-          </div>
-          <div id="contato" tabIndex={-1}>
-            <Suspense fallback={<div className="min-h-[12rem]" />}>
-              <ContactSection
-                onOpenJobFit={() => {
-                  setAssistantMode('jobfit');
-                  setAssistantOpen(true);
-                }}
-                onOpenCv={() => setCvOpen(true)}
-              />
-            </Suspense>
-          </div>
+        <div id="formacao">
+          <Suspense fallback={<div className="min-h-[32rem]" />}>
+            <CredentialsSection />
+          </Suspense>
         </div>
-      </div>
+        <div id="sobre">
+          <Suspense fallback={<div className="min-h-[28rem]" />}>
+            <AboutSection />
+          </Suspense>
+        </div>
+        <div id="contato">
+          <Suspense fallback={<div className="min-h-[24rem]" />}>
+            <ContactSection
+              onOpenJobFit={() => {
+                setAssistantMode('jobfit');
+                setAssistantOpen(true);
+              }}
+              onOpenCv={() => setCvOpen(true)}
+            />
+          </Suspense>
+        </div>
+      </main>
 
       <SiteFooter onOpenInspector={() => setInspectorOpen(true)} />
 
+      {assistantOpen ? (
+        <Suspense fallback={null}>
+          <AssistantPanel
+            open={assistantOpen}
+            mode={assistantMode}
+            onOpenChange={setAssistantOpen}
+            onModeChange={setAssistantMode}
+            onOpenCv={() => setCvOpen(true)}
+          />
+        </Suspense>
+      ) : null}
       {cvOpen ? (
         <Suspense fallback={null}>
           <CvPreviewModal open={cvOpen} onClose={() => setCvOpen(false)} />
