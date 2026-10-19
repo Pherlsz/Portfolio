@@ -36,18 +36,23 @@ export function useStickerHoloPointer(ref: RefObject<HTMLElement | null>, enable
     let rect = el.getBoundingClientRect();
     let frame = 0;
     let dragging = false;
-    let active = false;
+    let onscreen = true;
+    let pageVisible = document.visibilityState === 'visible';
 
     const cacheRect = () => {
       rect = el.getBoundingClientRect();
     };
 
+    const live = () => onscreen && pageVisible;
+
     const onMove = (event: PointerEvent) => {
       if (event.pointerType === 'touch') return;
+      if (!live()) return;
       if (frame) return;
       const { clientX, clientY } = event;
       frame = requestAnimationFrame(() => {
         frame = 0;
+        if (!live()) return;
         if (dragging) cacheRect();
         applyPointer(el, clientX, clientY, rect);
       });
@@ -55,14 +60,13 @@ export function useStickerHoloPointer(ref: RefObject<HTMLElement | null>, enable
 
     const onEnter = (event: PointerEvent) => {
       if (event.pointerType === 'touch') return;
+      if (!live()) return;
       cacheRect();
-      active = true;
       applyPointer(el, event.clientX, event.clientY, rect);
     };
 
     const onLeave = () => {
       if (dragging) return;
-      active = false;
       if (frame) {
         cancelAnimationFrame(frame);
         frame = 0;
@@ -85,11 +89,26 @@ export function useStickerHoloPointer(ref: RefObject<HTMLElement | null>, enable
         event.clientX <= rect.right &&
         event.clientY >= rect.top &&
         event.clientY <= rect.bottom;
-      if (!over) {
-        active = false;
-        setIdle(el);
+      if (!over) setIdle(el);
+    };
+
+    const io = new IntersectionObserver((entries) => {
+      onscreen = entries.some((entry) => entry.isIntersecting);
+      if (!onscreen && frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    });
+    io.observe(el);
+
+    const onVisibility = () => {
+      pageVisible = document.visibilityState === 'visible';
+      if (!pageVisible && frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
       }
     };
+    document.addEventListener('visibilitychange', onVisibility);
 
     setIdle(el);
     el.addEventListener('pointerenter', onEnter);
@@ -102,6 +121,8 @@ export function useStickerHoloPointer(ref: RefObject<HTMLElement | null>, enable
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       el.removeEventListener('pointerenter', onEnter);
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerleave', onLeave);

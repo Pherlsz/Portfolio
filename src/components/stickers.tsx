@@ -6,15 +6,29 @@ import {
   type KeyboardEvent,
   type RefObject
 } from 'react';
-import { animate, MotionConfig, motion, useDragControls, useMotionValue } from 'motion/react';
+import {
+  animate,
+  MotionConfig,
+  motion,
+  useDragControls,
+  useMotionValue,
+  useReducedMotion
+} from 'motion/react';
 import { HoloSparkleCanvas } from './HoloSparkleCanvas';
 import { useStickerHoloPointer } from '../utils/holoPointer';
 import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
 import {
-  createArrumarArrangement,
-  LID_ASPECT,
-  LID_LAYOUT,
-  type LidSlot
+  localPadded,
+  nudgeConflicts,
+  playableRect,
+  relayoutForWidth,
+  scatterStickers,
+  stickerBox,
+  STICKER_ORDER,
+  tagFracs,
+  TEXT_PAD,
+  type LidSlotId,
+  type ScatterSlot
 } from '../utils/lidStickerSlots';
 import {
   resolveLidCaptionLayout,
@@ -26,14 +40,7 @@ import {
   type AxisDragConstraints
 } from '../utils/stickerDragConstraints';
 
-export type StickerId =
-  | 'morcega'
-  | 'banguela'
-  | 'tomada'
-  | 'd20'
-  | 'typescript'
-  | 'react'
-  | 'nextjs';
+export type StickerId = LidSlotId;
 
 interface StickerDef {
   label: string;
@@ -116,8 +123,6 @@ const STICKERS: Record<StickerId, StickerDef> = {
     react: () => 'app/'
   }
 };
-
-type Slot = LidSlot & { id: StickerId };
 
 const DEFAULT_CAPTION_LAYOUT: LidCaptionLayout = { edge: 'above', align: 'center', shiftX: 0 };
 
@@ -231,17 +236,7 @@ export function StaticSticker({ id, className = '' }: { id: StickerId; className
   );
 }
 
-/** null volta cada sticker ao lugar original; senão cada um vai para o lugar sorteado. */
-type Arrangement = { key: number; targets: Record<StickerId, Slot> | null } | null;
-
 const SPRING = { type: 'spring', stiffness: 260, damping: 24 } as const;
-
-/** Centro do sticker no slot, em % da tampa. */
-function slotCenter(slot: Slot, id: StickerId) {
-  const def = STICKERS[id];
-  const height = slot.w * LID_ASPECT * (def.height / def.width);
-  return { x: slot.x + slot.w / 2, y: slot.y + height / 2 };
-}
 
 function applyAxisConstraints(
   constraints: AxisDragConstraints,
@@ -260,17 +255,19 @@ function applyAxisConstraints(
 function LidSticker({
   slot,
   lidRef,
-  arrangement,
   holoActive,
   onFront,
-  onReact
+  onReact,
+  onOffset,
+  onSettle
 }: {
-  slot: Slot;
+  slot: ScatterSlot;
   lidRef: RefObject<HTMLDivElement | null>;
-  arrangement: Arrangement;
   holoActive: boolean;
   onFront: () => void;
   onReact: (message: string) => void;
+  onOffset: (id: StickerId, x: number, y: number) => void;
+  onSettle: (id: StickerId, x: number, y: number) => void;
 }) {
   const def = STICKERS[slot.id];
   const maskUrl = holoActive ? holoMaskUrl(slot.id) : undefined;
@@ -285,7 +282,16 @@ function LidSticker({
   const [pressed, setPressed] = useState(false);
   const [captionLayout, setCaptionLayout] = useState<LidCaptionLayout>(DEFAULT_CAPTION_LAYOUT);
   const { reaction, react, face } = useStickerReaction(slot.id);
+  const reduceMotion = useReducedMotion() === true;
+  const baseRotate = useRef(slot.rotate);
   useStickerHoloPointer(ref, holoActive);
+
+  useLayoutEffect(() => {
+    x.set(0);
+    y.set(0);
+    rotate.set(slot.rotate);
+    baseRotate.current = slot.rotate;
+  }, [slot.x, slot.y, slot.rotate, rotate, x, y]);
 
   const room = () => {
     const lid = lidRef.current?.getBoundingClientRect();
@@ -332,7 +338,7 @@ function LidSticker({
     measure();
     const frame = requestAnimationFrame(measure);
     return () => cancelAnimationFrame(frame);
-  }, [pressed, reaction, arrangement, lidRef]);
+  }, [pressed, reaction, lidRef]);
 
   useEffect(() => {
     const node = ref.current;
@@ -347,28 +353,6 @@ function LidSticker({
       node.removeEventListener('pointercancel', stopDrag);
     };
   }, [dragControls]);
-
-  useEffect(() => {
-    if (!arrangement) return;
-    const target = arrangement.targets?.[slot.id];
-    const lid = lidRef.current?.getBoundingClientRect();
-    const space = room();
-    if (!target || !lid || !space) {
-      void Promise.all([animate(x, 0, SPRING), animate(y, 0, SPRING), animate(rotate, slot.rotate, SPRING)]);
-      return;
-    }
-    const from = slotCenter(slot, slot.id);
-    const to = slotCenter(target, slot.id);
-    const constraints = roomToDragConstraints(space, { x: x.get(), y: y.get() });
-    const deltaX = ((to.x - from.x) / 100) * lid.width;
-    const deltaY = ((to.y - from.y) / 100) * lid.height;
-    const clamped = applyAxisConstraints(constraints, { x: x.get(), y: y.get() }, deltaX, deltaY);
-    void Promise.all([
-      animate(x, clamped.x, SPRING),
-      animate(y, clamped.y, SPRING),
-      animate(rotate, target.rotate, SPRING)
-    ]);
-  }, [arrangement]);
 
   const nudge = (event: KeyboardEvent<HTMLButtonElement>) => {
     const step = event.shiftKey ? 48 : 16;
@@ -387,6 +371,7 @@ function LidSticker({
     const next = applyAxisConstraints(constraints, { x: x.get(), y: y.get() }, move[0], move[1]);
     x.set(next.x);
     y.set(next.y);
+    onSettle(slot.id, slot.x + next.x, slot.y + next.y);
   };
 
   const holoVars: Record<string, string> = maskUrl ? { '--holo-mask': `url("${maskUrl}")` } : {};
@@ -400,7 +385,7 @@ function LidSticker({
       dragConstraints={dragConstraints}
       dragElastic={0}
       dragMomentum={false}
-      whileDrag={{ scale: 1.08 }}
+      whileDrag={reduceMotion ? undefined : { scale: 1.06 }}
       onPointerDown={() => {
         onFront();
         setPressed(true);
@@ -414,9 +399,22 @@ function LidSticker({
         onFront();
         setPressed(true);
         syncDragConstraints();
+        baseRotate.current = rotate.get();
+      }}
+      onDrag={(_event, info) => {
+        onOffset(slot.id, x.get(), y.get());
+        if (reduceMotion) return;
+        const extra = Math.max(-14, Math.min(14, info.velocity.x / 160));
+        rotate.set(baseRotate.current + extra);
       }}
       onDragEnd={() => {
         releasePressed();
+        onSettle(slot.id, slot.x + x.get(), slot.y + y.get());
+        if (reduceMotion) {
+          rotate.set(baseRotate.current);
+        } else {
+          void animate(rotate, baseRotate.current, SPRING);
+        }
         window.setTimeout(() => {
           dragged.current = false;
         });
@@ -432,62 +430,144 @@ function LidSticker({
       data-pressed={pressed ? 'true' : undefined}
       data-holo={holoActive ? 'true' : undefined}
       data-holo-state={holoActive ? 'idle' : undefined}
-      className="group pointer-events-auto absolute cursor-grab touch-none active:cursor-grabbing"
+      className="group pointer-events-auto absolute flex cursor-grab touch-none items-center justify-center active:cursor-grabbing"
       style={{
         x,
         y,
         rotate,
-        left: `${slot.x}%`,
-        top: `${slot.y}%`,
-        width: `${slot.w}%`,
+        left: slot.x,
+        top: slot.y,
+        width: slot.w,
+        height: slot.h,
         ...holoVars
       }}
     >
-      <StickerArt
-        id={slot.id}
-        reaction={reaction}
-        face={face}
-        eager
-        holoFoil={holoActive}
-        captionLayout={captionLayout}
-        captionVisible={pressed}
-        bubbleRef={bubbleRef}
-      />
+      <span className="block" style={{ width: slot.artW }}>
+        <StickerArt
+          id={slot.id}
+          reaction={reaction}
+          face={face}
+          eager
+          holoFoil={holoActive}
+          captionLayout={captionLayout}
+          captionVisible={pressed}
+          bubbleRef={bubbleRef}
+        />
+      </span>
     </motion.button>
   );
 }
 
+function measureForbidden(field: DOMRectReadOnly) {
+  const identity = document.getElementById('hero-identity');
+  const nodes: (Element | null)[] = [
+    document.getElementById('inicio-titulo'),
+    identity?.children[1] ?? null,
+    identity?.children[2] ?? null,
+    document.querySelector('header')
+  ];
+  return nodes
+    .map((node) => localPadded(field, node, TEXT_PAD))
+    .filter((rect): rect is NonNullable<typeof rect> => rect !== null);
+}
+
+function foldDrag(slots: ScatterSlot[], offsets: Partial<Record<StickerId, { x: number; y: number }>>) {
+  return slots.map((slot) => {
+    const offset = offsets[slot.id];
+    if (!offset || (offset.x === 0 && offset.y === 0)) return slot;
+    return { ...slot, x: slot.x + offset.x, y: slot.y + offset.y };
+  });
+}
+
 export function StickerLid() {
   const lidRef = useRef<HTMLDivElement>(null);
+  const widthRef = useRef(0);
+  const heightRef = useRef(0);
+  const offsetsRef = useRef<Partial<Record<StickerId, { x: number; y: number }>>>({});
   const holo = useHoloRoulette();
-  const [order, setOrder] = useState<StickerId[]>(() => LID_LAYOUT.map((slot) => slot.id));
-  const [arrangement, setArrangement] = useState<Arrangement>(null);
+  const [slots, setSlots] = useState<ScatterSlot[]>([]);
+  const [order, setOrder] = useState<StickerId[]>(STICKER_ORDER);
   const [announcement, setAnnouncement] = useState('');
 
   const bringToFront = (id: StickerId) =>
     setOrder((prev) => (prev[prev.length - 1] === id ? prev : [...prev.filter((i) => i !== id), id]));
 
-  const shuffle = () => {
-    const slots = [...LID_LAYOUT];
-    for (let i = slots.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [slots[i], slots[j]] = [slots[j], slots[i]];
-    }
-    const targets = Object.fromEntries(LID_LAYOUT.map((slot, i) => [slot.id, slots[i]])) as Record<StickerId, Slot>;
-    setArrangement({ key: Date.now(), targets });
-    setAnnouncement('Stickers embaralhados. Use Tab e as setas para mover cada um.');
+  const settle = (id: StickerId, x: number, y: number) => {
+    offsetsRef.current[id] = { x: 0, y: 0 };
+    const field = lidRef.current?.getBoundingClientRect();
+    setSlots((prev) =>
+      tagFracs(
+        prev.map((slot) => (slot.id === id ? { ...slot, x, y } : slot)),
+        field?.width ?? 0,
+        field?.height ?? 0
+      )
+    );
   };
+
+  useLayoutEffect(() => {
+    const place = (reason: 'init' | 'width' | 'text') => {
+      const lid = lidRef.current;
+      if (!lid) return;
+      const field = lid.getBoundingClientRect();
+      if (field.width < 2 || field.height < 2) return;
+      const widthChanged = Math.abs(field.width - widthRef.current) >= 0.5 || widthRef.current === 0;
+      if (reason === 'width' && !widthChanged) return;
+      const prevW = widthRef.current || field.width;
+      const prevH = heightRef.current || field.height;
+      widthRef.current = field.width;
+      heightRef.current = field.height;
+      const playable = playableRect(field.width, field.height);
+      const forbidden = measureForbidden(field);
+      setSlots((prev) => {
+        const offsets = offsetsRef.current;
+        offsetsRef.current = {};
+        const dragged = foldDrag(prev, offsets);
+        const folded = Object.values(offsets).some((offset) => offset && (offset.x !== 0 || offset.y !== 0))
+          ? tagFracs(dragged, prevW, prevH)
+          : dragged;
+        if (folded.length === 0) {
+          return scatterStickers(
+            playable,
+            STICKER_ORDER.map((id) => stickerBox(id, field.width)),
+            forbidden,
+            field.width,
+            field.height
+          );
+        }
+        if (reason === 'text') return nudgeConflicts(folded, playable, forbidden, field.width, field.height);
+        return relayoutForWidth(folded, playable, forbidden, field.width, field.height);
+      });
+    };
+
+    place('init');
+    const fieldNode = lidRef.current;
+    const identity = document.getElementById('hero-identity');
+    const title = document.getElementById('inicio-titulo');
+    const fieldWatch = new ResizeObserver(() => place('width'));
+    const textWatch = new ResizeObserver(() => place('text'));
+    if (fieldNode) fieldWatch.observe(fieldNode);
+    if (identity) textWatch.observe(identity);
+    if (title) textWatch.observe(title);
+    let cancelFonts = false;
+    void document.fonts.ready.then(() => {
+      if (!cancelFonts) place('text');
+    });
+    return () => {
+      cancelFonts = true;
+      fieldWatch.disconnect();
+      textWatch.disconnect();
+    };
+  }, []);
 
   return (
     <MotionConfig reducedMotion="user">
-    <div className="no-print">
-      <div className="notebook relative z-10 aspect-[16/10] w-full">
+      <div className="pointer-events-none absolute inset-0 z-[2] no-print">
         <div ref={lidRef} className="lid absolute inset-0">
           <ul
-            aria-label="Stickers colados na tampa do notebook"
+            aria-label="Stickers"
             data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
           >
-            {LID_LAYOUT.map((slot) => (
+            {slots.map((slot) => (
               <li
                 key={slot.id}
                 className="pointer-events-none absolute inset-0"
@@ -496,42 +576,25 @@ export function StickerLid() {
                 <LidSticker
                   slot={slot}
                   lidRef={lidRef}
-                  arrangement={arrangement}
                   holoActive={isStickerHoloActive(holo, slot.id)}
                   onFront={() => bringToFront(slot.id)}
                   onReact={setAnnouncement}
+                  onOffset={(id, x, y) => {
+                    offsetsRef.current[id] = { x, y };
+                  }}
+                  onSettle={settle}
                 />
               </li>
             ))}
           </ul>
         </div>
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <p id="tampa-ajuda" className="eyebrow">
+        <p id="tampa-ajuda" className="sr-only">
           Arraste os stickers ou use as setas. Clique no D20 para rolar.
         </p>
-        <div className="flex gap-2">
-          <button type="button" onClick={shuffle} className="btn btn-ghost min-h-9 px-4 text-sm">
-            Embaralhar
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setArrangement(createArrumarArrangement(Date.now()));
-              setAnnouncement('Stickers no lugar original.');
-            }}
-            className="btn btn-ghost min-h-9 px-4 text-sm"
-          >
-            Arrumar
-          </button>
-        </div>
+        <p className="sr-only" aria-live="polite">
+          {announcement}
+        </p>
       </div>
-
-      <p className="sr-only" aria-live="polite">
-        {announcement}
-      </p>
-    </div>
     </MotionConfig>
   );
 }

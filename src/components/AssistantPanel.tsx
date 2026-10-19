@@ -328,8 +328,8 @@ export function AssistantPanel({
     .find((msg) => msg.role === 'model' && msg.id !== 'welcome')?.id;
 
   const tabClass = (active: boolean, compact = false) =>
-    `inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-semibold transition-colors ${
-      compact ? 'short-mobile:min-h-8 short-mobile:gap-1 short-mobile:px-2 short-mobile:text-xs' : ''
+    `inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 text-sm font-semibold transition-colors ${
+      compact ? 'short-mobile:gap-1 short-mobile:px-2 short-mobile:text-xs' : ''
     } ${active ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink'}`;
 
   const clearChat = () => {
@@ -371,7 +371,7 @@ export function AssistantPanel({
         onClick={(event) => {
           if (event.target === dialogRef.current) onOpenChange(false);
         }}
-        className="no-print fixed inset-x-0 bottom-0 top-auto m-0 h-[86dvh] max-h-none w-full max-w-none flex-col overflow-hidden rounded-t-[1.75rem] border border-line bg-surface p-0 text-ink shadow-2xl shadow-neutral-950/30 open:flex short-mobile:inset-0 short-mobile:top-0 short-mobile:h-dvh short-mobile:rounded-none sm:inset-y-0 sm:left-auto sm:right-0 sm:h-dvh sm:max-w-md sm:rounded-none sm:rounded-l-[1.75rem]"
+        className="assistant-dialog no-print fixed inset-x-0 bottom-0 top-auto m-0 h-[86dvh] max-h-none w-full max-w-none flex-col overflow-hidden border border-line bg-surface p-0 text-ink shadow-2xl shadow-neutral-950/30 open:flex short-mobile:inset-0 short-mobile:top-0 short-mobile:h-dvh sm:inset-y-0 sm:left-auto sm:right-0 sm:h-dvh sm:max-w-md"
       >
         <h2 id="assistente-titulo" className="sr-only">
           Assistente do portfólio
@@ -387,7 +387,7 @@ export function AssistantPanel({
               type="button"
               onClick={() => onOpenChange(false)}
               aria-label="Fechar assistente"
-              className="icon-btn size-10 shrink-0"
+              className="icon-btn shrink-0"
             >
               <X className="size-4" aria-hidden="true" />
             </button>
@@ -408,7 +408,7 @@ export function AssistantPanel({
                 type="button"
                 onClick={clearChat}
                 aria-label="Limpar conversa"
-                className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm text-ink-soft hover:text-ink"
+                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 px-3 text-sm text-ink-soft hover:text-ink"
               >
                 <RotateCcw className="size-4" aria-hidden="true" />
                 Limpar
@@ -446,7 +446,7 @@ export function AssistantPanel({
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label="Fechar assistente"
-            className="icon-btn size-9 shrink-0"
+            className="icon-btn shrink-0"
           >
             <X className="size-4" aria-hidden="true" />
           </button>
@@ -490,7 +490,7 @@ export function AssistantPanel({
                       key={action.label}
                       type="button"
                       onClick={() => runAction(action)}
-                      className="inline-flex min-h-8 items-center gap-1 rounded-full border border-line px-3 text-sm hover:border-ink"
+                      className="inline-flex min-h-11 items-center gap-1 border border-line px-3 text-sm hover:border-ink"
                     >
                       {action.label}
                       <ArrowUpRight className="size-3.5" aria-hidden="true" />
@@ -506,7 +506,7 @@ export function AssistantPanel({
                       type="button"
                       onClick={() => sendFollowUp(followUp)}
                       disabled={isLoading}
-                      className="inline-flex min-h-8 items-center rounded-full border border-dashed border-control px-3 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
+                      className="inline-flex min-h-11 items-center border border-dashed border-control px-3 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
                     >
                       {followUp}
                     </button>
@@ -549,7 +549,7 @@ export function AssistantPanel({
                     submitJobFollowUp(e);
                   }}
                   placeholder="Pergunte sobre esta vaga…"
-                  className="min-h-9 w-full rounded-full border border-control bg-paper px-3 text-[0.9375rem] placeholder:text-muted short-mobile:min-h-11 short-mobile:px-2.5 short-mobile:text-sm sm:min-h-11 sm:px-4"
+                  className="min-h-11 w-full border border-control bg-paper px-3 text-[0.9375rem] placeholder:text-muted short-mobile:px-2.5 short-mobile:text-sm sm:px-4"
                 />
                 <button
                   type="button"

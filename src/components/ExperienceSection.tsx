@@ -41,7 +41,7 @@ function ExperienceItem({ experience }: { experience: Experience }) {
             </ul>
             <p className="mt-4 max-w-2xl text-ink-soft">{experience.summary}</p>
           </div>
-          <span className="experience-chevron mt-1 inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-line">
+          <span className="experience-chevron mt-1 inline-flex size-11 shrink-0 items-center justify-center border border-line">
             <ChevronDown className="size-4" aria-hidden="true" />
             <span className="sr-only">Ver ou ocultar detalhes de {experience.company}</span>
           </span>
@@ -91,6 +91,7 @@ export function ExperienceSection() {
   return (
     <section
       id="experiencia"
+      tabIndex={-1}
       aria-labelledby="experiencia-titulo"
       className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-28"
     >

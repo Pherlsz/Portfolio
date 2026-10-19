@@ -32,6 +32,15 @@ export function SectionHeading({
   );
 }
 
+export async function copyEmailToClipboard(email: string) {
+  try {
+    await navigator.clipboard.writeText(email);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function CopyEmailButton({
   email,
   label,
@@ -49,14 +58,14 @@ export function CopyEmailButton({
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(email);
-      setCopied(true);
-      window.clearTimeout(timer.current);
-      timer.current = window.setTimeout(() => setCopied(false), 2000);
-    } catch {
+    const ok = await copyEmailToClipboard(email);
+    if (!ok) {
       window.location.href = `mailto:${email}`;
+      return;
     }
+    setCopied(true);
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setCopied(false), 2000);
   };
 
   if (hint) {

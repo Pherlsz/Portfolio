@@ -1,52 +1,73 @@
-import { lazy, Suspense } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FileText, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
-import { Marked } from './ui';
-
-const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
+import { StickerLid } from './stickers';
+import { Marked, copyEmailToClipboard } from './ui';
 
 export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
+  const titleParts = profile.jobTitle.split(' · ');
+  const role = titleParts[0];
+  const track = titleParts.length > 1 ? titleParts.slice(1).join(' · ') : undefined;
+  const [emailCopied, setEmailCopied] = useState(false);
+  const emailCopiedTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(emailCopiedTimer.current), []);
+
+  const copyHeroEmail = () => {
+    void copyEmailToClipboard(profile.email).then((ok) => {
+      if (!ok) return;
+      setEmailCopied(true);
+      window.clearTimeout(emailCopiedTimer.current);
+      emailCopiedTimer.current = window.setTimeout(() => setEmailCopied(false), 4000);
+    });
+  };
 
   return (
-    <section
-      id="inicio"
-      aria-labelledby="inicio-titulo"
-      className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 sm:gap-12 sm:px-8 sm:pb-20 sm:pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pb-28"
-    >
-      <div className="notebook-margin">
-        <p className="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-line bg-surface px-3 py-1">
-          <span className="size-2 shrink-0 rounded-full bg-status" aria-hidden="true" />
-          <span>{profile.status}</span>
-          <span className="hidden sm:inline" aria-hidden="true">·</span>
-          <span className="whitespace-nowrap basis-full sm:basis-auto">{profile.location}</span>
-        </p>
+    <section id="inicio" aria-labelledby="inicio-titulo">
+      <div className="name-band relative">
+        <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-8 lg:py-10">
+          <div className="relative min-h-[22rem] sm:min-h-[24rem] lg:min-h-[26rem]">
+            <div id="hero-identity" className="relative w-fit">
+              <h1
+                id="inicio-titulo"
+                className="display-wide text-[clamp(2.15rem,9vw,4.4rem)] leading-[0.9] text-on-band"
+              >
+                {profile.name.split(' ').map((word) => (
+                  <span key={word} className="block">
+                    {word}{' '}
+                  </span>
+                ))}
+              </h1>
+              <p className="mt-4 text-[0.9375rem] font-semibold text-on-band">
+                {track ? (
+                  <>
+                    {role}
+                    <span className="hidden sm:inline"> · {track}</span>
+                    <span className="block sm:hidden">{track}</span>
+                  </>
+                ) : (
+                  profile.jobTitle
+                )}
+              </p>
+              <p className="mt-1 text-[0.9375rem] text-on-band">{profile.location}</p>
+            </div>
+          </div>
+        </div>
+        <StickerLid />
+      </div>
 
-        <h1
-          id="inicio-titulo"
-          className="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]"
-        >
-          {profile.name.split(' ').map((word) => (
-            <span key={word} className="block">
-              {word}{' '}
-            </span>
-          ))}
-        </h1>
-
-        <p className="mt-5 font-mono text-[0.9375rem] text-ink-soft">
-          <span className="block">{profile.jobTitle}</span>
-          <span className="mt-1 block text-muted">React · Next.js · TypeScript</span>
-        </p>
-
-        <p className="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 sm:py-12">
+        <p className="text-status">{profile.status}</p>
+        <p className="mt-4 max-w-xl text-[clamp(1.2rem,2.1vw,1.5rem)] font-semibold leading-snug text-pretty">
           {profile.headline}
         </p>
-        <p className="mt-4 max-w-xl text-ink-soft">
+        <p className="mt-4 max-w-xl text-pretty text-ink-soft">
           <Marked text={profile.summary} />
         </p>
-        <p className="mt-4 max-w-xl text-ink-soft">{profile.trustCopy}</p>
+        <p className="mt-4 max-w-xl text-pretty text-ink-soft">{profile.trustCopy}</p>
 
         <div className="mt-8 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
           <CTA
@@ -60,9 +81,14 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
             Ver CV
           </CTA>
           <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
-          <CTA variant="tertiary" href={`mailto:${profile.email}`} className="self-start sm:self-auto">
-            Falar por e-mail
-          </CTA>
+          <span className="flex max-w-[16rem] flex-col self-start sm:self-auto">
+            <CTA variant="tertiary" href={`mailto:${profile.email}`} onClick={copyHeroEmail}>
+              Falar por e-mail
+            </CTA>
+            <span className="mt-1 min-h-[1.25rem] text-sm text-ink-soft" aria-live="polite">
+              {emailCopied ? 'Se o app de e-mail não abrir, o endereço já está copiado.' : ''}
+            </span>
+          </span>
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
@@ -86,16 +112,6 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
           </a>
         </div>
       </div>
-
-      <Suspense
-        fallback={
-          <div className="no-print">
-            <div className="notebook relative z-10 aspect-[16/10] w-full" />
-          </div>
-        }
-      >
-        <StickerLid />
-      </Suspense>
     </section>
   );
 }
