@@ -592,12 +592,8 @@
   }
 
   html.dark .name-band :focus-visible {
-    outline-color: #e7f25a;
-    box-shadow: 0 0 0 3px #111111;
-  }
-
-  .sticker-field {
-    position: relative;
+    outline-color: var(--marker);
+    box-shadow: 0 0 0 3px var(--focus-ring);
   }
 
   .site-nav-link {
@@ -648,7 +644,7 @@
   }
 
   .lid {
-    overflow: hidden;
+    overflow: visible;
     border-radius: inherit;
     background: transparent;
   }

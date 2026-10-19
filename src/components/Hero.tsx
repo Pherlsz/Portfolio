@@ -7,6 +7,7 @@ import { Marked } from './ui';
 
 export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
+  const [role, track] = profile.jobTitle.split(' · ');
 
   return (
     <section id="inicio" aria-labelledby="inicio-titulo">
@@ -24,7 +25,9 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
                   </span>
                 ))}
               </h1>
-              <p className="mt-4 text-[0.9375rem] font-semibold text-on-band">{profile.jobTitle}</p>
+              <p className="mt-4 text-[0.9375rem] font-semibold text-on-band">
+                {role} <span className="whitespace-nowrap">· {track}</span>
+              </p>
               <p className="mt-1 text-[0.9375rem] text-on-band">{profile.location}</p>
             </div>
             <StickerLid />

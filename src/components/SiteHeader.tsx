@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
-import { CTA } from './CTA';
 
 const NAV = [
   { id: 'experiencia', label: 'Experiência' },
@@ -157,14 +156,9 @@ export function SiteHeader({
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const { theme, toggleTheme } = useTheme();
   const active = useActiveSection();
-  const jumpRef = useRef<HTMLButtonElement>(null);
   const jumpDialogRef = useRef<HTMLDialogElement>(null);
   const [jumpOpen, setJumpOpen] = useState(false);
-  const [modKey, setModKey] = useState('Ctrl');
-
-  useEffect(() => {
-    setModKey(/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl');
-  }, []);
+  const [modKey] = useState(() => (/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'));
 
   const closeJump = () => {
     jumpDialogRef.current?.close();
@@ -260,7 +254,6 @@ export function SiteHeader({
 
         <div className="flex shrink-0 items-center gap-1">
           <button
-            ref={jumpRef}
             type="button"
             onClick={() => setJumpOpen(true)}
             aria-haspopup="dialog"
@@ -280,16 +273,15 @@ export function SiteHeader({
           >
             Perguntar
           </button>
-          <CTA
-            variant="tertiary"
+          <button
+            type="button"
             onClick={onOpenCv}
             aria-haspopup="dialog"
             aria-controls="cv-preview"
-            className="min-h-11 px-2 text-sm"
-            aria-label="Ver currículo"
+            className="btn btn-ghost min-h-11 min-w-11 px-2 text-sm"
           >
             CV
-          </CTA>
+          </button>
           <button
             type="button"
             onClick={toggleTheme}

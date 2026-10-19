@@ -20,10 +20,11 @@ import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stic
 import {
   localPadded,
   playableRect,
-  relocateOutOfBounds,
+  relayoutForWidth,
   scatterStickers,
   stickerBox,
   STICKER_ORDER,
+  TEXT_PAD,
   type LidSlotId,
   type ScatterSlot
 } from '../utils/lidStickerSlots';
@@ -254,13 +255,17 @@ function LidSticker({
   lidRef,
   holoActive,
   onFront,
-  onReact
+  onReact,
+  onOffset,
+  onSettle
 }: {
   slot: ScatterSlot;
   lidRef: RefObject<HTMLDivElement | null>;
   holoActive: boolean;
   onFront: () => void;
   onReact: (message: string) => void;
+  onOffset: (id: StickerId, x: number, y: number) => void;
+  onSettle: (id: StickerId, x: number, y: number) => void;
 }) {
   const def = STICKERS[slot.id];
   const maskUrl = holoActive ? holoMaskUrl(slot.id) : undefined;
@@ -364,6 +369,7 @@ function LidSticker({
     const next = applyAxisConstraints(constraints, { x: x.get(), y: y.get() }, move[0], move[1]);
     x.set(next.x);
     y.set(next.y);
+    onSettle(slot.id, slot.x + next.x, slot.y + next.y);
   };
 
   const holoVars: Record<string, string> = maskUrl ? { '--holo-mask': `url("${maskUrl}")` } : {};
@@ -394,12 +400,14 @@ function LidSticker({
         baseRotate.current = rotate.get();
       }}
       onDrag={(_event, info) => {
+        onOffset(slot.id, x.get(), y.get());
         if (reduceMotion) return;
         const extra = Math.max(-14, Math.min(14, info.velocity.x / 160));
         rotate.set(baseRotate.current + extra);
       }}
       onDragEnd={() => {
         releasePressed();
+        onSettle(slot.id, slot.x + x.get(), slot.y + y.get());
         if (reduceMotion) {
           rotate.set(baseRotate.current);
         } else {
@@ -449,16 +457,26 @@ function LidSticker({
 }
 
 function measureForbidden(field: DOMRectReadOnly) {
+  const identity = document.getElementById('hero-identity');
+  const lines = identity ? [...identity.children] : [];
   return [
-    localPadded(field, document.querySelector('header')),
-    localPadded(field, document.getElementById('hero-identity')),
-    localPadded(field, document.getElementById('tampa-ajuda'), 8)
+    ...lines.map((node) => localPadded(field, node, TEXT_PAD)),
+    localPadded(field, document.getElementById('tampa-ajuda'), TEXT_PAD)
   ].filter((rect): rect is NonNullable<typeof rect> => rect !== null);
+}
+
+function foldDrag(slots: ScatterSlot[], offsets: Partial<Record<StickerId, { x: number; y: number }>>) {
+  return slots.map((slot) => {
+    const offset = offsets[slot.id];
+    if (!offset || (offset.x === 0 && offset.y === 0)) return slot;
+    return { ...slot, x: slot.x + offset.x, y: slot.y + offset.y };
+  });
 }
 
 export function StickerLid() {
   const lidRef = useRef<HTMLDivElement>(null);
-  const booted = useRef(false);
+  const widthRef = useRef(0);
+  const offsetsRef = useRef<Partial<Record<StickerId, { x: number; y: number }>>>({});
   const holo = useHoloRoulette();
   const [slots, setSlots] = useState<ScatterSlot[]>([]);
   const [order, setOrder] = useState<StickerId[]>(STICKER_ORDER);
@@ -467,40 +485,40 @@ export function StickerLid() {
   const bringToFront = (id: StickerId) =>
     setOrder((prev) => (prev[prev.length - 1] === id ? prev : [...prev.filter((i) => i !== id), id]));
 
+  const settle = (id: StickerId, x: number, y: number) => {
+    offsetsRef.current[id] = { x: 0, y: 0 };
+    setSlots((prev) => prev.map((slot) => (slot.id === id ? { ...slot, x, y } : slot)));
+  };
+
   useLayoutEffect(() => {
-    const place = () => {
+    const place = (force = false) => {
       const lid = lidRef.current;
       if (!lid) return;
       const field = lid.getBoundingClientRect();
       if (field.width < 2 || field.height < 2) return;
-      const playable = playableRect(field, window.innerWidth, window.innerHeight);
+      if (!force && Math.abs(field.width - widthRef.current) < 0.5 && widthRef.current !== 0) return;
+      widthRef.current = field.width;
+      const playable = playableRect(field.width, field.height);
       const forbidden = measureForbidden(field);
       setSlots((prev) => {
-        if (!booted.current || prev.length === 0) {
-          booted.current = true;
+        const folded = foldDrag(prev, offsetsRef.current);
+        offsetsRef.current = {};
+        if (folded.length === 0) {
           return scatterStickers(
             playable,
             STICKER_ORDER.map((id) => stickerBox(id, field.width)),
             forbidden
           );
         }
-        const next = relocateOutOfBounds(prev, playable, forbidden);
-        const same =
-          next.length === prev.length &&
-          next.every((slot, i) => slot.x === prev[i]?.x && slot.y === prev[i]?.y && slot.id === prev[i]?.id);
-        return same ? prev : next;
+        return relayoutForWidth(folded, playable, forbidden, field.width);
       });
     };
 
-    place();
+    place(true);
     const node = lidRef.current;
-    const observer = new ResizeObserver(place);
+    const observer = new ResizeObserver(() => place());
     if (node) observer.observe(node);
-    window.addEventListener('resize', place);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', place);
-    };
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -508,7 +526,7 @@ export function StickerLid() {
       <div className="pointer-events-none absolute inset-0 z-[1] no-print">
         <div ref={lidRef} className="lid absolute inset-0">
           <ul
-            aria-label="Stickers: Morcega, Banguela, Tomada e D20"
+            aria-label="Stickers"
             data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
           >
             {slots.map((slot) => (
@@ -523,6 +541,10 @@ export function StickerLid() {
                   holoActive={isStickerHoloActive(holo, slot.id)}
                   onFront={() => bringToFront(slot.id)}
                   onReact={setAnnouncement}
+                  onOffset={(id, x, y) => {
+                    offsetsRef.current[id] = { x, y };
+                  }}
+                  onSettle={settle}
                 />
               </li>
             ))}

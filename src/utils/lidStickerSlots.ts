@@ -19,6 +19,8 @@ export type ScatterSlot = {
   rotate: number;
 };
 
+export type StickerBox = { id: LidSlotId; w: number; h: number; artW: number };
+
 export const STICKER_ORDER: LidSlotId[] = [
   'morcega',
   'banguela',
@@ -49,39 +51,40 @@ const ART_H_OVER_W: Record<LidSlotId, number> = {
   nextjs: 1
 };
 
-const FALLBACK: Record<LidSlotId, { fx: number; fy: number; rotate: number }> = {
-  morcega: { fx: 0.78, fy: 0.08, rotate: -5 },
-  react: { fx: 0.88, fy: 0.36, rotate: 8 },
-  banguela: { fx: 0.7, fy: 0.62, rotate: 6 },
-  tomada: { fx: 0.08, fy: 0.78, rotate: 2 },
-  d20: { fx: 0.52, fy: 0.72, rotate: 10 },
-  typescript: { fx: 0.88, fy: 0.72, rotate: -6 },
-  nextjs: { fx: 0.36, fy: 0.8, rotate: 5 }
+const FALLBACK_ROTATE: Record<LidSlotId, number> = {
+  morcega: -5,
+  react: 8,
+  banguela: 6,
+  tomada: 2,
+  d20: 10,
+  typescript: -6,
+  nextjs: 5
 };
 
 export const MIN_HIT = 44;
-const PAD = 12;
-const KISS = 1;
+export const TEXT_PAD = 12;
+export const STICKER_GAP = 8;
+const EDGE = 14;
 const TRIES = 48;
 const GRID = 6;
 
-export function stickerBox(id: LidSlotId, fieldW: number) {
+export function stickerBox(id: LidSlotId, fieldW: number): StickerBox {
   const scale = Math.min(2, Math.max(1, fieldW / 420));
   const artW = Math.round(ART_W[id] * scale);
   const artH = Math.round(artW * ART_H_OVER_W[id]);
   return { id, artW, w: Math.max(MIN_HIT, artW), h: Math.max(MIN_HIT, artH) };
 }
 
-export function playableRect(field: DOMRectReadOnly, viewW: number, viewH: number): Rect {
-  const inset = 4;
-  const left = Math.max(inset, -field.left);
-  const top = Math.max(inset, -field.top);
-  const right = Math.min(field.width - inset, viewW - field.left - inset);
-  const bottom = Math.min(field.height - inset, viewH - field.top - inset);
-  return { x: left, y: top, w: Math.max(0, right - left), h: Math.max(0, bottom - top) };
+export function playableRect(fieldW: number, fieldH: number): Rect {
+  return {
+    x: EDGE,
+    y: EDGE,
+    w: Math.max(0, fieldW - EDGE * 2),
+    h: Math.max(0, fieldH - EDGE * 2)
+  };
 }
 
-export function localPadded(field: DOMRectReadOnly, node: Element | null, pad = PAD): Rect | null {
+export function localPadded(field: DOMRectReadOnly, node: Element | null, pad = TEXT_PAD): Rect | null {
   if (!node) return null;
   const r = node.getBoundingClientRect();
   return {
@@ -109,21 +112,8 @@ function aabbOf(slot: { x: number; y: number; w: number; h: number; rotate: numb
   };
 }
 
-function hits(a: Rect, b: Rect, kiss = KISS) {
-  return a.x < b.x + b.w - kiss && a.x + a.w - kiss > b.x && a.y < b.y + b.h - kiss && a.y + a.h - kiss > b.y;
-}
-
-function clampLayout(playable: Rect, w: number, h: number, aw: number, ah: number, x: number, y: number) {
-  const dx = (aw - w) / 2;
-  const dy = (ah - h) / 2;
-  const minX = playable.x - dx;
-  const minY = playable.y - dy;
-  const maxX = playable.x + playable.w - aw - dx;
-  const maxY = playable.y + playable.h - ah - dy;
-  return {
-    x: Math.min(Math.max(x, minX), Math.max(minX, maxX)),
-    y: Math.min(Math.max(y, minY), Math.max(minY, maxY))
-  };
+function tooClose(a: Rect, b: Rect, gap: number) {
+  return a.x < b.x + b.w + gap && a.x + a.w + gap > b.x && a.y < b.y + b.h + gap && a.y + a.h + gap > b.y;
 }
 
 function allowed(slot: ScatterSlot, playable: Rect, forbidden: Rect[], placed: ScatterSlot[]) {
@@ -131,21 +121,15 @@ function allowed(slot: ScatterSlot, playable: Rect, forbidden: Rect[], placed: S
   if (box.x < playable.x - 0.5 || box.y < playable.y - 0.5) return false;
   if (box.x + box.w > playable.x + playable.w + 0.5) return false;
   if (box.y + box.h > playable.y + playable.h + 0.5) return false;
-  for (const block of forbidden) if (hits(box, block)) return false;
-  for (const other of placed) if (hits(box, aabbOf(other))) return false;
+  for (const block of forbidden) if (tooClose(box, block, 0)) return false;
+  for (const other of placed) if (tooClose(box, aabbOf(other), STICKER_GAP)) return false;
   return true;
 }
 
-function fromAabb(
-  id: LidSlotId,
-  size: { w: number; h: number; artW: number },
-  rotate: number,
-  aabbX: number,
-  aabbY: number
-): ScatterSlot {
+function fromAabb(size: StickerBox, rotate: number, aabbX: number, aabbY: number): ScatterSlot {
   const aabb = rotSize(size.w, size.h, rotate);
   return {
-    id,
+    id: size.id,
     x: aabbX + (aabb.w - size.w) / 2,
     y: aabbY + (aabb.h - size.h) / 2,
     w: size.w,
@@ -156,8 +140,7 @@ function fromAabb(
 }
 
 function gridPlace(
-  id: LidSlotId,
-  size: { w: number; h: number; artW: number },
+  size: StickerBox,
   rotate: number,
   playable: Rect,
   forbidden: Rect[],
@@ -169,7 +152,7 @@ function gridPlace(
   if (maxX < playable.x || maxY < playable.y) return undefined;
   for (let y = playable.y; y <= maxY; y += GRID) {
     for (let x = playable.x; x <= maxX; x += GRID) {
-      const slot = fromAabb(id, size, rotate, x, y);
+      const slot = fromAabb(size, rotate, x, y);
       if (allowed(slot, playable, forbidden, placed)) return slot;
     }
   }
@@ -177,39 +160,34 @@ function gridPlace(
 }
 
 function fallbackPlace(
-  id: LidSlotId,
-  size: { w: number; h: number; artW: number },
+  size: StickerBox,
   playable: Rect,
   forbidden: Rect[],
   placed: ScatterSlot[]
-): ScatterSlot {
-  const safe = FALLBACK[id];
-  for (const rotate of [safe.rotate, 0]) {
-    const found = gridPlace(id, size, rotate, playable, forbidden, placed);
+): ScatterSlot | undefined {
+  for (const rotate of [FALLBACK_ROTATE[size.id], 0]) {
+    const found = gridPlace(size, rotate, playable, forbidden, placed);
     if (found) return found;
   }
-  const aabb = rotSize(size.w, size.h, 0);
-  const pos = clampLayout(
-    playable,
-    size.w,
-    size.h,
-    aabb.w,
-    aabb.h,
-    playable.x + safe.fx * Math.max(0, playable.w - aabb.w),
-    playable.y + safe.fy * Math.max(0, playable.h - aabb.h)
-  );
-  return { id, x: pos.x, y: pos.y, w: size.w, h: size.h, artW: size.artW, rotate: 0 };
+  return undefined;
 }
 
-// shortcut: 48 random tries then a 6px grid; upgrade if a new breakpoint still packs on the name
-export function scatterStickers(
+function orderSlots(slots: ScatterSlot[]) {
+  return STICKER_ORDER.map((id) => slots.find((slot) => slot.id === id)).filter(
+    (slot): slot is ScatterSlot => slot !== undefined
+  );
+}
+
+// shortcut: 48 random tries then a 6px grid; upgrade if a new breakpoint still cannot pack with an 8px gap
+function pack(
+  sizes: StickerBox[],
   playable: Rect,
-  sizes: { id: LidSlotId; w: number; h: number; artW: number }[],
   forbidden: Rect[],
-  rng: () => number = Math.random
-): ScatterSlot[] {
+  rng: () => number,
+  occupied: ScatterSlot[] = []
+): ScatterSlot[] | null {
+  const out = [...occupied];
   const ordered = [...sizes].sort((a, b) => b.w * b.h - a.w * a.h);
-  const out: ScatterSlot[] = [];
   for (const size of ordered) {
     let placed: ScatterSlot | undefined;
     for (let i = 0; i < TRIES; i++) {
@@ -217,46 +195,53 @@ export function scatterStickers(
       const aabb = rotSize(size.w, size.h, rotate);
       const maxX = Math.max(0, playable.w - aabb.w);
       const maxY = Math.max(0, playable.h - aabb.h);
-      const slot = fromAabb(size.id, size, rotate, playable.x + rng() * maxX, playable.y + rng() * maxY);
+      const slot = fromAabb(size, rotate, playable.x + rng() * maxX, playable.y + rng() * maxY);
       if (allowed(slot, playable, forbidden, out)) {
         placed = slot;
         break;
       }
     }
-    out.push(placed ?? fallbackPlace(size.id, size, playable, forbidden, out));
+    placed = placed ?? fallbackPlace(size, playable, forbidden, out);
+    if (!placed) return null;
+    out.push(placed);
   }
-  return STICKER_ORDER.map((id) => out.find((slot) => slot.id === id)).filter(
-    (slot): slot is ScatterSlot => slot !== undefined
-  );
+  return orderSlots(out);
 }
 
-export function slotInBounds(slot: ScatterSlot, playable: Rect) {
-  return allowed(slot, playable, [], []);
-}
-
-export function relocateOutOfBounds(
-  prev: ScatterSlot[],
+export function scatterStickers(
   playable: Rect,
+  sizes: StickerBox[],
   forbidden: Rect[],
   rng: () => number = Math.random
 ): ScatterSlot[] {
-  const next: ScatterSlot[] = [];
-  const pending: ScatterSlot[] = [];
-  for (const slot of prev) {
-    if (slotInBounds(slot, playable) && allowed(slot, playable, forbidden, next)) next.push(slot);
-    else pending.push(slot);
+  return pack(sizes, playable, forbidden, rng) ?? pack(sizes, playable, forbidden, rng) ?? [];
+}
+
+export function relayoutForWidth(
+  prev: ScatterSlot[],
+  playable: Rect,
+  forbidden: Rect[],
+  fieldW: number,
+  rng: () => number = Math.random
+): ScatterSlot[] {
+  const keep: ScatterSlot[] = [];
+  const rest: StickerBox[] = [];
+  for (const id of STICKER_ORDER) {
+    const box = stickerBox(id, fieldW);
+    const last = prev.find((slot) => slot.id === id);
+    const candidate = last
+      ? { ...last, w: box.w, h: box.h, artW: box.artW }
+      : { ...box, x: playable.x, y: playable.y, rotate: 0 };
+    if (last && allowed(candidate, playable, forbidden, keep)) keep.push(candidate);
+    else rest.push(box);
   }
-  for (const slot of pending) {
-    const occupied = next.filter((s) => s.id !== slot.id);
-    const [moved] = scatterStickers(
-      playable,
-      [{ id: slot.id, w: slot.w, h: slot.h, artW: slot.artW }],
-      forbidden.concat(occupied.map((s) => aabbOf(s))),
-      rng
-    );
-    next.push(moved ?? fallbackPlace(slot.id, slot, playable, forbidden, occupied));
-  }
-  return STICKER_ORDER.map((id) => next.find((slot) => slot.id === id)).filter(
-    (slot): slot is ScatterSlot => slot !== undefined
+  if (rest.length === 0) return orderSlots(keep);
+  const stacked = pack(rest, playable, forbidden, rng, keep);
+  if (stacked) return stacked;
+  return scatterStickers(
+    playable,
+    STICKER_ORDER.map((id) => stickerBox(id, fieldW)),
+    forbidden,
+    rng
   );
 }
