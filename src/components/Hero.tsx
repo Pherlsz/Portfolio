@@ -41,9 +41,6 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
               <p className="mt-1 text-[0.9375rem] text-on-band">{profile.location}</p>
             </div>
           </div>
-          <p id="tampa-ajuda" className="relative mt-5 max-w-xl text-sm text-on-band">
-            Arraste os stickers ou use as setas. Clique no D20 para rolar.
-          </p>
         </div>
         <StickerLid />
       </div>

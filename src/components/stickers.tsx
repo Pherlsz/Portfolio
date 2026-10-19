@@ -464,7 +464,6 @@ function measureForbidden(field: DOMRectReadOnly) {
     document.getElementById('inicio-titulo'),
     identity?.children[1] ?? null,
     identity?.children[2] ?? null,
-    document.getElementById('tampa-ajuda'),
     document.querySelector('header')
   ];
   return nodes
@@ -544,13 +543,11 @@ export function StickerLid() {
     const fieldNode = lidRef.current;
     const identity = document.getElementById('hero-identity');
     const title = document.getElementById('inicio-titulo');
-    const hint = document.getElementById('tampa-ajuda');
     const fieldWatch = new ResizeObserver(() => place('width'));
     const textWatch = new ResizeObserver(() => place('text'));
     if (fieldNode) fieldWatch.observe(fieldNode);
     if (identity) textWatch.observe(identity);
     if (title) textWatch.observe(title);
-    if (hint) textWatch.observe(hint);
     let cancelFonts = false;
     void document.fonts.ready.then(() => {
       if (!cancelFonts) place('text');
@@ -591,6 +588,9 @@ export function StickerLid() {
             ))}
           </ul>
         </div>
+        <p id="tampa-ajuda" className="sr-only">
+          Arraste os stickers ou use as setas. Clique no D20 para rolar.
+        </p>
         <p className="sr-only" aria-live="polite">
           {announcement}
         </p>
