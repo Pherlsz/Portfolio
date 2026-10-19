@@ -1,12 +1,7 @@
 import { z } from 'zod';
-import {
-  DEFAULT_PORTFOLIO_DATA,
-  plainText,
-  skillNames,
-  type PortfolioData
-} from '../data/portfolioData.ts';
+import { plainText, skillNames, type PortfolioData } from '../data/portfolioData.ts';
 
-export const PRESET_QUESTIONS = [
+const PRESET_QUESTIONS = [
   { id: 'recruiter_summary', text: 'Resumo rápido para recrutador' },
   { id: 'stack', text: 'Qual a stack principal?' },
   { id: 'atlas_ai', text: 'O que ele fez com IA na Atlas?' },
@@ -42,7 +37,7 @@ export function presetIdForChipText(text: string): PresetQuestionId | undefined 
   return PRESET_QUESTIONS.find((preset) => preset.text === trimmed)?.id;
 }
 
-export function buildPresetFallback(id: PresetQuestionId, data: PortfolioData = DEFAULT_PORTFOLIO_DATA): string {
+export function buildPresetFallback(id: PresetQuestionId, data: PortfolioData): string {
   const { profile, experiences, skills } = data;
   const atlas = experiences[0];
 
