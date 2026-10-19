@@ -1,15 +1,29 @@
+import { useEffect, useRef, useState } from 'react';
 import { FileText, Github, Linkedin } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
 import { StickerLid } from './stickers';
-import { Marked } from './ui';
+import { Marked, copyEmailToClipboard } from './ui';
 
 export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const titleParts = profile.jobTitle.split(' · ');
   const role = titleParts[0];
   const track = titleParts.length > 1 ? titleParts.slice(1).join(' · ') : undefined;
+  const [emailCopied, setEmailCopied] = useState(false);
+  const emailCopiedTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(emailCopiedTimer.current), []);
+
+  const copyHeroEmail = () => {
+    void copyEmailToClipboard(profile.email).then((ok) => {
+      if (!ok) return;
+      setEmailCopied(true);
+      window.clearTimeout(emailCopiedTimer.current);
+      emailCopiedTimer.current = window.setTimeout(() => setEmailCopied(false), 2000);
+    });
+  };
 
   return (
     <section id="inicio" aria-labelledby="inicio-titulo">
@@ -67,9 +81,14 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
             Ver CV
           </CTA>
           <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
-          <CTA variant="tertiary" href={`mailto:${profile.email}`} className="self-start sm:self-auto">
-            Falar por e-mail
-          </CTA>
+          <span className="flex flex-col self-start sm:self-auto">
+            <CTA variant="tertiary" href={`mailto:${profile.email}`} onClick={copyHeroEmail}>
+              Falar por e-mail
+            </CTA>
+            <span className="mt-1 min-h-[1.25rem] text-sm text-ink-soft" aria-live="polite">
+              {emailCopied ? 'E-mail copiado' : ''}
+            </span>
+          </span>
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
