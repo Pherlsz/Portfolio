@@ -600,10 +600,14 @@
     font-weight: 700;
   }
 
+  #inicio,
+  .name-band {
+    overflow-x: clip;
+  }
+
   .name-band {
     background: var(--band);
     color: var(--on-band);
-    overflow-x: clip;
   }
 
   html.dark .name-band {

@@ -460,11 +460,16 @@ function LidSticker({
 
 function measureForbidden(field: DOMRectReadOnly) {
   const identity = document.getElementById('hero-identity');
-  const lines = identity ? [...identity.children] : [];
-  return [
-    ...lines.map((node) => localPadded(field, node, TEXT_PAD)),
-    localPadded(field, document.getElementById('tampa-ajuda'), TEXT_PAD)
-  ].filter((rect): rect is NonNullable<typeof rect> => rect !== null);
+  const nodes: (Element | null)[] = [
+    document.getElementById('inicio-titulo'),
+    identity?.children[1] ?? null,
+    identity?.children[2] ?? null,
+    document.getElementById('tampa-ajuda'),
+    document.querySelector('header')
+  ];
+  return nodes
+    .map((node) => localPadded(field, node, TEXT_PAD))
+    .filter((rect): rect is NonNullable<typeof rect> => rect !== null);
 }
 
 function foldDrag(slots: ScatterSlot[], offsets: Partial<Record<StickerId, { x: number; y: number }>>) {
@@ -538,10 +543,14 @@ export function StickerLid() {
     place('init');
     const fieldNode = lidRef.current;
     const identity = document.getElementById('hero-identity');
+    const title = document.getElementById('inicio-titulo');
+    const hint = document.getElementById('tampa-ajuda');
     const fieldWatch = new ResizeObserver(() => place('width'));
     const textWatch = new ResizeObserver(() => place('text'));
     if (fieldNode) fieldWatch.observe(fieldNode);
     if (identity) textWatch.observe(identity);
+    if (title) textWatch.observe(title);
+    if (hint) textWatch.observe(hint);
     let cancelFonts = false;
     void document.fonts.ready.then(() => {
       if (!cancelFonts) place('text');
@@ -555,7 +564,7 @@ export function StickerLid() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="pointer-events-none absolute inset-0 z-[1] no-print">
+      <div className="pointer-events-none absolute inset-0 z-[2] no-print">
         <div ref={lidRef} className="lid absolute inset-0">
           <ul
             aria-label="Stickers"
