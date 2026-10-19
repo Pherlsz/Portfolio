@@ -25,6 +25,7 @@ import {
   scatterStickers,
   stickerBox,
   STICKER_ORDER,
+  tagFracs,
   TEXT_PAD,
   type LidSlotId,
   type ScatterSlot
@@ -488,7 +489,14 @@ export function StickerLid() {
 
   const settle = (id: StickerId, x: number, y: number) => {
     offsetsRef.current[id] = { x: 0, y: 0 };
-    setSlots((prev) => prev.map((slot) => (slot.id === id ? { ...slot, x, y } : slot)));
+    const field = lidRef.current?.getBoundingClientRect();
+    setSlots((prev) =>
+      tagFracs(
+        prev.map((slot) => (slot.id === id ? { ...slot, x, y } : slot)),
+        field?.width ?? 0,
+        field?.height ?? 0
+      )
+    );
   };
 
   useLayoutEffect(() => {
@@ -503,17 +511,19 @@ export function StickerLid() {
       const playable = playableRect(field.width, field.height);
       const forbidden = measureForbidden(field);
       setSlots((prev) => {
-        const folded = foldDrag(prev, offsetsRef.current);
+        const folded = tagFracs(foldDrag(prev, offsetsRef.current), field.width, field.height);
         offsetsRef.current = {};
         if (folded.length === 0) {
           return scatterStickers(
             playable,
             STICKER_ORDER.map((id) => stickerBox(id, field.width)),
-            forbidden
+            forbidden,
+            field.width,
+            field.height
           );
         }
-        if (reason === 'text') return nudgeConflicts(folded, playable, forbidden, field.width);
-        return relayoutForWidth(folded, playable, forbidden, field.width);
+        if (reason === 'text') return nudgeConflicts(folded, playable, forbidden, field.width, field.height);
+        return relayoutForWidth(folded, playable, forbidden, field.width, field.height);
       });
     };
 

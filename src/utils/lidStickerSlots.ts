@@ -17,6 +17,8 @@ export type ScatterSlot = {
   h: number;
   artW: number;
   rotate: number;
+  fx: number;
+  fy: number;
 };
 
 export type StickerBox = { id: LidSlotId; w: number; h: number; artW: number };
@@ -135,8 +137,53 @@ function fromAabb(size: StickerBox, rotate: number, aabbX: number, aabbY: number
     w: size.w,
     h: size.h,
     artW: size.artW,
-    rotate
+    rotate,
+    fx: 0,
+    fy: 0
   };
+}
+
+export function tagFracs(slots: ScatterSlot[], fieldW: number, fieldH: number): ScatterSlot[] {
+  return slots.map((slot) => ({
+    ...slot,
+    fx: fieldW ? slot.x / fieldW : 0,
+    fy: fieldH ? slot.y / fieldH : 0
+  }));
+}
+
+function inflate(rect: Rect, pad: number): Rect {
+  return { x: rect.x - pad, y: rect.y - pad, w: rect.w + pad * 2, h: rect.h + pad * 2 };
+}
+
+function mergeIntervals(spans: [number, number][]) {
+  if (spans.length === 0) return [];
+  const sorted = [...spans].sort((a, b) => a[0] - b[0]);
+  const out: [number, number][] = [sorted[0]];
+  for (let i = 1; i < sorted.length; i++) {
+    const cur = sorted[i];
+    const last = out[out.length - 1];
+    if (cur[0] <= last[1]) last[1] = Math.max(last[1], cur[1]);
+    else out.push(cur);
+  }
+  return out;
+}
+
+function verticalGaps(x: number, w: number, h: number, playable: Rect, blocked: Rect[]): { y: number; h: number }[] {
+  const x1 = x + w;
+  const spans: [number, number][] = [];
+  for (const block of blocked) {
+    if (x < block.x + block.w && x1 > block.x) spans.push([block.y, block.y + block.h]);
+  }
+  const merged = mergeIntervals(spans);
+  const gaps: { y: number; h: number }[] = [];
+  let cursor = playable.y;
+  const end = playable.y + playable.h;
+  for (const [top, bottom] of merged) {
+    if (top - cursor >= h) gaps.push({ y: cursor, h: top - cursor });
+    cursor = Math.max(cursor, bottom);
+  }
+  if (end - cursor >= h) gaps.push({ y: cursor, h: end - cursor });
+  return gaps;
 }
 
 function gridPlace(
@@ -192,7 +239,9 @@ function evenGrid(sizes: StickerBox[], playable: Rect): ScatterSlot[] {
       ...size,
       x: playable.x + col * cellW + Math.max(0, (cellW - size.w) / 2),
       y: playable.y + row * cellH + Math.max(0, (cellH - size.h) / 2),
-      rotate: 0
+      rotate: 0,
+      fx: 0,
+      fy: 0
     };
   });
 }
@@ -223,7 +272,9 @@ function nearestPlace(
           w: size.w,
           h: size.h,
           artW: size.artW,
-          rotate
+          rotate,
+          fx: 0,
+          fy: 0
         };
         if (allowed(slot, playable, forbidden, placed)) return slot;
       }
@@ -248,8 +299,27 @@ function pack(
       const rotate = Math.round((rng() * 2 - 1) * 10);
       const aabb = rotSize(size.w, size.h, rotate);
       const maxX = Math.max(0, playable.w - aabb.w);
-      const maxY = Math.max(0, playable.h - aabb.h);
-      const slot = fromAabb(size, rotate, playable.x + rng() * maxX, playable.y + rng() * maxY);
+      const x = playable.x + rng() * maxX;
+      const gaps = verticalGaps(
+        x,
+        aabb.w,
+        aabb.h,
+        playable,
+        forbidden.concat(out.map((slot) => inflate(aabbOf(slot), STICKER_GAP)))
+      );
+      if (gaps.length === 0) continue;
+      const weights = gaps.map((gap) => gap.h - aabb.h);
+      let pick = rng() * weights.reduce((sum, w) => sum + w, 0);
+      let gap = gaps[0];
+      for (let g = 0; g < gaps.length; g++) {
+        pick -= weights[g];
+        if (pick <= 0) {
+          gap = gaps[g];
+          break;
+        }
+      }
+      const y = gap.y + rng() * Math.max(0, gap.h - aabb.h);
+      const slot = fromAabb(size, rotate, x, y);
       if (allowed(slot, playable, forbidden, out)) {
         placed = slot;
         break;
@@ -266,9 +336,13 @@ export function scatterStickers(
   playable: Rect,
   sizes: StickerBox[],
   forbidden: Rect[],
+  fieldW: number,
+  fieldH: number,
   rng: () => number = Math.random
 ): ScatterSlot[] {
-  return pack(sizes, playable, forbidden, rng) ?? pack(sizes, playable, forbidden, rng) ?? evenGrid(sizes, playable);
+  const packed =
+    pack(sizes, playable, forbidden, rng) ?? pack(sizes, playable, forbidden, rng) ?? evenGrid(sizes, playable);
+  return tagFracs(packed, fieldW, fieldH);
 }
 
 export function relayoutForWidth(
@@ -276,32 +350,34 @@ export function relayoutForWidth(
   playable: Rect,
   forbidden: Rect[],
   fieldW: number,
+  fieldH: number,
   rng: () => number = Math.random
 ): ScatterSlot[] {
   const keep: ScatterSlot[] = [];
-  const rest: { last?: ScatterSlot; box: StickerBox }[] = [];
+  const rest: StickerBox[] = [];
   for (const id of STICKER_ORDER) {
     const box = stickerBox(id, fieldW);
     const last = prev.find((slot) => slot.id === id);
     const candidate = last
-      ? { ...last, w: box.w, h: box.h, artW: box.artW }
-      : { ...box, x: playable.x, y: playable.y, rotate: 0 };
+      ? {
+          ...last,
+          ...box,
+          x: last.fx * fieldW,
+          y: last.fy * fieldH
+        }
+      : { ...box, x: playable.x, y: playable.y, rotate: 0, fx: 0, fy: 0 };
     if (last && allowed(candidate, playable, forbidden, keep)) keep.push(candidate);
-    else rest.push({ last, box });
+    else rest.push(box);
   }
-  if (rest.length === 0) return orderSlots(keep);
-  const stacked = pack(
-    rest.map((item) => item.box),
-    playable,
-    forbidden,
-    rng,
-    keep
-  );
-  if (stacked) return stacked;
+  if (rest.length === 0) return tagFracs(orderSlots(keep), fieldW, fieldH);
+  const stacked = pack(rest, playable, forbidden, rng, keep);
+  if (stacked) return tagFracs(stacked, fieldW, fieldH);
   return scatterStickers(
     playable,
     STICKER_ORDER.map((id) => stickerBox(id, fieldW)),
     forbidden,
+    fieldW,
+    fieldH,
     rng
   );
 }
@@ -310,7 +386,8 @@ export function nudgeConflicts(
   prev: ScatterSlot[],
   playable: Rect,
   forbidden: Rect[],
-  fieldW: number
+  fieldW: number,
+  fieldH: number
 ): ScatterSlot[] {
   const keep: ScatterSlot[] = [];
   const rest: { last?: ScatterSlot; box: StickerBox }[] = [];
@@ -319,7 +396,7 @@ export function nudgeConflicts(
     const last = prev.find((slot) => slot.id === id);
     const candidate = last
       ? { ...last, w: box.w, h: box.h, artW: box.artW }
-      : { ...box, x: playable.x, y: playable.y, rotate: 0 };
+      : { ...box, x: playable.x, y: playable.y, rotate: 0, fx: 0, fy: 0 };
     if (last && allowed(candidate, playable, forbidden, keep)) keep.push(candidate);
     else rest.push({ last, box });
   }
@@ -330,5 +407,5 @@ export function nudgeConflicts(
       evenGrid([item.box], playable)[0];
     if (moved) keep.push(moved);
   }
-  return orderSlots(keep);
+  return tagFracs(orderSlots(keep), fieldW, fieldH);
 }
