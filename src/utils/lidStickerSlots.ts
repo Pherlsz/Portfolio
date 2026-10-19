@@ -30,13 +30,13 @@ export const STICKER_ORDER: LidSlotId[] = [
 ];
 
 const ART_W: Record<LidSlotId, number> = {
-  morcega: 72,
-  banguela: 60,
-  tomada: 72,
-  d20: 56,
-  typescript: 32,
-  react: 32,
-  nextjs: 32
+  morcega: 56,
+  banguela: 50,
+  tomada: 56,
+  d20: 46,
+  typescript: 28,
+  react: 28,
+  nextjs: 28
 };
 
 const ART_H_OVER_W: Record<LidSlotId, number> = {
@@ -49,34 +49,35 @@ const ART_H_OVER_W: Record<LidSlotId, number> = {
   nextjs: 1
 };
 
-/** Safe corners/edges used when sampling fails. */
 const FALLBACK: Record<LidSlotId, { fx: number; fy: number; rotate: number }> = {
-  morcega: { fx: 0.02, fy: 0.06, rotate: -5 },
-  react: { fx: 0.86, fy: 0.04, rotate: 10 },
-  banguela: { fx: 0.04, fy: 0.7, rotate: 7 },
-  tomada: { fx: 0.52, fy: 0.72, rotate: 2 },
-  d20: { fx: 0.78, fy: 0.38, rotate: 12 },
-  typescript: { fx: 0.88, fy: 0.58, rotate: -8 },
-  nextjs: { fx: 0.72, fy: 0.78, rotate: 6 }
+  morcega: { fx: 0.78, fy: 0.08, rotate: -5 },
+  react: { fx: 0.88, fy: 0.36, rotate: 8 },
+  banguela: { fx: 0.7, fy: 0.62, rotate: 6 },
+  tomada: { fx: 0.08, fy: 0.78, rotate: 2 },
+  d20: { fx: 0.52, fy: 0.72, rotate: 10 },
+  typescript: { fx: 0.88, fy: 0.72, rotate: -6 },
+  nextjs: { fx: 0.36, fy: 0.8, rotate: 5 }
 };
 
 export const MIN_HIT = 44;
-const PAD = 10;
-const KISS = 2;
+const PAD = 12;
+const KISS = 1;
 const TRIES = 48;
+const GRID = 6;
 
 export function stickerBox(id: LidSlotId, fieldW: number) {
-  const scale = Math.min(2.1, Math.max(1, fieldW / 360));
+  const scale = Math.min(2, Math.max(1, fieldW / 420));
   const artW = Math.round(ART_W[id] * scale);
   const artH = Math.round(artW * ART_H_OVER_W[id]);
   return { id, artW, w: Math.max(MIN_HIT, artW), h: Math.max(MIN_HIT, artH) };
 }
 
 export function playableRect(field: DOMRectReadOnly, viewW: number, viewH: number): Rect {
-  const left = Math.max(0, -field.left);
-  const top = Math.max(0, -field.top);
-  const right = Math.min(field.width, viewW - field.left);
-  const bottom = Math.min(field.height, viewH - field.top);
+  const inset = 4;
+  const left = Math.max(inset, -field.left);
+  const top = Math.max(inset, -field.top);
+  const right = Math.min(field.width - inset, viewW - field.left - inset);
+  const bottom = Math.min(field.height - inset, viewH - field.top - inset);
   return { x: left, y: top, w: Math.max(0, right - left), h: Math.max(0, bottom - top) };
 }
 
@@ -91,26 +92,88 @@ export function localPadded(field: DOMRectReadOnly, node: Element | null, pad = 
   };
 }
 
+function rotSize(w: number, h: number, deg: number) {
+  const rad = (Math.abs(deg) * Math.PI) / 180;
+  const c = Math.abs(Math.cos(rad));
+  const s = Math.abs(Math.sin(rad));
+  return { w: w * c + h * s, h: w * s + h * c };
+}
+
+function aabbOf(slot: { x: number; y: number; w: number; h: number; rotate: number }): Rect {
+  const size = rotSize(slot.w, slot.h, slot.rotate);
+  return {
+    x: slot.x + (slot.w - size.w) / 2,
+    y: slot.y + (slot.h - size.h) / 2,
+    w: size.w,
+    h: size.h
+  };
+}
+
 function hits(a: Rect, b: Rect, kiss = KISS) {
   return a.x < b.x + b.w - kiss && a.x + a.w - kiss > b.x && a.y < b.y + b.h - kiss && a.y + a.h - kiss > b.y;
 }
 
-function clampTo(playable: Rect, w: number, h: number, x: number, y: number) {
-  const maxX = playable.x + Math.max(0, playable.w - w);
-  const maxY = playable.y + Math.max(0, playable.h - h);
+function clampLayout(playable: Rect, w: number, h: number, aw: number, ah: number, x: number, y: number) {
+  const dx = (aw - w) / 2;
+  const dy = (ah - h) / 2;
+  const minX = playable.x - dx;
+  const minY = playable.y - dy;
+  const maxX = playable.x + playable.w - aw - dx;
+  const maxY = playable.y + playable.h - ah - dy;
   return {
-    x: Math.min(Math.max(x, playable.x), maxX),
-    y: Math.min(Math.max(y, playable.y), maxY)
+    x: Math.min(Math.max(x, minX), Math.max(minX, maxX)),
+    y: Math.min(Math.max(y, minY), Math.max(minY, maxY))
   };
 }
 
-function fits(c: Rect, playable: Rect, forbidden: Rect[], placed: Rect[]) {
-  if (c.x < playable.x - 0.5 || c.y < playable.y - 0.5) return false;
-  if (c.x + c.w > playable.x + playable.w + 0.5) return false;
-  if (c.y + c.h > playable.y + playable.h + 0.5) return false;
-  for (const block of forbidden) if (hits(c, block)) return false;
-  for (const other of placed) if (hits(c, other)) return false;
+function allowed(slot: ScatterSlot, playable: Rect, forbidden: Rect[], placed: ScatterSlot[]) {
+  const box = aabbOf(slot);
+  if (box.x < playable.x - 0.5 || box.y < playable.y - 0.5) return false;
+  if (box.x + box.w > playable.x + playable.w + 0.5) return false;
+  if (box.y + box.h > playable.y + playable.h + 0.5) return false;
+  for (const block of forbidden) if (hits(box, block)) return false;
+  for (const other of placed) if (hits(box, aabbOf(other))) return false;
   return true;
+}
+
+function fromAabb(
+  id: LidSlotId,
+  size: { w: number; h: number; artW: number },
+  rotate: number,
+  aabbX: number,
+  aabbY: number
+): ScatterSlot {
+  const aabb = rotSize(size.w, size.h, rotate);
+  return {
+    id,
+    x: aabbX + (aabb.w - size.w) / 2,
+    y: aabbY + (aabb.h - size.h) / 2,
+    w: size.w,
+    h: size.h,
+    artW: size.artW,
+    rotate
+  };
+}
+
+function gridPlace(
+  id: LidSlotId,
+  size: { w: number; h: number; artW: number },
+  rotate: number,
+  playable: Rect,
+  forbidden: Rect[],
+  placed: ScatterSlot[]
+): ScatterSlot | undefined {
+  const aabb = rotSize(size.w, size.h, rotate);
+  const maxX = playable.x + playable.w - aabb.w;
+  const maxY = playable.y + playable.h - aabb.h;
+  if (maxX < playable.x || maxY < playable.y) return undefined;
+  for (let y = playable.y; y <= maxY; y += GRID) {
+    for (let x = playable.x; x <= maxX; x += GRID) {
+      const slot = fromAabb(id, size, rotate, x, y);
+      if (allowed(slot, playable, forbidden, placed)) return slot;
+    }
+  }
+  return undefined;
 }
 
 function fallbackPlace(
@@ -118,33 +181,27 @@ function fallbackPlace(
   size: { w: number; h: number; artW: number },
   playable: Rect,
   forbidden: Rect[],
-  placed: Rect[]
+  placed: ScatterSlot[]
 ): ScatterSlot {
   const safe = FALLBACK[id];
-  const origin = clampTo(
+  for (const rotate of [safe.rotate, 0]) {
+    const found = gridPlace(id, size, rotate, playable, forbidden, placed);
+    if (found) return found;
+  }
+  const aabb = rotSize(size.w, size.h, 0);
+  const pos = clampLayout(
     playable,
     size.w,
     size.h,
-    playable.x + safe.fx * Math.max(0, playable.w - size.w),
-    playable.y + safe.fy * Math.max(0, playable.h - size.h)
+    aabb.w,
+    aabb.h,
+    playable.x + safe.fx * Math.max(0, playable.w - aabb.w),
+    playable.y + safe.fy * Math.max(0, playable.h - aabb.h)
   );
-  const step = 12;
-  for (let radius = 0; radius <= 8; radius++) {
-    for (let dx = -radius; dx <= radius; dx++) {
-      for (let dy = -radius; dy <= radius; dy++) {
-        if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
-        const pos = clampTo(playable, size.w, size.h, origin.x + dx * step, origin.y + dy * step);
-        const c = { x: pos.x, y: pos.y, w: size.w, h: size.h };
-        if (fits(c, playable, forbidden, placed)) {
-          return { id, ...c, artW: size.artW, rotate: safe.rotate };
-        }
-      }
-    }
-  }
-  return { id, ...origin, w: size.w, h: size.h, artW: size.artW, rotate: safe.rotate };
+  return { id, x: pos.x, y: pos.y, w: size.w, h: size.h, artW: size.artW, rotate: 0 };
 }
 
-// shortcut: 48 random tries then a fixed slot; upgrade if a breakpoint still packs on the name
+// shortcut: 48 random tries then a 6px grid; upgrade if a new breakpoint still packs on the name
 export function scatterStickers(
   playable: Rect,
   sizes: { id: LidSlotId; w: number; h: number; artW: number }[],
@@ -155,18 +212,16 @@ export function scatterStickers(
   const out: ScatterSlot[] = [];
   for (const size of ordered) {
     let placed: ScatterSlot | undefined;
-    const maxX = Math.max(0, playable.w - size.w);
-    const maxY = Math.max(0, playable.h - size.h);
     for (let i = 0; i < TRIES; i++) {
-      const c = {
-        x: playable.x + rng() * maxX,
-        y: playable.y + rng() * maxY,
-        w: size.w,
-        h: size.h
-      };
-      if (!fits(c, playable, forbidden, out)) continue;
-      placed = { id: size.id, ...c, artW: size.artW, rotate: Math.round((rng() * 2 - 1) * 12) };
-      break;
+      const rotate = Math.round((rng() * 2 - 1) * 10);
+      const aabb = rotSize(size.w, size.h, rotate);
+      const maxX = Math.max(0, playable.w - aabb.w);
+      const maxY = Math.max(0, playable.h - aabb.h);
+      const slot = fromAabb(size.id, size, rotate, playable.x + rng() * maxX, playable.y + rng() * maxY);
+      if (allowed(slot, playable, forbidden, out)) {
+        placed = slot;
+        break;
+      }
     }
     out.push(placed ?? fallbackPlace(size.id, size, playable, forbidden, out));
   }
@@ -175,8 +230,8 @@ export function scatterStickers(
   );
 }
 
-export function slotInBounds(slot: Rect, playable: Rect) {
-  return fits(slot, playable, [], []);
+export function slotInBounds(slot: ScatterSlot, playable: Rect) {
+  return allowed(slot, playable, [], []);
 }
 
 export function relocateOutOfBounds(
@@ -188,7 +243,7 @@ export function relocateOutOfBounds(
   const next: ScatterSlot[] = [];
   const pending: ScatterSlot[] = [];
   for (const slot of prev) {
-    if (slotInBounds(slot, playable)) next.push(slot);
+    if (slotInBounds(slot, playable) && allowed(slot, playable, forbidden, next)) next.push(slot);
     else pending.push(slot);
   }
   for (const slot of pending) {
@@ -196,7 +251,7 @@ export function relocateOutOfBounds(
     const [moved] = scatterStickers(
       playable,
       [{ id: slot.id, w: slot.w, h: slot.h, artW: slot.artW }],
-      forbidden.concat(occupied),
+      forbidden.concat(occupied.map((s) => aabbOf(s))),
       rng
     );
     next.push(moved ?? fallbackPlace(slot.id, slot, playable, forbidden, occupied));

@@ -452,7 +452,7 @@ function measureForbidden(field: DOMRectReadOnly) {
   return [
     localPadded(field, document.querySelector('header')),
     localPadded(field, document.getElementById('hero-identity')),
-    localPadded(field, document.getElementById('tampa-ajuda'))
+    localPadded(field, document.getElementById('tampa-ajuda'), 8)
   ].filter((rect): rect is NonNullable<typeof rect> => rect !== null);
 }
 

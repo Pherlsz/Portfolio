@@ -621,7 +621,7 @@
     text-underline-offset: 0.22em;
   }
 
-  @media (hover: none) and (pointer: coarse) {
+  @media (hover: none) and (pointer: coarse), (max-width: 639px) {
     .jump-trigger {
       display: none;
     }
@@ -648,15 +648,9 @@
   }
 
   .lid {
-    overflow: visible;
+    overflow: hidden;
     border-radius: inherit;
     background: transparent;
-  }
-
-  @media (pointer: coarse) {
-    .lid {
-      overflow: hidden;
-    }
   }
 
   .sticker-face-host {
