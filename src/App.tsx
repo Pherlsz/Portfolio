@@ -70,22 +70,22 @@ export default function App() {
           onOpenCv={() => setCvOpen(true)}
         />
         <ExperienceSection />
-        <div id="projeto">
+        <div id="projeto" tabIndex={-1}>
           <Suspense fallback={<div className="min-h-[28rem]" />}>
             <ProjectSection />
           </Suspense>
         </div>
-        <div id="formacao">
+        <div id="formacao" tabIndex={-1}>
           <Suspense fallback={<div className="min-h-[32rem]" />}>
             <CredentialsSection />
           </Suspense>
         </div>
-        <div id="sobre">
+        <div id="sobre" tabIndex={-1}>
           <Suspense fallback={<div className="min-h-[28rem]" />}>
             <AboutSection />
           </Suspense>
         </div>
-        <div id="contato">
+        <div id="contato" tabIndex={-1}>
           <Suspense fallback={<div className="min-h-[24rem]" />}>
             <ContactSection
               onOpenJobFit={() => {

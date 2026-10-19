@@ -6,7 +6,14 @@ import {
   type KeyboardEvent,
   type RefObject
 } from 'react';
-import { animate, MotionConfig, motion, useDragControls, useMotionValue } from 'motion/react';
+import {
+  animate,
+  MotionConfig,
+  motion,
+  useDragControls,
+  useMotionValue,
+  useReducedMotion
+} from 'motion/react';
 import { HoloSparkleCanvas } from './HoloSparkleCanvas';
 import { useStickerHoloPointer } from '../utils/holoPointer';
 import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
@@ -285,6 +292,8 @@ function LidSticker({
   const [pressed, setPressed] = useState(false);
   const [captionLayout, setCaptionLayout] = useState<LidCaptionLayout>(DEFAULT_CAPTION_LAYOUT);
   const { reaction, react, face } = useStickerReaction(slot.id);
+  const reduceMotion = useReducedMotion() === true;
+  const baseRotate = useRef(slot.rotate);
   useStickerHoloPointer(ref, holoActive);
 
   const room = () => {
@@ -400,7 +409,7 @@ function LidSticker({
       dragConstraints={dragConstraints}
       dragElastic={0}
       dragMomentum={false}
-      whileDrag={{ scale: 1.08 }}
+      whileDrag={reduceMotion ? undefined : { scale: 1.06 }}
       onPointerDown={() => {
         onFront();
         setPressed(true);
@@ -414,9 +423,20 @@ function LidSticker({
         onFront();
         setPressed(true);
         syncDragConstraints();
+        baseRotate.current = rotate.get();
+      }}
+      onDrag={(_event, info) => {
+        if (reduceMotion) return;
+        const extra = Math.max(-14, Math.min(14, info.velocity.x / 160));
+        rotate.set(baseRotate.current + extra);
       }}
       onDragEnd={() => {
         releasePressed();
+        if (reduceMotion) {
+          rotate.set(baseRotate.current);
+        } else {
+          void animate(rotate, baseRotate.current, SPRING);
+        }
         window.setTimeout(() => {
           dragged.current = false;
         });
@@ -432,6 +452,7 @@ function LidSticker({
       data-pressed={pressed ? 'true' : undefined}
       data-holo={holoActive ? 'true' : undefined}
       data-holo-state={holoActive ? 'idle' : undefined}
+      // shortcut: logo stickers stay smaller than 44px on the fenced lid slots; resize slots when that file is free
       className="group pointer-events-auto absolute cursor-grab touch-none active:cursor-grabbing"
       style={{
         x,
@@ -481,10 +502,10 @@ export function StickerLid() {
   return (
     <MotionConfig reducedMotion="user">
     <div className="no-print">
-      <div className="notebook relative z-10 aspect-[16/10] w-full">
+      <div className="sticker-field relative z-10 aspect-[16/10] w-full">
         <div ref={lidRef} className="lid absolute inset-0">
           <ul
-            aria-label="Stickers colados na tampa do notebook"
+            aria-label="Stickers: Morcega, Banguela, Tomada e D20"
             data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
           >
             {LID_LAYOUT.map((slot) => (
@@ -508,11 +529,11 @@ export function StickerLid() {
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <p id="tampa-ajuda" className="eyebrow">
+        <p id="tampa-ajuda" className="text-sm text-on-band">
           Arraste os stickers ou use as setas. Clique no D20 para rolar.
         </p>
         <div className="flex gap-2">
-          <button type="button" onClick={shuffle} className="btn btn-ghost min-h-9 px-4 text-sm">
+          <button type="button" onClick={shuffle} className="btn btn-ghost px-4 text-sm">
             Embaralhar
           </button>
           <button
@@ -521,7 +542,7 @@ export function StickerLid() {
               setArrangement(createArrumarArrangement(Date.now()));
               setAnnouncement('Stickers no lugar original.');
             }}
-            className="btn btn-ghost min-h-9 px-4 text-sm"
+            className="btn btn-ghost px-4 text-sm"
           >
             Arrumar
           </button>

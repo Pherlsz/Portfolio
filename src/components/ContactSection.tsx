@@ -140,14 +140,14 @@ export function ContactSection({
               <a
                 href={`mailto:${profile.email}`}
                 translate="no"
-                className="text-lg font-semibold underline decoration-marker decoration-2 underline-offset-4"
+                className="inline-flex min-h-11 items-center text-lg font-semibold underline decoration-marker decoration-2 underline-offset-4"
               >
                 {profile.email}
               </a>
               <CopyEmailButton
                 email={profile.email}
                 label="Copiar e-mail"
-                className="h-9 cursor-pointer rounded-full border border-line px-3 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-ink hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[outline-color:var(--focus-ring)] active:translate-y-px"
+                className="min-h-11 cursor-pointer border border-line px-3 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-ink hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[outline-color:var(--focus-ring)] active:translate-y-px"
               />
             </div>
 
