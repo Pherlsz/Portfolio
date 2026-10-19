@@ -7,7 +7,9 @@ import { Marked } from './ui';
 
 export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
-  const [role, track] = profile.jobTitle.split(' · ');
+  const titleParts = profile.jobTitle.split(' · ');
+  const role = titleParts[0];
+  const track = titleParts.length > 1 ? titleParts.slice(1).join(' · ') : undefined;
 
   return (
     <section id="inicio" aria-labelledby="inicio-titulo">
@@ -26,7 +28,15 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
                 ))}
               </h1>
               <p className="mt-4 text-[0.9375rem] font-semibold text-on-band">
-                {role} <span className="whitespace-nowrap">· {track}</span>
+                {track ? (
+                  <>
+                    {role}
+                    <span className="hidden sm:inline"> · {track}</span>
+                    <span className="block sm:hidden">{track}</span>
+                  </>
+                ) : (
+                  profile.jobTitle
+                )}
               </p>
               <p className="mt-1 text-[0.9375rem] text-on-band">{profile.location}</p>
             </div>

@@ -36,9 +36,9 @@ const ART_W: Record<LidSlotId, number> = {
   banguela: 50,
   tomada: 56,
   d20: 46,
-  typescript: 28,
-  react: 28,
-  nextjs: 28
+  typescript: 36,
+  react: 36,
+  nextjs: 36
 };
 
 const ART_H_OVER_W: Record<LidSlotId, number> = {
@@ -178,6 +178,60 @@ function orderSlots(slots: ScatterSlot[]) {
   );
 }
 
+// shortcut: last-resort even grid may sit on text; upgrade if pack fails at a real breakpoint
+function evenGrid(sizes: StickerBox[], playable: Rect): ScatterSlot[] {
+  const n = Math.max(1, sizes.length);
+  const cols = Math.min(n, Math.max(1, Math.floor((playable.w + STICKER_GAP) / (MIN_HIT + STICKER_GAP))));
+  const rows = Math.ceil(n / cols);
+  const cellW = playable.w / cols;
+  const cellH = playable.h / rows;
+  return sizes.map((size, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    return {
+      ...size,
+      x: playable.x + col * cellW + Math.max(0, (cellW - size.w) / 2),
+      y: playable.y + row * cellH + Math.max(0, (cellH - size.h) / 2),
+      rotate: 0
+    };
+  });
+}
+
+function nearestPlace(
+  from: ScatterSlot | undefined,
+  size: StickerBox,
+  playable: Rect,
+  forbidden: Rect[],
+  placed: ScatterSlot[]
+): ScatterSlot | undefined {
+  const rotate = from?.rotate ?? 0;
+  if (from) {
+    const candidate = { ...from, w: size.w, h: size.h, artW: size.artW };
+    if (allowed(candidate, playable, forbidden, placed)) return candidate;
+  }
+  const originX = from?.x ?? playable.x;
+  const originY = from?.y ?? playable.y;
+  const maxR = Math.ceil(Math.max(playable.w, playable.h) / GRID);
+  for (let r = 1; r <= maxR; r++) {
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+        const slot: ScatterSlot = {
+          id: size.id,
+          x: originX + dx * GRID,
+          y: originY + dy * GRID,
+          w: size.w,
+          h: size.h,
+          artW: size.artW,
+          rotate
+        };
+        if (allowed(slot, playable, forbidden, placed)) return slot;
+      }
+    }
+  }
+  return fallbackPlace(size, playable, forbidden, placed);
+}
+
 // shortcut: 48 random tries then a 6px grid; upgrade if a new breakpoint still cannot pack with an 8px gap
 function pack(
   sizes: StickerBox[],
@@ -214,7 +268,7 @@ export function scatterStickers(
   forbidden: Rect[],
   rng: () => number = Math.random
 ): ScatterSlot[] {
-  return pack(sizes, playable, forbidden, rng) ?? pack(sizes, playable, forbidden, rng) ?? [];
+  return pack(sizes, playable, forbidden, rng) ?? pack(sizes, playable, forbidden, rng) ?? evenGrid(sizes, playable);
 }
 
 export function relayoutForWidth(
@@ -225,7 +279,7 @@ export function relayoutForWidth(
   rng: () => number = Math.random
 ): ScatterSlot[] {
   const keep: ScatterSlot[] = [];
-  const rest: StickerBox[] = [];
+  const rest: { last?: ScatterSlot; box: StickerBox }[] = [];
   for (const id of STICKER_ORDER) {
     const box = stickerBox(id, fieldW);
     const last = prev.find((slot) => slot.id === id);
@@ -233,10 +287,16 @@ export function relayoutForWidth(
       ? { ...last, w: box.w, h: box.h, artW: box.artW }
       : { ...box, x: playable.x, y: playable.y, rotate: 0 };
     if (last && allowed(candidate, playable, forbidden, keep)) keep.push(candidate);
-    else rest.push(box);
+    else rest.push({ last, box });
   }
   if (rest.length === 0) return orderSlots(keep);
-  const stacked = pack(rest, playable, forbidden, rng, keep);
+  const stacked = pack(
+    rest.map((item) => item.box),
+    playable,
+    forbidden,
+    rng,
+    keep
+  );
   if (stacked) return stacked;
   return scatterStickers(
     playable,
@@ -244,4 +304,34 @@ export function relayoutForWidth(
     forbidden,
     rng
   );
+}
+
+export function nudgeConflicts(
+  prev: ScatterSlot[],
+  playable: Rect,
+  forbidden: Rect[],
+  fieldW: number
+): ScatterSlot[] {
+  const keep: ScatterSlot[] = [];
+  const rest: { last?: ScatterSlot; box: StickerBox }[] = [];
+  for (const id of STICKER_ORDER) {
+    const box = stickerBox(id, fieldW);
+    const last = prev.find((slot) => slot.id === id);
+    const candidate = last
+      ? { ...last, w: box.w, h: box.h, artW: box.artW }
+      : { ...box, x: playable.x, y: playable.y, rotate: 0 };
+    if (last && allowed(candidate, playable, forbidden, keep)) keep.push(candidate);
+    else rest.push({ last, box });
+  }
+  for (const item of rest) {
+    keep.push(
+      nearestPlace(item.last, item.box, playable, forbidden, keep) ?? {
+        ...item.box,
+        x: item.last?.x ?? playable.x,
+        y: item.last?.y ?? playable.y,
+        rotate: item.last?.rotate ?? 0
+      }
+    );
+  }
+  return orderSlots(keep);
 }

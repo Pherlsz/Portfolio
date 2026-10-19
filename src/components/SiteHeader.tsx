@@ -260,9 +260,9 @@ export function SiteHeader({
             aria-controls="atalhos"
             aria-expanded={jumpOpen}
             aria-label={`Abrir atalhos, ${modKey} K`}
-            className="jump-trigger btn btn-ghost min-h-11 px-2 font-mono text-sm sm:px-3"
+            className="jump-trigger btn btn-ghost min-h-11 px-2 text-sm tracking-normal sm:px-3"
           >
-            <kbd className="font-mono">{modKey}&nbsp;K</kbd>
+            {modKey === '⌘' ? '⌘K' : 'Ctrl K'}
           </button>
           <button
             type="button"

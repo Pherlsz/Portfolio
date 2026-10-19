@@ -19,6 +19,7 @@ import { useStickerHoloPointer } from '../utils/holoPointer';
 import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
 import {
   localPadded,
+  nudgeConflicts,
   playableRect,
   relayoutForWidth,
   scatterStickers,
@@ -511,6 +512,7 @@ export function StickerLid() {
             forbidden
           );
         }
+        if (reason === 'text') return nudgeConflicts(folded, playable, forbidden, field.width);
         return relayoutForWidth(folded, playable, forbidden, field.width);
       });
     };
@@ -522,8 +524,12 @@ export function StickerLid() {
     const textWatch = new ResizeObserver(() => place('text'));
     if (fieldNode) fieldWatch.observe(fieldNode);
     if (identity) textWatch.observe(identity);
-    void document.fonts.ready.then(() => place('text'));
+    let cancelFonts = false;
+    void document.fonts.ready.then(() => {
+      if (!cancelFonts) place('text');
+    });
     return () => {
+      cancelFonts = true;
       fieldWatch.disconnect();
       textWatch.disconnect();
     };

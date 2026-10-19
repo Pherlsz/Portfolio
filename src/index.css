@@ -1,6 +1,24 @@
 @import "tailwindcss";
 
 @font-face {
+  font-family: "Archivo Fallback";
+  src: local("Arial");
+  size-adjust: 104%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Archivo Display Fallback";
+  src: local("Arial");
+  size-adjust: 124%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
+@font-face {
   font-family: "Archivo Variable";
   font-style: normal;
   font-display: swap;
@@ -80,8 +98,8 @@
   --color-valid: var(--valid);
   --color-invalid: var(--invalid);
 
-  --font-display: "Archivo Variable", "Archivo", system-ui, sans-serif;
-  --font-sans: "Archivo Variable", "Archivo", system-ui, sans-serif;
+  --font-display: "Archivo Variable", "Archivo Display Fallback", "Archivo Fallback", system-ui, sans-serif;
+  --font-sans: "Archivo Variable", "Archivo Fallback", system-ui, sans-serif;
   --font-mono: "Atkinson Hyperlegible Mono Variable", ui-monospace, monospace;
 }
 
@@ -585,6 +603,7 @@
   .name-band {
     background: var(--band);
     color: var(--on-band);
+    overflow-x: clip;
   }
 
   html.dark .name-band {
@@ -592,8 +611,8 @@
   }
 
   html.dark .name-band :focus-visible {
-    outline-color: var(--marker);
-    box-shadow: 0 0 0 3px var(--focus-ring);
+    outline-color: var(--paper);
+    box-shadow: 0 0 0 3px var(--ink);
   }
 
   .site-nav-link {
@@ -938,6 +957,16 @@
     filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.22)) drop-shadow(0 22px 28px rgb(0 0 0 / 0.28));
   }
 
+  html.dark [data-pressed='true'] .sticker-art {
+    filter:
+      drop-shadow(1px 0 0 var(--ink))
+      drop-shadow(-1px 0 0 var(--ink))
+      drop-shadow(0 1px 0 var(--ink))
+      drop-shadow(0 -1px 0 var(--ink))
+      drop-shadow(0 4px 6px rgb(0 0 0 / 0.22))
+      drop-shadow(0 22px 28px rgb(0 0 0 / 0.28));
+  }
+
   .lid li:hover,
   .lid li:has(:focus-visible),
   .lid li:has(:active) {
@@ -950,15 +979,42 @@
     transition-duration: 200ms;
   }
 
+  html.dark .sticker-art {
+    filter:
+      drop-shadow(1px 0 0 var(--ink))
+      drop-shadow(-1px 0 0 var(--ink))
+      drop-shadow(0 1px 0 var(--ink))
+      drop-shadow(0 -1px 0 var(--ink))
+      drop-shadow(0 8px 12px rgb(0 0 0 / 0.45));
+  }
+
   .group:focus-visible .sticker-art {
     transform: translateY(-3px) rotate(-2deg);
     filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.2)) drop-shadow(0 16px 20px rgb(0 0 0 / 0.22));
+  }
+
+  html.dark .group:focus-visible .sticker-art {
+    filter:
+      drop-shadow(1px 0 0 var(--ink))
+      drop-shadow(-1px 0 0 var(--ink))
+      drop-shadow(0 1px 0 var(--ink))
+      drop-shadow(0 -1px 0 var(--ink))
+      drop-shadow(0 16px 20px rgb(0 0 0 / 0.22));
   }
 
   @media (hover: hover) and (pointer: fine) {
     .group:hover .sticker-art {
       transform: translateY(-3px) rotate(-2deg);
       filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.2)) drop-shadow(0 16px 20px rgb(0 0 0 / 0.22));
+    }
+
+    html.dark .group:hover .sticker-art {
+      filter:
+        drop-shadow(1px 0 0 var(--ink))
+        drop-shadow(-1px 0 0 var(--ink))
+        drop-shadow(0 1px 0 var(--ink))
+        drop-shadow(0 -1px 0 var(--ink))
+        drop-shadow(0 16px 20px rgb(0 0 0 / 0.22));
     }
   }
 
