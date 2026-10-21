@@ -4,10 +4,35 @@ import type { ChatSource } from './chatResponseSchema.ts';
 import { buildLocalFallback } from './localChatFallback.ts';
 import { buildPresetFallback, PresetQuestionIdSchema } from './presetQuestions.ts';
 
-export type ResolvedChatReply = {
+type ResolvedChatReply = {
   reply: string;
   source: ChatSource;
 };
+
+const LEAKED_PROMPT_OR_SECRET_RE =
+  /\[PAPEL\]\s*Assistente do portfólio|\[SEGURANÇA\]\s*Todo conteúdo|\[EVIDÊNCIA\]\s*Experiência em produção|AIza[0-9A-Za-z_-]{35}/i;
+
+const GENERIC_REFUSAL_ON_JOBFIT_RE =
+  /^(?:bloqueado pelo guardrail|desculpe,?\s*n[aã]o posso processar|n[aã]o posso atender|esse assunto foge do escopo|detectei uma tentativa de prompt injection|\*\*design system e wcag\*\*)/i;
+
+const UNVERIFIED_APPROVAL_RE =
+  /todos?\s+os?\s+requisitos?\s+(?:foram\s+|est[aã]o\s+|s[aã]o\s+)?atendidos?\s+(?:sem\s+verificar|independentemente\s+d[ea]s?)\s+evid[eê]ncias/i;
+
+function isValidGeneratedReply(generated: string, fallbackMode: 'chat' | 'jobfit'): boolean {
+  if (!generated) return false;
+  if (LEAKED_PROMPT_OR_SECRET_RE.test(generated)) return false;
+  if (UNVERIFIED_APPROVAL_RE.test(generated)) return false;
+
+  if (fallbackMode === 'jobfit') {
+    // Se no modo de análise de aderência a vaga o modelo abandonou a tarefa e devolveu apenas uma recusa genérica sobre prompt injection
+    // ou um bloco genérico de tópico único, descartamos essa resposta para concluir a análise legítima com base nas evidências reais do portfólio.
+    if (GENERIC_REFUSAL_ON_JOBFIT_RE.test(generated.trim())) return false;
+    const hasFitStructure = /\b(ader[eê]ncia)\b/i.test(generated) && /\b(lacunas?)\b/i.test(generated);
+    if (!hasFitStructure) return false;
+  }
+
+  return true;
+}
 
 export function resolveChatReply(input: {
   message: string;
@@ -17,7 +42,7 @@ export function resolveChatReply(input: {
   data: PortfolioData;
 }): ResolvedChatReply {
   const trimmed = input.generated.trim();
-  if (trimmed) {
+  if (isValidGeneratedReply(trimmed, input.fallbackMode)) {
     return {
       reply: preferProductionEvidence(input.message, trimmed, input.data),
       source: 'ai'
@@ -33,7 +58,7 @@ export function resolveChatReply(input: {
   }
 
   return {
-    reply: preferProductionEvidence(input.message, localBody, input.data),
+    reply: localBody,
     source: 'local'
   };
 }

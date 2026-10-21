@@ -1,14 +1,9 @@
-import {
-  featuredProjectLlmsMdItems,
-  featuredProjectSchemaOrg
-} from '../utils/featuredProjectLinks.ts';
-
-export interface Highlight {
+interface Highlight {
   metric?: string;
   text: string;
 }
 
-export interface Role {
+interface Role {
   title: string;
   /** YYYY-MM */
   start: string;
@@ -26,7 +21,7 @@ export interface Experience {
   stack: string[];
 }
 
-export interface Project {
+interface Project {
   name: string;
   tagline: string;
   repoUrl: string;
@@ -63,33 +58,33 @@ export interface Certification {
   badge: { code: string; caption: string; shape: 'hexagon' | 'circle'; color: string };
 }
 
-export interface Education {
+interface Education {
   course: string;
   school: string;
   period: string;
 }
 
-export interface Language {
+interface Language {
   name: string;
   code: string;
   level: string;
 }
 
-export interface SkillGroup {
+interface SkillGroup {
   name: string;
   /** Aparecem como selos com logo; o resto fica em texto corrido. */
   featured: string[];
   items: string[];
 }
 
-export interface Pet {
+interface Pet {
   id: string;
   name: string;
   kind: 'gata' | 'gato';
   bio: string;
 }
 
-export interface Interest {
+interface Interest {
   id: string;
   title: string;
   text: string;
@@ -99,7 +94,6 @@ export interface PortfolioData {
   profile: {
     name: string;
     shortName: string;
-    role: string;
     jobTitle: string;
     headline: string;
     /** Trechos entre ==sinais== aparecem com marca-texto. */
@@ -133,11 +127,10 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
   profile: {
     name: 'Pedro Henrique Lopes',
     shortName: 'Pedro Lopes',
-    role: 'Software Engineer · Frontend',
     jobTitle: 'Software Engineer · Frontend',
     headline: 'Transformo fluxos complexos em interfaces rápidas, acessíveis e fáceis de manter.',
     summary:
-      'Cerca de 5 anos em produção com React, Next.js e TypeScript: um design system com ==30+ componentes WCAG 2.1 AA==, listas com ==5.000+ registros== sem travar e IA integrada a fluxos reais de negócio.',
+      'Cerca de 5 anos em produção com React, Next.js e TypeScript: um design system com ==30+ componentes WCAG 2.1 AA==, listas com ==5.000+ registros== sem travar e interfaces de chat de IA.',
     trustCopy:
       'São cerca de 5 anos construindo front-end em produção, de estágio a júnior, usando IA no dia a dia para entregar mais e melhor. Estou aberto a vagas pleno quando houver fit.',
     status: 'Aberto a oportunidades',
@@ -150,7 +143,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     github: 'https://github.com/Pherlsz',
     cvUrl: '/cv/Pedro-Henrique-Lopes-CV.pdf',
     about: [
-      'Engenheiro de software com foco em frontend. Comecei em suporte e no monitoramento de sistemas de alta disponibilidade; essa experiência orienta o modo como construo interfaces: estáveis, observáveis e fáceis de manter.',
+      'Gosto de construir interfaces previsíveis, bem tipadas e fáceis de evoluir em time: componentes reutilizáveis com acessibilidade real, separação clara entre estado de servidor e de UI e cobertura de testes nos fluxos críticos.',
       'Participo de gincanas no RS, no Setor de Diversas. Parte dos projetos pessoais nasceu desse contexto. Treino com regularidade, jogo RPG e convivo com três gatos.'
     ]
   },
@@ -160,7 +153,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       company: 'Atlas Governance',
       location: 'Brasil',
       summary:
-        'Plataforma de governança corporativa. Atuei no frontend do Atlas PLG e do Atlas Sign como Software Engineer, com design system e integração de IA, após período de estágio.',
+        'Plataforma de governança corporativa. Atuei no frontend do Atlas PLG e do Atlas Sign como Software Engineer, com design system e interfaces do chat de IA, após período de estágio.',
       roles: [
         { title: 'Software Engineer', start: '2021-11', end: '2026-07' },
         { title: 'Estagiário em Engenharia de Software', start: '2021-03', end: '2021-11' }
@@ -179,12 +172,12 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
           text: 'Estruturei a navegação em árvore e os fluxos críticos de assinatura eletrônica, com Error Boundaries e testes em Vitest e React Testing Library.'
         },
         {
-          metric: 'LLMs em produção',
-          text: 'Integrei modelos de IA aos fluxos de negócio com function calling e tool calling, via APIs REST em Python e C#/.NET Core.'
+          metric: 'Chat de IA',
+          text: 'Criei as interfaces visuais do chat da IA e suas funcionalidades no frontend da plataforma, consumindo APIs REST em Python e C#/.NET Core.'
         },
         {
           metric: '1.000+ templates',
-          text: 'Refatorei o serviço de mensageria em C#/.NET Core, consolidando templates de e-mail legados em modelos parametrizados, com Docker e CI/CD no Azure DevOps.'
+          text: 'Refatorei os templates de e-mail no serviço de mensageria em C#/.NET Core, consolidando modelos legados em templates parametrizados.'
         },
         {
           metric: '15+ fluxos',
@@ -201,14 +194,20 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         'React',
         'Next.js',
         'TypeScript',
+        'JavaScript (ES6+)',
+        'HTML e CSS',
+        'Tailwind CSS',
+        'Styled Components',
+        'Webpack',
         'TanStack Query',
         'TanStack Virtual',
         'Zustand',
+        'Context API',
         'Vitest',
         'React Testing Library',
         'Python',
         'C# / .NET Core',
-        'Docker',
+        'SQL',
         'Azure DevOps'
       ]
     },
@@ -474,166 +473,45 @@ export const CONTACT_API = {
 } as const;
 
 export const SITE_ORIGIN = 'https://pherls.dev';
-export const PROFILE_IMAGE_PATH = '/og.png';
 /** Revisão pública do perfil. Atualize quando os fatos do currículo mudarem. */
 export const PROFILE_UPDATED = '2026-10-18';
 
-export function generateJsonLdSchema(data: PortfolioData): object {
-  const { profile, project, featuredProjects } = data;
-  const pageUrl = `${SITE_ORIGIN}/`;
-  const personId = `${SITE_ORIGIN}/#person`;
-  const description = `${profile.headline} ${plainText(profile.summary)}`;
-  const hasPart = [
-    ...featuredProjects.map((item) => featuredProjectSchemaOrg(item)),
-    {
-      '@type': 'SoftwareSourceCode',
-      name: project.name,
-      description: project.tagline,
-      codeRepository: project.repoUrl,
-      programmingLanguage: project.language,
-      version: project.version
-    }
-  ];
-
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'ProfilePage',
-        '@id': `${SITE_ORIGIN}/#profilepage`,
-        url: pageUrl,
-        dateModified: PROFILE_UPDATED,
-        mainEntity: {
-          '@type': 'Person',
-          '@id': personId,
-          name: profile.name,
-          alternateName: profile.shortName,
-          url: pageUrl,
-          image: {
-            '@type': 'ImageObject',
-            url: `${SITE_ORIGIN}${PROFILE_IMAGE_PATH}`,
-            width: 1200,
-            height: 630
-          },
-          email: `mailto:${profile.email}`,
-          jobTitle: profile.jobTitle,
-          description,
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: 'Porto Alegre',
-            addressRegion: 'RS',
-            addressCountry: 'BR'
-          },
-          sameAs: [profile.linkedin, profile.github],
-          alumniOf: data.education.map((e) => ({ '@type': 'EducationalOrganization', name: e.school })),
-          knowsAbout: data.skills.flatMap(skillNames),
-          knowsLanguage: data.languages.map((l) => l.code),
-          hasCredential: data.certifications.map((cert) => ({
-            '@type': 'EducationalOccupationalCredential',
-            name: cert.name,
-            recognizedBy: { '@type': 'Organization', name: cert.issuer },
-            dateCreated: cert.year,
-            ...(cert.href ? { url: cert.href } : {})
-          }))
-        },
-        hasPart
-      },
-      {
-        '@type': 'WebSite',
-        '@id': `${SITE_ORIGIN}/#website`,
-        url: pageUrl,
-        name: `${profile.name} · ${profile.role}`,
-        description,
-        inLanguage: 'pt-BR',
-        publisher: { '@id': personId }
-      }
-    ]
-  };
+/** Normaliza texto para comparação insensível a acentos, caixa e pontuação de borda. */
+export function foldText(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 }
 
-function mdItem(label: string, href: string, note?: string): string {
-  return note ? `- [${label}](${href}): ${note}` : `- [${label}](${href})`;
+/** Extrai o conteúdo entre aspas ou crases (`"..."`, `'...'`, `“...”`, `` `...` ``). */
+export function extractQuotedText(text: string): string {
+  return Array.from(text.matchAll(/["'“”`]+([^"'“”`\n]{2,120})["'“”`]+/g), (match) => match[1]).join(' ');
 }
 
-export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): string {
-  const { profile, project, featuredProjects } = data;
-  const lines = [
-    `# ${profile.name} — ${profile.jobTitle}`,
-    '',
-    `> ${profile.headline} ${plainText(profile.summary)}`,
-    '',
-    '## Páginas',
-    mdItem('Portfólio', `${origin}/`, 'Página principal'),
-    mdItem('Currículo HTML', `${origin}/cv`, 'Versão para impressão'),
-    mdItem('Currículo PDF', `${origin}${profile.cvUrl}`, 'Download direto'),
-    mdItem('ai.json', `${origin}/ai.json`, 'Perfil estruturado para agentes'),
-    mdItem('pedro.md', `${origin}/pedro.md`, 'Perfil em Markdown'),
-    mdItem('AGENTS.md', `${origin}/AGENTS.md`, 'Como agentes devem ler este site e enviar contato'),
-    mdItem('resume.json', `${origin}/resume.json`, 'Currículo em JSON'),
-    mdItem('Mapa do site', `${origin}/sitemap.xml`),
-    '',
-    '## Contato',
-    mdItem('E-mail', `mailto:${profile.email}`),
-    mdItem('LinkedIn', profile.linkedin),
-    mdItem('GitHub', profile.github),
-    `- Local: ${profile.location}`,
-    `- Status: ${profile.status}`,
-    `- Senioridade: ${profile.seniority}`,
-    `- Formato: ${profile.workMode}`,
-    `- Pretensão salarial: ${profile.salary}`,
-    mdItem('Formulário no site', `${origin}/#contato`),
-    mdItem(
-      `${CONTACT_API.method} ${CONTACT_API.path}`,
-      `${origin}${CONTACT_API.path}`,
-      `${CONTACT_API.description} JSON { "name", "email", "message", "source": "agent" }. Campos: name (${CONTACT_API.body.name}); email (${CONTACT_API.body.email}); message (${CONTACT_API.body.message}). Resposta 200: { "ok": true }.`
-    ),
-    '',
-    '## Experiência',
-    ...data.experiences.flatMap((exp) => {
-      const span = experienceSpan(exp);
-      return [
-        `### ${exp.company} (${formatPeriod(span.start, span.end)})`,
-        exp.summary,
-        ...exp.roles.map((role) => `- Cargo: ${role.title} (${formatPeriod(role.start, role.end)})`),
-        ...exp.highlights.map((h) => `- ${h.metric ? `${h.metric}: ` : ''}${h.text}`),
-        `- Stack: ${exp.stack.join(', ')}`,
-        ''
-      ];
-    }),
-    '## Projetos em destaque (ferramentas e sites)',
-    ...featuredProjects.flatMap((item) => [
-      `### ${item.name}`,
-      item.tagline,
-      ...featuredProjectLlmsMdItems(item, mdItem),
-      `- Acesso: ${item.access === 'restricted' ? 'restrito (login)' : 'público'}`,
-      `- Stack: ${item.stack.join(', ')}`,
-      ''
-    ]),
-    `## Outro projeto: ${project.name} (${project.language}, ${project.version})`,
-    project.tagline,
-    mdItem('Repositório', project.repoUrl),
-    mdItem('Releases', project.releasesUrl, project.releasesPeriod),
-    ...project.cards.map((card) => `- ${card.title}: ${card.text}`),
-    `- Pacotes: ${project.modules.map((m) => `${m.name} (${m.description})`).join('; ')}`,
-    '',
-    '## Habilidades',
-    ...data.skills.map((group) => `- ${group.name}: ${skillNames(group).join(', ')}`),
-    '',
-    '## Formação',
-    ...data.education.map((e) => `- ${e.course}, ${e.school} (${e.period})`),
-    '',
-    '## Certificações',
-    ...data.certifications.map((c) =>
-      c.href ? mdItem(`${c.name} — ${c.issuer} (${c.year})`, c.href) : `- ${c.name} — ${c.issuer} (${c.year})`
-    ),
-    `- Outros cursos: ${data.otherCourses.join(', ')}`,
-    '',
-    '## Idiomas',
-    ...data.languages.map((l) => `- ${l.name}: ${l.level}`),
-    '',
-    '## Bastidores',
-    ...data.interests.map((i) => `- ${i.title}: ${i.text}`),
-    ...data.pets.map((p) => `- ${p.name} (${p.kind}): ${p.bio}`)
-  ];
-  return lines.join('\n');
+/** Verifica se `needle` ocorre como palavra/termo inteiro dentro de `haystack` (ambos normalizados com `foldText`). */
+export function hasWholeWord(haystack: string, needle: string): boolean {
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?:^|[^a-z0-9#+.])${escaped}(?:$|[^a-z0-9#+.])`, 'i').test(haystack);
 }
+
+export interface FeaturedProjectResolvedLink {
+  kind: 'repo' | 'live';
+  href: string;
+}
+
+/** Links públicos disponíveis para um projeto em destaque (`repoUrl` e/ou `href`). */
+export function featuredProjectLinks(project: Pick<FeaturedProject, 'repoUrl' | 'href'>): FeaturedProjectResolvedLink[] {
+  const out: FeaturedProjectResolvedLink[] = [];
+  const repo = project.repoUrl?.trim();
+  const live = project.href?.trim();
+  if (repo) out.push({ kind: 'repo', href: repo });
+  if (live && live !== repo) out.push({ kind: 'live', href: live });
+  return out;
+}
+
+export function featuredProjectPrimaryUrl(project: Pick<FeaturedProject, 'repoUrl' | 'href'>): string | undefined {
+  return featuredProjectLinks(project)[0]?.href;
+}
+
+export { generateJsonLdSchema, generateLlmsTxt } from './machineDocuments.ts';

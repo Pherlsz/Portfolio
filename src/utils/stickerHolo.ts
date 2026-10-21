@@ -1,27 +1,25 @@
 import { useEffect, useState } from 'react';
 
-export const STICKER_HOLO_STORAGE_KEY = 'pherls:sticker-holo';
-export const HOLO_SCHEMA_VERSION = 2 as const;
+const STICKER_HOLO_STORAGE_KEY = 'pherls:sticker-holo';
+const HOLO_SCHEMA_VERSION = 2 as const;
 
 /** Production all-three odds. Locked 2026-10-15. */
-export const ALL_ODDS = 1 / 100;
-/** Permanently off — no single-sticker roll. */
-export const SINGLE_ODDS = 0;
+const ALL_ODDS = 1 / 100;
 
 /** Lid cat stickers only — never d20 / typescript / react / nextjs. */
-export const HOLO_ELIGIBLE_LID_STICKER_IDS = ['morcega', 'banguela', 'tomada'] as const;
+const HOLO_ELIGIBLE_LID_STICKER_IDS = ['morcega', 'banguela', 'tomada'] as const;
 
-export type HoloEligibleId = (typeof HOLO_ELIGIBLE_LID_STICKER_IDS)[number];
+type HoloEligibleId = (typeof HOLO_ELIGIBLE_LID_STICKER_IDS)[number];
 
-export const HOLO_MASK_SRC: Record<HoloEligibleId, string> = {
+const HOLO_MASK_SRC: Record<HoloEligibleId, string> = {
   morcega: '/holo-masks/morcega-cut.png',
   banguela: '/holo-masks/banguela-cut.png',
   tomada: '/holo-masks/tomada-cut.png'
 };
 
-export type HoloMode = 'all' | 'none';
+type HoloMode = 'all' | 'none';
 
-export interface HoloState {
+interface HoloState {
   mode: HoloMode;
   id: null;
   v: typeof HOLO_SCHEMA_VERSION;
@@ -40,15 +38,11 @@ function randomUnit(): number {
 /**
  * Holo roulette: one roll per browser tab, persisted in `pherls:sticker-holo` v:2.
  * - Production: 1/100 all three cats together; otherwise none.
- * - SINGLE_ODDS = 0 (never a single-sticker win).
  * - DEV: `?holo=1` / `?holo=all` force all three and do not write sessionStorage.
  */
-export function rollHolo(random: () => number = randomUnit): HoloState {
+function rollHolo(random: () => number = randomUnit): HoloState {
   if (random() < ALL_ODDS) {
     return ALL;
-  }
-  if (SINGLE_ODDS > 0 && random() < SINGLE_ODDS) {
-    return NONE;
   }
   return NONE;
 }
@@ -61,7 +55,7 @@ function isValidStoredState(value: unknown): value is HoloState {
   return record.id === null || record.id === undefined;
 }
 
-export function readStickerHoloFromSession(): HoloState | null {
+function readStickerHoloFromSession(): HoloState | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = sessionStorage.getItem(STICKER_HOLO_STORAGE_KEY);
@@ -74,7 +68,7 @@ export function readStickerHoloFromSession(): HoloState | null {
   }
 }
 
-export function writeStickerHoloToSession(state: HoloState): void {
+function writeStickerHoloToSession(state: HoloState): void {
   if (typeof window === 'undefined') return;
   try {
     sessionStorage.setItem(STICKER_HOLO_STORAGE_KEY, JSON.stringify(state));
@@ -84,7 +78,7 @@ export function writeStickerHoloToSession(state: HoloState): void {
 }
 
 /** DEV-only: `?holo=1` and `?holo=all` force all cats. Ignored in production. Never writes storage. */
-export function devHoloOverride(): HoloState | null {
+function devHoloOverride(): HoloState | null {
   if (!import.meta.env.DEV || typeof window === 'undefined') return null;
   const param = new URLSearchParams(window.location.search).get('holo');
   if (param === 'all' || param === '1') {
@@ -101,7 +95,7 @@ function initialHoloState(): HoloState {
   return NONE;
 }
 
-export function resolveStickerHolo(): HoloState {
+function resolveStickerHolo(): HoloState {
   const dev = devHoloOverride();
   if (dev) return dev;
   const stored = readStickerHoloFromSession();
@@ -121,7 +115,7 @@ export function holoMaskUrl(stickerId: string): string | undefined {
   return HOLO_MASK_SRC[stickerId];
 }
 
-export function isHoloEligibleId(id: string): id is HoloEligibleId {
+function isHoloEligibleId(id: string): id is HoloEligibleId {
   return (HOLO_ELIGIBLE_LID_STICKER_IDS as readonly string[]).includes(id);
 }
 

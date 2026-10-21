@@ -1,6 +1,12 @@
 import { useEffect, type ReactNode } from 'react';
-import { DEFAULT_PORTFOLIO_DATA, experienceSpan, formatPeriod, plainText, skillNames } from '../data/portfolioData';
-import { featuredProjectPrimaryUrl } from '../utils/featuredProjectLinks';
+import {
+  DEFAULT_PORTFOLIO_DATA,
+  experienceSpan,
+  featuredProjectPrimaryUrl,
+  formatPeriod,
+  plainText,
+  skillNames
+} from '../data/portfolioData';
 
 const shortUrl = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 
@@ -21,8 +27,14 @@ export function CvDocument() {
     DEFAULT_PORTFOLIO_DATA;
 
   useEffect(() => {
+    const prevTitle = document.title;
+    const wasDark = document.documentElement.classList.contains('dark');
     document.title = `${profile.name} · Currículo`;
     document.documentElement.classList.remove('dark');
+    return () => {
+      document.title = prevTitle;
+      if (wasDark) document.documentElement.classList.add('dark');
+    };
   }, [profile.name]);
 
   return (

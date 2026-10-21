@@ -1,19 +1,12 @@
-import type { PortfolioData } from '../data/portfolioData.ts';
+import { foldText, type PortfolioData } from '../data/portfolioData.ts';
 import { mentionsPersonalProject, type ChatMode } from './chatGuardrails.ts';
 import { presetChipText, type PresetQuestionId } from './presetQuestions.ts';
-
-function fold(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '');
-}
 
 function unique(items: string[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
   for (const item of items) {
-    const key = fold(item);
+    const key = foldText(item);
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(item);
@@ -22,8 +15,8 @@ function unique(items: string[]): string[] {
 }
 
 function alreadyAsked(asked: string, chip: string): boolean {
-  const a = fold(asked);
-  const c = fold(chip);
+  const a = foldText(asked);
+  const c = foldText(chip);
   if (!a || !c) return false;
   return a.includes(c.slice(0, 22)) || c.includes(a.slice(0, 22));
 }
@@ -32,7 +25,7 @@ function presetChips(...ids: PresetQuestionId[]): string[] {
   return ids.map((id) => presetChipText(id));
 }
 
-export type FollowUpInput = {
+type FollowUpInput = {
   mode: ChatMode;
   asked: string;
   reply: string;
@@ -48,11 +41,11 @@ function pickFollowUps(asked: string, candidates: string[]): string[] {
 /** Full unsliced chip list before dedupe, alreadyAsked filter, and slice(0, 3). */
 function followUpCandidates(input: FollowUpInput): string[] {
   const { mode, asked, reply, job, isFollowUp, data } = input;
-  const q = fold(asked);
-  const replyAndJob = `${fold(reply)} ${fold(job ?? '')}`;
+  const q = foldText(asked);
+  const replyAndJob = `${foldText(reply)} ${foldText(job ?? '')}`;
 
   if (mode === 'jobfit') {
-    const fromJd = fold(job ?? '') || q;
+    const fromJd = foldText(job ?? '') || q;
     const chips: string[] = [];
     if (!/senior|staff|principal|pleno|junior/.test(fromJd)) {
       chips.push('E se a vaga for sênior?');
@@ -67,7 +60,7 @@ function followUpCandidates(input: FollowUpInput): string[] {
       /llm|function calling|tool calling|inteligencia artificial/.test(fromJd) ||
       /(?:^|[^a-z0-9+#])ia(?:[^a-z0-9+#]|$)/.test(fromJd)
     ) {
-      chips.push('A IA é function calling em fluxo real?');
+      chips.push('A vaga foca na UI de IA ou na integração do modelo?');
     }
     if (isFollowUp) {
       chips.push('Quais perguntas eu faço na entrevista?');

@@ -18,5 +18,3 @@ export const ChatResponseSchema = z.object({
   blockedByZod: z.boolean().optional(),
   error: z.string().optional()
 });
-
-export type ChatResponse = z.infer<typeof ChatResponseSchema>;

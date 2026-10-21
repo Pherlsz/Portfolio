@@ -1,20 +1,7 @@
-import { experienceSpan, formatPeriod, type PortfolioData } from '../data/portfolioData.ts';
-
-function fold(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '');
-}
+import { experienceSpan, foldText, formatPeriod, hasWholeWord, type PortfolioData } from '../data/portfolioData.ts';
 
 function has(haystack: string, ...needles: string[]): boolean {
   return needles.some((needle) => haystack.includes(needle));
-}
-
-/** Evita 'java' em 'javascript' e 'ia' em 'hibrida'. */
-function hasWord(haystack: string, word: string): boolean {
-  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`(?:^|[^a-z0-9+#])${escaped}(?:[^a-z0-9+#]|$)`).test(haystack);
 }
 
 function joinBold(items: string[]): string {
@@ -40,7 +27,7 @@ const MISSING_TECH: { label: string; keys: string[]; words?: string[] }[] = [
 ];
 
 export function buildJobFitReply(job: string, data: PortfolioData): string {
-  const q = fold(job);
+  const q = foldText(job);
   const { profile, experiences, project } = data;
   const atlas = experiences[0];
   const atlasWhen = formatPeriod(experienceSpan(atlas).start, experienceSpan(atlas).end);
@@ -55,11 +42,15 @@ export function buildJobFitReply(job: string, data: PortfolioData): string {
   const wantsTest = has(q, 'teste', 'vitest', 'jest', 'testing library');
   const wantsPython = has(q, 'python');
   const wantsDotnet = has(q, '.net', 'dotnet', 'c#');
-  const wantsNode = has(q, 'node.js', 'nodejs') || hasWord(q, 'node');
-  const wantsGo = has(q, 'golang') || hasWord(q, 'go');
+  const wantsRest =
+    has(q, 'api rest', 'apis rest', 'rest api', 'rest apis', 'integracao com api', 'consumo de api') ||
+    hasWholeWord(q, 'rest');
+  const wantsCollab = has(q, 'produto e backend', 'equipes de produto', 'times de produto', 'colaboracao com');
+  const wantsNode = has(q, 'node.js', 'nodejs') || hasWholeWord(q, 'node');
+  const wantsGo = has(q, 'golang') || hasWholeWord(q, 'go');
   const wantsLlm =
     has(q, 'llm', 'function calling', 'tool calling', 'openai', 'gemini', 'ia aplicada', 'inteligencia artificial') ||
-    hasWord(q, 'ia');
+    hasWholeWord(q, 'ia');
   const wantsFullstack = has(q, 'full-stack', 'fullstack', 'full stack');
   const wantsHybrid = has(q, 'hibrid');
   const wantsRemote = has(q, 'remoto', 'remote');
@@ -76,7 +67,7 @@ export function buildJobFitReply(job: string, data: PortfolioData): string {
     'campinas',
     'recife'
   );
-  const wantsJunior = has(q, 'junior') || hasWord(q, 'jr');
+  const wantsJunior = has(q, 'junior') || hasWholeWord(q, 'jr');
   const wantsPleno = has(q, 'pleno');
   const wantsSenior = has(q, 'senior', 'staff', 'principal', 'tech lead', 'techlead');
   const wantsEnglishFluent = has(q, 'ingles fluente', 'ingles avancado', 'english fluent', 'english native');
@@ -123,12 +114,18 @@ export function buildJobFitReply(job: string, data: PortfolioData): string {
     match.push(
       `**APIs REST** em **${backend || 'Python e C#/.NET'}** na Atlas, com o frontend separado do estado de servidor (TanStack Query).`
     );
+  } else if (wantsRest) {
+    match.push(
+      `**APIs REST**: consumo e integração no frontend da **Atlas** com serviços em **Python** e **C#/.NET Core** (estado de servidor com TanStack Query${wantsCollab ? ', em colaboração com produto e backend' : ''}).`
+    );
   } else if (wantsNode) {
     match.push('**Node.js** aparece na stack; o backend em produção na Atlas foi **Python** e **C#/.NET**.');
   }
 
   if (wantsLlm) {
-    match.push('**IA em produção**: function calling e tool calling nos fluxos da Atlas.');
+    match.push(
+      `**IA**: na **Atlas** criou as interfaces visuais do chat da IA e suas funcionalidades; a integração de modelos (tools, RAG e orquestração) está nos projetos pessoais **Gymkhana Database** e **${project.name}**.`
+    );
   }
 
   if (wantsGo) {
@@ -170,7 +167,7 @@ export function buildJobFitReply(job: string, data: PortfolioData): string {
   }
 
   const missingAsked = MISSING_TECH.filter(
-    (tech) => tech.keys.some((key) => has(q, key)) || tech.words?.some((word) => hasWord(q, word))
+    (tech) => tech.keys.some((key) => has(q, key)) || tech.words?.some((word) => hasWholeWord(q, word))
   ).map((tech) => tech.label);
   if (missingAsked.length) {
     gaps.unshift(
@@ -186,7 +183,7 @@ export function buildJobFitReply(job: string, data: PortfolioData): string {
 
   if (match.length === 0) {
     match.push(
-      `Perfil de **${profile.role}** (React, Next.js, TypeScript) na **Atlas** (${atlasWhen}), com design system WCAG 2.1 AA.`
+      `Perfil de **${profile.jobTitle}** (React, Next.js, TypeScript) na **Atlas** (${atlasWhen}), com design system WCAG 2.1 AA.`
     );
   }
 
@@ -211,12 +208,12 @@ export function buildJobFitReply(job: string, data: PortfolioData): string {
     questions.push('O design system é interno, e o critério de acessibilidade é WCAG 2.1 AA ou outro nível?');
   }
   if (wantsLlm) {
-    questions.push('A vaga pede LLMs em fluxos reais (function/tool calling) ou só consumo de API pronta?');
+    questions.push('O foco em IA da vaga é na interface/experiência do chat ou na integração direta de LLMs no backend?');
   }
   if (questions.length < 2) {
     questions.push(
       wantsLlm
-        ? 'Como o time avalia qualidade dos fluxos com LLM em produção?'
+        ? 'Como o time divide o trabalho entre frontend do chat de IA e serviços de modelo?'
         : 'Como o time mede qualidade de frontend (testes, a11y, revisão de performance)?'
     );
   }
@@ -226,7 +223,7 @@ export function buildJobFitReply(job: string, data: PortfolioData): string {
 
   return [
     '**Aderência**',
-    ...match.slice(0, 5).map((line) => `- ${line}`),
+    ...match.slice(0, 6).map((line) => `- ${line}`),
     '',
     '**Lacunas**',
     ...gaps.slice(0, 4).map((line) => `- ${line}`),
