@@ -24,9 +24,17 @@ const STRICT_SYNONYMS: Record<string, string[]> = {
   '.NET': ['.net', '.net core', 'c# / .net core', 'c#/.net core'],
   'C#': ['c#', 'c# / .net core', 'c#/.net core'],
   'C# / .NET Core': ['c#', '.net', '.net core', 'c# / .net core', 'c#/.net core'],
-  'Acessibilidade (WCAG 2.1 AA)': ['wcag 2.1 aa'],
+  'Acessibilidade (WCAG 2.1 AA)': ['wcag 2.1 aa', 'wcag 2.1 level aa', 'wcag 2.1'],
+  'Web Performance': ['performance', 'virtualizacao do dom', 'code splitting', 'layout thrashing'],
   'Design Systems': ['design system'],
-  'LLMs (function e tool calling)': ['function calling', 'tool calling', 'modelos de ia', 'assistente de ia', 'tools, rag'],
+  'LLMs (function e tool calling)': [
+    'modelos de linguagem (llms)',
+    'function calling',
+    'tool calling',
+    'modelos de ia',
+    'assistente de ia',
+    'tools, rag'
+  ],
   'APIs REST': ['apis rest'],
   'Microsoft Azure': ['azure fundamentals', 'azure cloud computing'],
   Docker: ['docker', 'container fundamentals']

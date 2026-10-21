@@ -107,24 +107,27 @@ export function buildJobFitReply(job: string, data: PortfolioData): string {
     );
   }
 
-  if (wantsPython || wantsDotnet || wantsFullstack) {
-    const backend = [wantsPython || wantsFullstack ? 'Python' : null, wantsDotnet || wantsFullstack ? 'C#/.NET' : null]
-      .filter(Boolean)
-      .join(' e ');
+  if (wantsDotnet || wantsFullstack) {
     match.push(
-      `**APIs REST** em **${backend || 'Python e C#/.NET'}** na Atlas, com o frontend separado do estado de servidor (TanStack Query).`
+      `**APIs REST e C#/.NET Core** na **Atlas** (mensageria corporativa, serviços transacionais e gerenciamento de dados no frontend com TanStack Query).`
     );
   } else if (wantsRest) {
     match.push(
-      `**APIs REST**: consumo e integração no frontend da **Atlas** com serviços em **Python** e **C#/.NET Core** (estado de servidor com TanStack Query${wantsCollab ? ', em colaboração com produto e backend' : ''}).`
+      `**APIs REST**: consumo e integração no frontend da **Atlas** com TanStack Query (cache e deduplicação de requisições${wantsCollab ? ', em colaboração com produto e backend' : ''}) e atuação complementar em **C#/.NET Core**.`
     );
   } else if (wantsNode) {
-    match.push('**Node.js** aparece na stack; o backend em produção na Atlas foi **Python** e **C#/.NET**.');
+    match.push('**Node.js** aparece na stack; o backend em produção na Atlas foi **C#/.NET Core**.');
+  }
+
+  if (wantsPython) {
+    match.push(
+      '**Python** consta entre as competências técnicas para projetos pessoais; o backend em produção na Atlas foi **C#/.NET Core**.'
+    );
   }
 
   if (wantsLlm) {
     match.push(
-      `**IA**: na **Atlas** criou as interfaces visuais do chat da IA e suas funcionalidades; a integração de modelos (tools, RAG e orquestração) está nos projetos pessoais **Gymkhana Database** e **${project.name}**.`
+      `**IA**: na **Atlas** desenvolveu as interfaces de funcionalidades baseadas em modelos de linguagem (LLMs) em produção, incluindo chat e exibição de relatórios gerados por IA; a integração de modelos (tools, RAG e orquestração) está nos projetos pessoais **Gymkhana Database** e **${project.name}**.`
     );
   }
 

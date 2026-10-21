@@ -130,9 +130,9 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     jobTitle: 'Software Engineer · Frontend',
     headline: 'Transformo fluxos complexos em interfaces rápidas, acessíveis e fáceis de manter.',
     summary:
-      'Cerca de 5 anos em produção com React, Next.js e TypeScript: um design system com ==30+ componentes WCAG 2.1 AA==, listas com ==5.000+ registros== sem travar e interfaces de chat de IA.',
+      'Mais de 4 anos desenvolvendo e evoluindo aplicações web em produção com React, Next.js e TypeScript: contribuição em Design System com ==30+ componentes (WCAG 2.1 AA)==, listagens com ==5.000+ registros== virtualizadas e interfaces para funcionalidades baseadas em LLMs.',
     trustCopy:
-      'São cerca de 5 anos construindo front-end em produção, de estágio a júnior, usando IA no dia a dia para entregar mais e melhor. Estou aberto a vagas pleno quando houver fit.',
+      'Mais de 4 anos construindo frontend em produção, de estágio a júnior, com foco em componentização, performance, testes automatizados e interfaces para produtos com IA. Aberto a vagas pleno quando houver fit.',
     status: 'Aberto a oportunidades',
     location: 'Porto Alegre, RS',
     seniority: 'Júnior/Pleno',
@@ -143,7 +143,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     github: 'https://github.com/Pherlsz',
     cvUrl: '/cv/Pedro-Henrique-Lopes-CV.pdf',
     about: [
-      'Gosto de construir interfaces previsíveis, bem tipadas e fáceis de evoluir em time: componentes reutilizáveis com acessibilidade real, separação clara entre estado de servidor e de UI e cobertura de testes nos fluxos críticos.',
+      'Minha atuação combina desenvolvimento frontend, componentização, performance e qualidade de software: criação de primitivos e componentes reutilizáveis com acessibilidade (WCAG 2.1 AA), organização de estado e dados com TanStack Query e Zustand, cobertura de testes em fluxos críticos e interfaces para funcionalidades baseadas em LLMs.',
       'Participo de gincanas no RS, no Setor de Diversas. Parte dos projetos pessoais nasceu desse contexto. Treino com regularidade, jogo RPG e convivo com três gatos.'
     ]
   },
@@ -153,41 +153,44 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       company: 'Atlas Governance',
       location: 'Brasil',
       summary:
-        'Plataforma de governança corporativa. Atuei no frontend do Atlas PLG e do Atlas Sign como Software Engineer, com design system e interfaces do chat de IA, após período de estágio.',
+        'Atuação no desenvolvimento e na evolução de aplicações web em produção, com foco em React, Next.js e TypeScript. Experiência em componentização, construção de componentes reutilizáveis, otimização de performance, gerenciamento de estado e dados e implementação de testes automatizados. Atuação complementar em backend com C#/.NET Core e em interfaces para funcionalidades baseadas em modelos de linguagem (LLMs).',
       roles: [
         { title: 'Software Engineer', start: '2021-11', end: '2026-07' },
-        { title: 'Estagiário em Engenharia de Software', start: '2021-03', end: '2021-11' }
+        { title: 'Estágio em Engenharia de Software', start: '2021-03', end: '2021-11' }
       ],
       highlights: [
         {
           metric: '30+ componentes',
-          text: 'Arquitetei o frontend da plataforma Atlas PLG com React, Next.js e TypeScript e criei um design system modular em conformidade com WCAG 2.1 AA.'
+          text: 'Fui um dos responsáveis pela criação de primitivos e componentes customizados do Design System da plataforma Atlas PLG com React, Next.js e TypeScript, promovendo padronização visual, acessibilidade (WCAG 2.1 Level AA) e participando de discussões técnicas com o time de arquitetura.'
         },
         {
           metric: '5.000+ registros',
-          text: 'Estabilizei as listagens do Atlas Sign (assinatura digital) com virtualização de DOM (TanStack Virtual) e code splitting, eliminando gargalos de renderização.'
+          text: 'Otimizei a performance de listagens com mais de 5.000 registros no módulo Atlas Sign, utilizando virtualização do DOM com TanStack Virtual (@tanstack/react-virtual) e code splitting para reduzir gargalos de renderização e layout thrashing.'
         },
         {
           metric: '10.000+ usuários',
-          text: 'Estruturei a navegação em árvore e os fluxos críticos de assinatura eletrônica, com Error Boundaries e testes em Vitest e React Testing Library.'
+          text: 'Desenvolvi módulos de navegação em árvore e fluxos críticos de assinatura eletrônica em uma plataforma com mais de 10.000 usuários ativos, incorporando Error Boundaries e testes automatizados com Vitest e React Testing Library.'
         },
         {
-          metric: 'Chat de IA',
-          text: 'Criei as interfaces visuais do chat da IA e suas funcionalidades no frontend da plataforma, consumindo APIs REST em Python e C#/.NET Core.'
+          metric: 'Interfaces de IA',
+          text: 'Desenvolvi as interfaces de funcionalidades baseadas em modelos de linguagem (LLMs) em produção, incluindo um chat e a exibição de relatórios gerados por IA.'
         },
         {
           metric: '1.000+ templates',
-          text: 'Refatorei os templates de e-mail no serviço de mensageria em C#/.NET Core, consolidando modelos legados em templates parametrizados.'
+          text: 'Refatorei o serviço de mensageria corporativa em C#/.NET Core, consolidando mais de 1.000 templates legados de e-mail em modelos parametrizados e utilizando Docker e esteiras de CI/CD no Azure DevOps.'
         },
         {
           metric: '15+ fluxos',
-          text: 'No estágio, criei uma biblioteca de componentes com Styled Components e Context API que acelerou o desenvolvimento de fluxos corporativos.'
+          text: 'No estágio, criei uma biblioteca padronizada de componentes reutilizáveis com Styled Components e Context API, reduzindo redundâncias de código e o tempo de desenvolvimento em mais de 15 fluxos corporativos.'
         },
         {
-          text: 'Separei o estado de servidor do estado de interface com TanStack Query (cache e deduplicação), Zustand e Context API, eliminando requisições redundantes.'
+          text: 'Aprimorei o gerenciamento de dados e estados da interface com TanStack Query, Zustand e Context API, utilizando cache e deduplicação de requisições para reduzir chamadas redundantes à rede e organizar o estado das aplicações.'
         },
         {
-          text: 'Corrigi falhas de frontend e de integração com análise de causa raiz no Azure DevOps, aplicando o OWASP Top 10 contra XSS.'
+          text: 'No estágio, desenvolvi e mantive interfaces corporativas e serviços transacionais com React, TypeScript e C#/.NET Core, contribuindo para a estabilidade operacional e a manutenção das regras de negócio em produção.'
+        },
+        {
+          text: 'Diagnostiquei e corrigi falhas nas camadas de frontend e na integração entre serviços com análise de causa raiz (RCA) e Azure DevOps, aplicando práticas alinhadas ao OWASP Top 10 na prevenção de XSS e sanitização segura de dados de entrada.'
         }
       ],
       stack: [
@@ -205,9 +208,9 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         'Context API',
         'Vitest',
         'React Testing Library',
-        'Python',
         'C# / .NET Core',
         'SQL',
+        'Docker',
         'Azure DevOps'
       ]
     },
@@ -215,17 +218,18 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       id: 'nelogica',
       company: 'Nelogica',
       location: 'Porto Alegre, RS',
-      summary: 'Plataformas de negociação do mercado financeiro, operando com alta disponibilidade.',
+      summary:
+        'Atuação em operações de TI e monitoramento de sistemas transacionais de alta disponibilidade, com foco em observabilidade, diagnóstico de incidentes e continuidade dos ambientes de produção.',
       roles: [{ title: 'Analista de Operações de TI (NOC)', start: '2019-08', end: '2020-09' }],
       highlights: [
         {
-          text: 'Monitorei plataformas de negociação e sistemas transacionais com Grafana, Zabbix e Kibana, antecipando oscilações de latência e degradação de serviço.'
+          text: 'Monitorei plataformas de negociação financeira e sistemas transacionais utilizando Grafana, Zabbix e Kibana, identificando sinais de degradação de serviços e oscilações de latência.'
         },
         {
-          text: 'Fiz diagnóstico de causa raiz e escalonei incidentes críticos com os times de engenharia e infraestrutura, ajudando a reduzir o MTTR.'
+          text: 'Investiguei incidentes operacionais por meio de análise de causa raiz, atuando na contenção de falhas e no escalonamento de incidentes críticos para os times de Engenharia de Software e Infraestrutura, com foco na redução do tempo médio de recuperação (MTTR).'
         },
         {
-          text: 'Montei dashboards operacionais, limites de telemetria e fluxos de alerta para acompanhar a saúde da produção em tempo real.'
+          text: 'Desenvolvi dashboards operacionais e configurei limites de telemetria e alertas para acompanhar a saúde dos sistemas em tempo real, apoiando a identificação de anomalias e a continuidade dos ambientes de produção.'
         }
       ],
       stack: ['Grafana', 'Zabbix', 'Kibana']
@@ -234,16 +238,19 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       id: 'lebes',
       company: 'Lojas Lebes',
       location: 'Eldorado do Sul, RS',
-      summary: 'Sistemas corporativos (ERP e CRM) de uma rede varejista gaúcha.',
-      roles: [{ title: 'Analista de Suporte a Sistemas', start: '2018-02', end: '2019-08' }],
+      summary:
+        'Atuação no suporte e na sustentação de sistemas corporativos, com foco na continuidade operacional, diagnóstico de falhas e integridade de dados em ambientes de produção.',
+      roles: [{ title: 'Technical Support Analyst', start: '2018-02', end: '2019-08' }],
       highlights: [
         {
-          text: 'Sustentei ambientes de missão crítica (ERP e CRM), garantindo a continuidade operacional e a integridade dos dados.'
+          text: 'Realizei a sustentação de sistemas corporativos, incluindo ERP e CRM, apoiando a continuidade operacional e a integridade dos fluxos de dados das rotinas de negócio.'
         },
         {
-          text: 'Analisei a causa raiz de falhas em servidores, integrações e rotinas de comunicação, reduzindo o tempo de indisponibilidade.'
+          text: 'Diagnostiquei falhas técnicas em servidores, integrações entre sistemas corporativos e rotinas de comunicação, conduzindo análises de causa raiz para reduzir o tempo de indisponibilidade operacional.'
         },
-        { text: 'Validei correções e homologuei melhorias junto aos times de TI e engenharia.' }
+        {
+          text: 'Validei correções técnicas, integridade de dados e melhorias em conjunto com equipes multidisciplinares de TI e Engenharia, contribuindo para a identificação e a mitigação de gargalos operacionais.'
+        }
       ],
       stack: ['ERP', 'CRM']
     }
@@ -313,13 +320,15 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
   skills: [
     {
       name: 'Frontend',
-      featured: ['TypeScript', 'React', 'Next.js', 'Tailwind CSS'],
+      featured: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
       items: [
         'JavaScript (ES6+)',
         'HTML e CSS',
         'Styled Components',
         'Design Systems',
         'Acessibilidade (WCAG 2.1 AA)',
+        'Web Performance',
+        'Vite',
         'Webpack'
       ]
     },
@@ -330,13 +339,22 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     },
     {
       name: 'Backend e IA',
-      featured: ['Python', 'Go', 'Node.js', '.NET'],
+      featured: ['.NET', 'Node.js', 'Go', 'Python'],
       items: ['C#', 'APIs REST', 'LLMs (function e tool calling)', 'SQL']
     },
     {
       name: 'Qualidade e DevOps',
       featured: ['Vitest', 'Docker', 'GitHub Actions'],
-      items: ['Jest', 'React Testing Library', 'Git', 'Azure DevOps', 'Microsoft Azure', 'OWASP Top 10']
+      items: [
+        'React Testing Library',
+        'Jest',
+        'Git',
+        'Azure DevOps',
+        'Microsoft Azure',
+        'OWASP Top 10',
+        'Grafana',
+        'Zabbix'
+      ]
     }
   ],
   education: [
@@ -474,7 +492,7 @@ export const CONTACT_API = {
 
 export const SITE_ORIGIN = 'https://pherls.dev';
 /** Revisão pública do perfil. Atualize quando os fatos do currículo mudarem. */
-export const PROFILE_UPDATED = '2026-10-18';
+export const PROFILE_UPDATED = '2026-10-21';
 
 /** Normaliza texto para comparação insensível a acentos, caixa e pontuação de borda. */
 export function foldText(text: string): string {

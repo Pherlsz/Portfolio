@@ -178,10 +178,10 @@ export function buildLocalFallback(
       return `O Pedro divide o escritório com três gatos pretos:\n${pets.map((p) => `- **${p.name}**: ${p.bio}`).join('\n')}`;
     case 'design_system': {
       const ds = atlas.highlights.find((h) => h.metric === '30+ componentes');
-      return `**Design system e WCAG**\n- ${ds?.text ?? 'Design system modular em conformidade com WCAG 2.1 AA.'}\n- Também estabilizou listagens com 5.000+ registros (TanStack Virtual) e cobriu fluxos críticos com Vitest e React Testing Library.`;
+      return `**Design system e WCAG**\n- ${ds?.text ?? 'Design system modular com referência à WCAG 2.1 Level AA.'}\n- Também otimizou listagens com 5.000+ registros (TanStack Virtual e code splitting) e cobriu fluxos críticos com Vitest e React Testing Library.`;
     }
     case 'atlas_ai':
-      return `**IA na ${atlas.company}**\n- Pedro criou as interfaces visuais do chat da IA e suas funcionalidades no frontend da plataforma, consumindo APIs REST em Python e C# / .NET Core.\n- A integração direta de modelos de IA (tools, RAG e orquestração multimodal) está nos projetos pessoais **Gymkhana Database** e **Gymkhana Core**.`;
+      return `**IA na ${atlas.company}**\n- Desenvolveu as interfaces de funcionalidades baseadas em modelos de linguagem (LLMs) em produção, incluindo um chat e a exibição de relatórios gerados por IA.\n- A orquestração direta de modelos de IA (tools, RAG e roteamento multimodal) está nos projetos pessoais **Gymkhana Database** e **Gymkhana Core**.`;
     case 'projects': {
       const featured = featuredProjects
         .map((item) => {
