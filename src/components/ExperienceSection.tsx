@@ -78,7 +78,7 @@ function ExperienceItem({
 
           <div className="mt-2">
             {metrics.length > 0 && (
-              <ul className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <ul className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {metrics.map((h, mIdx) => {
                   const matched = selectedSkill
                     ? textMatchesSkill(`${h.metric ?? ''} ${h.text}`, selectedSkill)
@@ -86,16 +86,16 @@ function ExperienceItem({
                   return (
                     <li key={h.metric}>
                       <Reveal
-                        delay={mIdx * 0.05}
-                        y={14}
-                        className={`h-full rounded-2xl border bg-surface p-5 transition-colors ${
+                        delay={mIdx * 0.04}
+                        y={10}
+                        className={`flex h-full flex-col justify-start rounded-xl border bg-surface p-3.5 sm:p-4 transition-colors ${
                           matched ? 'border-ink ring-2 ring-marker' : 'border-line'
                         }`}
                       >
-                        <p className="display text-xl">
-                          <mark>{h.metric}</mark>
+                        <p className="display text-base sm:text-lg font-bold tracking-tight">
+                          <mark className="bg-transparent text-ink">{h.metric}</mark>
                         </p>
-                        <p className="mt-2 text-[0.9375rem] text-ink-soft">{h.text}</p>
+                        <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-ink-soft">{h.text}</p>
                       </Reveal>
                     </li>
                   );

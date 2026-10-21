@@ -161,27 +161,27 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       highlights: [
         {
           metric: '30+ componentes',
-          text: 'Fui um dos responsáveis pela criação de primitivos e componentes customizados do Design System da plataforma Atlas PLG com React, Next.js e TypeScript, promovendo padronização visual, acessibilidade (WCAG 2.1 Level AA) e participando de discussões técnicas com o time de arquitetura.'
+          text: 'Primitivos e componentes customizados do Design System no Atlas PLG (React, Next.js e TypeScript), com foco em padronização visual e acessibilidade (WCAG 2.1 Level AA).'
         },
         {
           metric: '5.000+ registros',
-          text: 'Otimizei a performance de listagens com mais de 5.000 registros no módulo Atlas Sign, utilizando virtualização do DOM com TanStack Virtual (@tanstack/react-virtual) e code splitting para reduzir gargalos de renderização e layout thrashing.'
+          text: 'Virtualização do DOM (TanStack Virtual) e code splitting no módulo Atlas Sign, eliminando gargalos de renderização e layout thrashing em listagens extensas.'
         },
         {
           metric: '10.000+ usuários',
-          text: 'Desenvolvi módulos de navegação em árvore e fluxos críticos de assinatura eletrônica em uma plataforma com mais de 10.000 usuários ativos, incorporando Error Boundaries e testes automatizados com Vitest e React Testing Library.'
+          text: 'Navegação em árvore e fluxos críticos de assinatura eletrônica com Error Boundaries para contenção de falhas e testes automatizados com Vitest e React Testing Library.'
         },
         {
           metric: 'Interfaces de IA',
-          text: 'Desenvolvi as interfaces de funcionalidades baseadas em modelos de linguagem (LLMs) em produção, incluindo um chat e a exibição de relatórios gerados por IA.'
+          text: 'Interfaces para funcionalidades com modelos de linguagem (LLMs) em produção, incluindo chat interativo e exibição de relatórios gerados por IA.'
         },
         {
           metric: '1.000+ templates',
-          text: 'Refatorei o serviço de mensageria corporativa em C#/.NET Core, consolidando mais de 1.000 templates legados de e-mail em modelos parametrizados e utilizando Docker e esteiras de CI/CD no Azure DevOps.'
+          text: 'Refatoração da mensageria corporativa em C#/.NET Core, consolidando e-mails legados em modelos parametrizados com Docker e esteiras de CI/CD no Azure DevOps.'
         },
         {
           metric: '15+ fluxos',
-          text: 'No estágio, criei uma biblioteca padronizada de componentes reutilizáveis com Styled Components e Context API, reduzindo redundâncias de código e o tempo de desenvolvimento em mais de 15 fluxos corporativos.'
+          text: 'Biblioteca padronizada de componentes com Styled Components e Context API no estágio, acelerando o desenvolvimento e reduzindo redundâncias.'
         },
         {
           text: 'Aprimorei o gerenciamento de dados e estados da interface com TanStack Query, Zustand e Context API, utilizando cache e deduplicação de requisições para reduzir chamadas redundantes à rede e organizar o estado das aplicações.'
