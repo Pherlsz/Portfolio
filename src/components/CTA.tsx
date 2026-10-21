@@ -1,6 +1,6 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
 
-export type CtaVariant = 'primary' | 'secondary' | 'tertiary';
+type CtaVariant = 'primary' | 'secondary' | 'tertiary';
 
 type CtaClassProps = {
   variant: CtaVariant;
@@ -9,7 +9,7 @@ type CtaClassProps = {
   icon?: ReactNode;
 };
 
-export function ctaClassName(variant: CtaVariant, className = '') {
+function ctaClassName(variant: CtaVariant, className = '') {
   return ['cta', `cta-${variant}`, className].filter(Boolean).join(' ');
 }
 

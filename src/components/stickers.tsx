@@ -30,208 +30,160 @@ import {
   type LidSlotId,
   type ScatterSlot
 } from '../utils/lidStickerSlots';
-import {
-  resolveLidCaptionLayout,
-  type LidCaptionLayout
-} from '../utils/stickerCaptionLayout';
-import {
-  roomToDragConstraints,
-  ZERO_DRAG_CONSTRAINTS,
-  type AxisDragConstraints
-} from '../utils/stickerDragConstraints';
 
 export type StickerId = LidSlotId;
 
+interface AxisDragConstraints {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+const ZERO_DRAG_CONSTRAINTS: AxisDragConstraints = { left: 0, right: 0, top: 0, bottom: 0 };
+
+function roomToDragConstraints(
+  space: { left: number; right: number; up: number; down: number },
+  offset: { x: number; y: number }
+): AxisDragConstraints {
+  return {
+    left: offset.x + space.left,
+    right: offset.x + space.right,
+    top: offset.y + space.up,
+    bottom: offset.y + space.down
+  };
+}
+
 interface StickerDef {
   label: string;
-  caption: string;
   src: string;
   /** Tamanho real do arquivo em public/stickers, para reservar espaço sem layout shift. */
   width: number;
   height: number;
   animation: string;
-  react: () => string;
 }
 
 const STICKERS: Record<StickerId, StickerDef> = {
   morcega: {
     label: 'Sticker da Morcega, a gata mais velha',
-    caption: 'Morcega',
     src: '/stickers/morcega.webp',
     width: 290,
     height: 320,
-    animation: 'animate-sleep',
-    react: () => 'Mrrr… zZz'
+    animation: 'animate-sleep'
   },
   banguela: {
     label: 'Sticker da Banguela, a gata de uma presa só',
-    caption: 'Banguela',
     src: '/stickers/banguela.webp',
     width: 320,
     height: 290,
-    animation: 'animate-munch',
-    react: () => 'Nhac, nhac'
+    animation: 'animate-munch'
   },
   tomada: {
     label: 'Sticker do Tomada, o gato caçula',
-    caption: 'Tomada',
     src: '/stickers/tomada.webp',
     width: 320,
     height: 295,
-    animation: 'animate-buzz',
-    react: () => '220V!'
+    animation: 'animate-buzz'
   },
   d20: {
     label: 'Sticker de um dado D20 de RPG. Clique para rolar.',
-    caption: 'D20',
     src: '/stickers/d20.webp',
     width: 268,
     height: 320,
-    animation: 'animate-roll',
-    react: () => {
-      const roll = 1 + Math.floor(Math.random() * 20);
-      if (roll === 20) return '20: crítico!';
-      if (roll === 1) return '1: falha crítica';
-      return `${roll}`;
-    }
+    animation: 'animate-roll'
   },
   typescript: {
     label: 'Sticker do TypeScript',
-    caption: 'TypeScript',
     src: '/stickers/typescript.svg',
     width: 128,
     height: 128,
-    animation: 'animate-pop',
-    react: () => 'tsc --noEmit'
+    animation: 'animate-pop'
   },
   react: {
     label: 'Sticker do React',
-    caption: 'React',
     src: '/stickers/react.svg',
     width: 128,
     height: 128,
-    animation: 'animate-wiggle',
-    react: () => 're-render'
+    animation: 'animate-wiggle'
   },
   nextjs: {
     label: 'Sticker do Next.js',
-    caption: 'Next.js',
     src: '/stickers/nextjs.svg',
     width: 128,
     height: 128,
-    animation: 'animate-pop',
-    react: () => 'app/'
+    animation: 'animate-pop'
   }
 };
 
-const DEFAULT_CAPTION_LAYOUT: LidCaptionLayout = { edge: 'above', align: 'center', shiftX: 0 };
-
-function prefersCoarsePointer() {
-  return typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-}
-
-interface Reaction {
-  text: string;
-  key: number;
-}
-
-function parseD20Face(text: string | undefined) {
-  const match = text?.match(/^(\d+)/);
-  return match ? Number(match[1]) : 20;
-}
-
 function useStickerReaction(id: StickerId) {
-  const [reaction, setReaction] = useState<Reaction | null>(null);
+  const [reactionKey, setReactionKey] = useState<number | null>(null);
   const [face, setFace] = useState(20);
   const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
   const react = () => {
-    const text = STICKERS[id].react();
     window.clearTimeout(timer.current);
-    setReaction({ text, key: Date.now() });
-    if (id === 'd20') setFace(parseD20Face(text));
-    timer.current = window.setTimeout(() => setReaction(null), 1800);
-    return text;
+    setReactionKey(Date.now());
+    if (id === 'd20') {
+      setFace(1 + Math.floor(Math.random() * 20));
+    }
+    timer.current = window.setTimeout(() => setReactionKey(null), 1800);
   };
 
-  return { reaction, react, face };
+  return { reactionKey, react, face };
 }
 
 function StickerArt({
   id,
-  reaction,
+  reactionKey,
   face,
-  showCaption = true,
   eager = false,
-  holoFoil = false,
-  captionLayout = DEFAULT_CAPTION_LAYOUT,
-  captionVisible = false,
-  bubbleRef
+  holoFoil = false
 }: {
   id: StickerId;
-  reaction: Reaction | null;
+  reactionKey: number | null;
   face?: number;
-  showCaption?: boolean;
   eager?: boolean;
   holoFoil?: boolean;
-  captionLayout?: LidCaptionLayout;
-  captionVisible?: boolean;
-  bubbleRef?: RefObject<HTMLSpanElement | null>;
 }) {
   const def = STICKERS[id];
-  const showBubble = Boolean(reaction) || captionVisible;
   return (
-    <>
-      {(showCaption || reaction) && (
-        <span
-          ref={bubbleRef}
-          className="sticker-bubble"
-          data-caption-edge={captionLayout.edge}
-          data-caption-align={captionLayout.align}
-          data-visible={showBubble ? 'true' : undefined}
-          aria-hidden="true"
-        >
-          {reaction?.text ?? def.caption}
-        </span>
-      )}
-      <span key={reaction?.key} className={`sticker-face-host relative block ${reaction ? def.animation : ''}`}>
-        <span className={holoFoil ? 'sticker-holo-stage' : 'block'}>
-          {holoFoil && <span className="holo-foil" aria-hidden="true" />}
-          <img
-            src={def.src}
-            width={def.width}
-            height={def.height}
-            alt=""
-            draggable={false}
-            decoding="async"
-            loading={eager ? 'eager' : 'lazy'}
-            className="sticker-art relative z-[1] block h-auto w-full select-none"
-          />
-          {holoFoil && (
-            <>
-              <span className="holo-sheen" aria-hidden="true" />
-              <span className="holo-edge" aria-hidden="true" />
-              <HoloSparkleCanvas />
-            </>
-          )}
-        </span>
-        {id === 'd20' && (
-          <span className="d20-face" aria-hidden="true">
-            {face ?? 20}
-          </span>
+    <span key={reactionKey} className={`sticker-face-host relative block ${reactionKey ? def.animation : ''}`}>
+      <span className={holoFoil ? 'sticker-holo-stage' : 'block'}>
+        {holoFoil && <span className="holo-foil" aria-hidden="true" />}
+        <img
+          src={def.src}
+          width={def.width}
+          height={def.height}
+          alt=""
+          draggable={false}
+          decoding="async"
+          loading={eager ? 'eager' : 'lazy'}
+          className="sticker-art relative z-[1] block h-auto w-full select-none"
+        />
+        {holoFoil && (
+          <>
+            <span className="holo-sheen" aria-hidden="true" />
+            <span className="holo-edge" aria-hidden="true" />
+            <HoloSparkleCanvas />
+          </>
         )}
       </span>
-    </>
+      {id === 'd20' && (
+        <span className="d20-face" aria-hidden="true">
+          {face ?? 20}
+        </span>
+      )}
+    </span>
   );
 }
 
 export function StaticSticker({ id, className = '' }: { id: StickerId; className?: string }) {
-  const { reaction, react, face } = useStickerReaction(id);
+  const { reactionKey, react, face } = useStickerReaction(id);
   return (
     <button type="button" onClick={react} aria-label={STICKERS[id].label} className={`group relative block ${className}`}>
-      <StickerArt id={id} reaction={reaction} face={face} showCaption={false} />
+      <StickerArt id={id} reactionKey={reactionKey} face={face} />
     </button>
   );
 }
@@ -257,7 +209,6 @@ function LidSticker({
   lidRef,
   holoActive,
   onFront,
-  onReact,
   onOffset,
   onSettle
 }: {
@@ -265,14 +216,12 @@ function LidSticker({
   lidRef: RefObject<HTMLDivElement | null>;
   holoActive: boolean;
   onFront: () => void;
-  onReact: (message: string) => void;
   onOffset: (id: StickerId, x: number, y: number) => void;
   onSettle: (id: StickerId, x: number, y: number) => void;
 }) {
   const def = STICKERS[slot.id];
   const maskUrl = holoActive ? holoMaskUrl(slot.id) : undefined;
   const ref = useRef<HTMLButtonElement>(null);
-  const bubbleRef = useRef<HTMLSpanElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const rotate = useMotionValue(slot.rotate);
@@ -280,8 +229,7 @@ function LidSticker({
   const dragControls = useDragControls();
   const dragConstraints = useRef<AxisDragConstraints>({ ...ZERO_DRAG_CONSTRAINTS }).current;
   const [pressed, setPressed] = useState(false);
-  const [captionLayout, setCaptionLayout] = useState<LidCaptionLayout>(DEFAULT_CAPTION_LAYOUT);
-  const { reaction, react, face } = useStickerReaction(slot.id);
+  const { reactionKey, react, face } = useStickerReaction(slot.id);
   const reduceMotion = useReducedMotion() === true;
   const baseRotate = useRef(slot.rotate);
   useStickerHoloPointer(ref, holoActive);
@@ -316,29 +264,6 @@ function LidSticker({
   };
 
   const releasePressed = () => setPressed(false);
-
-  useLayoutEffect(() => {
-    if (!prefersCoarsePointer()) return;
-    const bubble = bubbleRef.current;
-    if (!bubble) return;
-    bubble.style.setProperty('--caption-clamp-x', `${captionLayout.shiftX}px`);
-  }, [captionLayout.shiftX]);
-
-  useLayoutEffect(() => {
-    if (!prefersCoarsePointer() || (!pressed && !reaction)) return;
-    const measure = () => {
-      const lid = lidRef.current;
-      const button = ref.current;
-      const bubble = bubbleRef.current;
-      if (!lid || !button || !bubble) return;
-      setCaptionLayout(
-        resolveLidCaptionLayout(lid.getBoundingClientRect(), button.getBoundingClientRect(), bubble.getBoundingClientRect())
-      );
-    };
-    measure();
-    const frame = requestAnimationFrame(measure);
-    return () => cancelAnimationFrame(frame);
-  }, [pressed, reaction, lidRef]);
 
   useEffect(() => {
     const node = ref.current;
@@ -421,7 +346,7 @@ function LidSticker({
       }}
       onClick={() => {
         if (dragged.current) return;
-        onReact(`${def.caption}: ${react()}`);
+        react();
       }}
       onKeyDown={nudge}
       aria-label={def.label}
@@ -445,13 +370,10 @@ function LidSticker({
       <span className="block" style={{ width: slot.artW }}>
         <StickerArt
           id={slot.id}
-          reaction={reaction}
+          reactionKey={reactionKey}
           face={face}
           eager
           holoFoil={holoActive}
-          captionLayout={captionLayout}
-          captionVisible={pressed}
-          bubbleRef={bubbleRef}
         />
       </span>
     </motion.button>
@@ -487,7 +409,6 @@ export function StickerLid() {
   const holo = useHoloRoulette();
   const [slots, setSlots] = useState<ScatterSlot[]>([]);
   const [order, setOrder] = useState<StickerId[]>(STICKER_ORDER);
-  const [announcement, setAnnouncement] = useState('');
 
   const bringToFront = (id: StickerId) =>
     setOrder((prev) => (prev[prev.length - 1] === id ? prev : [...prev.filter((i) => i !== id), id]));
@@ -578,7 +499,6 @@ export function StickerLid() {
                   lidRef={lidRef}
                   holoActive={isStickerHoloActive(holo, slot.id)}
                   onFront={() => bringToFront(slot.id)}
-                  onReact={setAnnouncement}
                   onOffset={(id, x, y) => {
                     offsetsRef.current[id] = { x, y };
                   }}
@@ -590,9 +510,6 @@ export function StickerLid() {
         </div>
         <p id="tampa-ajuda" className="sr-only">
           Arraste os stickers ou use as setas. Clique no D20 para rolar.
-        </p>
-        <p className="sr-only" aria-live="polite">
-          {announcement}
         </p>
       </div>
     </MotionConfig>

@@ -1,14 +1,9 @@
-import {
-  featuredProjectLlmsMdItems,
-  featuredProjectSchemaOrg
-} from '../utils/featuredProjectLinks.ts';
-
-export interface Highlight {
+interface Highlight {
   metric?: string;
   text: string;
 }
 
-export interface Role {
+interface Role {
   title: string;
   /** YYYY-MM */
   start: string;
@@ -26,7 +21,7 @@ export interface Experience {
   stack: string[];
 }
 
-export interface Project {
+interface Project {
   name: string;
   tagline: string;
   repoUrl: string;
@@ -63,33 +58,33 @@ export interface Certification {
   badge: { code: string; caption: string; shape: 'hexagon' | 'circle'; color: string };
 }
 
-export interface Education {
+interface Education {
   course: string;
   school: string;
   period: string;
 }
 
-export interface Language {
+interface Language {
   name: string;
   code: string;
   level: string;
 }
 
-export interface SkillGroup {
+interface SkillGroup {
   name: string;
   /** Aparecem como selos com logo; o resto fica em texto corrido. */
   featured: string[];
   items: string[];
 }
 
-export interface Pet {
+interface Pet {
   id: string;
   name: string;
   kind: 'gata' | 'gato';
   bio: string;
 }
 
-export interface Interest {
+interface Interest {
   id: string;
   title: string;
   text: string;
@@ -99,7 +94,6 @@ export interface PortfolioData {
   profile: {
     name: string;
     shortName: string;
-    role: string;
     jobTitle: string;
     headline: string;
     /** Trechos entre ==sinais== aparecem com marca-texto. */
@@ -133,13 +127,12 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
   profile: {
     name: 'Pedro Henrique Lopes',
     shortName: 'Pedro Lopes',
-    role: 'Software Engineer · Frontend',
     jobTitle: 'Software Engineer · Frontend',
     headline: 'Transformo fluxos complexos em interfaces rápidas, acessíveis e fáceis de manter.',
     summary:
-      'Cerca de 5 anos em produção com React, Next.js e TypeScript: um design system com ==30+ componentes WCAG 2.1 AA==, listas com ==5.000+ registros== sem travar e IA integrada a fluxos reais de negócio.',
+      'Mais de 4 anos desenvolvendo e evoluindo aplicações web em produção com React, Next.js e TypeScript: contribuição em Design System com ==30+ componentes (WCAG 2.1 AA)==, listagens com ==5.000+ registros== virtualizadas e interfaces para funcionalidades baseadas em LLMs.',
     trustCopy:
-      'São cerca de 5 anos construindo front-end em produção, de estágio a júnior, usando IA no dia a dia para entregar mais e melhor. Estou aberto a vagas pleno quando houver fit.',
+      'Mais de 4 anos construindo frontend em produção, de estágio a júnior, com foco em componentização, performance, testes automatizados e interfaces para produtos com IA. Aberto a vagas pleno quando houver fit.',
     status: 'Aberto a oportunidades',
     location: 'Porto Alegre, RS',
     seniority: 'Júnior/Pleno',
@@ -150,7 +143,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     github: 'https://github.com/Pherlsz',
     cvUrl: '/cv/Pedro-Henrique-Lopes-CV.pdf',
     about: [
-      'Engenheiro de software com foco em frontend. Comecei em suporte e no monitoramento de sistemas de alta disponibilidade; essa experiência orienta o modo como construo interfaces: estáveis, observáveis e fáceis de manter.',
+      'Minha atuação combina desenvolvimento frontend, componentização, performance e qualidade de software: criação de primitivos e componentes reutilizáveis com acessibilidade (WCAG 2.1 AA), organização de estado e dados com TanStack Query e Zustand, cobertura de testes em fluxos críticos e interfaces para funcionalidades baseadas em LLMs.',
       'Participo de gincanas no RS, no Setor de Diversas. Parte dos projetos pessoais nasceu desse contexto. Treino com regularidade, jogo RPG e convivo com três gatos.'
     ]
   },
@@ -160,54 +153,63 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       company: 'Atlas Governance',
       location: 'Brasil',
       summary:
-        'Plataforma de governança corporativa. Atuei no frontend do Atlas PLG e do Atlas Sign como Software Engineer, com design system e integração de IA, após período de estágio.',
+        'Atuação no desenvolvimento e na evolução de aplicações web em produção, com foco em React, Next.js e TypeScript. Experiência em componentização, construção de componentes reutilizáveis, otimização de performance, gerenciamento de estado e dados e implementação de testes automatizados. Atuação complementar em backend com C#/.NET Core e em interfaces para funcionalidades baseadas em modelos de linguagem (LLMs).',
       roles: [
         { title: 'Software Engineer', start: '2021-11', end: '2026-07' },
-        { title: 'Estagiário em Engenharia de Software', start: '2021-03', end: '2021-11' }
+        { title: 'Estágio em Engenharia de Software', start: '2021-03', end: '2021-11' }
       ],
       highlights: [
         {
           metric: '30+ componentes',
-          text: 'Arquitetei o frontend da plataforma Atlas PLG com React, Next.js e TypeScript e criei um design system modular em conformidade com WCAG 2.1 AA.'
+          text: 'Primitivos e componentes customizados do Design System no Atlas PLG (React, Next.js e TypeScript), com foco em padronização visual e acessibilidade (WCAG 2.1 Level AA).'
         },
         {
           metric: '5.000+ registros',
-          text: 'Estabilizei as listagens do Atlas Sign (assinatura digital) com virtualização de DOM (TanStack Virtual) e code splitting, eliminando gargalos de renderização.'
+          text: 'Virtualização do DOM (TanStack Virtual) e code splitting no módulo Atlas Sign, eliminando gargalos de renderização e layout thrashing em listagens extensas.'
         },
         {
           metric: '10.000+ usuários',
-          text: 'Estruturei a navegação em árvore e os fluxos críticos de assinatura eletrônica, com Error Boundaries e testes em Vitest e React Testing Library.'
+          text: 'Navegação em árvore e fluxos críticos de assinatura eletrônica com Error Boundaries para contenção de falhas e testes automatizados com Vitest e React Testing Library.'
         },
         {
-          metric: 'LLMs em produção',
-          text: 'Integrei modelos de IA aos fluxos de negócio com function calling e tool calling, via APIs REST em Python e C#/.NET Core.'
+          metric: 'Interfaces de IA',
+          text: 'Interfaces para funcionalidades com modelos de linguagem (LLMs) em produção, incluindo chat interativo e exibição de relatórios gerados por IA.'
         },
         {
           metric: '1.000+ templates',
-          text: 'Refatorei o serviço de mensageria em C#/.NET Core, consolidando templates de e-mail legados em modelos parametrizados, com Docker e CI/CD no Azure DevOps.'
+          text: 'Refatoração da mensageria corporativa em C#/.NET Core, consolidando e-mails legados em modelos parametrizados com Docker e esteiras de CI/CD no Azure DevOps.'
         },
         {
           metric: '15+ fluxos',
-          text: 'No estágio, criei uma biblioteca de componentes com Styled Components e Context API que acelerou o desenvolvimento de fluxos corporativos.'
+          text: 'Biblioteca padronizada de componentes com Styled Components e Context API no estágio, acelerando o desenvolvimento e reduzindo redundâncias.'
         },
         {
-          text: 'Separei o estado de servidor do estado de interface com TanStack Query (cache e deduplicação), Zustand e Context API, eliminando requisições redundantes.'
+          text: 'Aprimorei o gerenciamento de dados e estados da interface com TanStack Query, Zustand e Context API, utilizando cache e deduplicação de requisições para reduzir chamadas redundantes à rede e organizar o estado das aplicações.'
         },
         {
-          text: 'Corrigi falhas de frontend e de integração com análise de causa raiz no Azure DevOps, aplicando o OWASP Top 10 contra XSS.'
+          text: 'No estágio, desenvolvi e mantive interfaces corporativas e serviços transacionais com React, TypeScript e C#/.NET Core, contribuindo para a estabilidade operacional e a manutenção das regras de negócio em produção.'
+        },
+        {
+          text: 'Diagnostiquei e corrigi falhas nas camadas de frontend e na integração entre serviços com análise de causa raiz (RCA) e Azure DevOps, aplicando práticas alinhadas ao OWASP Top 10 na prevenção de XSS e sanitização segura de dados de entrada.'
         }
       ],
       stack: [
         'React',
         'Next.js',
         'TypeScript',
+        'JavaScript (ES6+)',
+        'HTML e CSS',
+        'Tailwind CSS',
+        'Styled Components',
+        'Webpack',
         'TanStack Query',
         'TanStack Virtual',
         'Zustand',
+        'Context API',
         'Vitest',
         'React Testing Library',
-        'Python',
         'C# / .NET Core',
+        'SQL',
         'Docker',
         'Azure DevOps'
       ]
@@ -216,17 +218,18 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       id: 'nelogica',
       company: 'Nelogica',
       location: 'Porto Alegre, RS',
-      summary: 'Plataformas de negociação do mercado financeiro, operando com alta disponibilidade.',
+      summary:
+        'Atuação em operações de TI e monitoramento de sistemas transacionais de alta disponibilidade, com foco em observabilidade, diagnóstico de incidentes e continuidade dos ambientes de produção.',
       roles: [{ title: 'Analista de Operações de TI (NOC)', start: '2019-08', end: '2020-09' }],
       highlights: [
         {
-          text: 'Monitorei plataformas de negociação e sistemas transacionais com Grafana, Zabbix e Kibana, antecipando oscilações de latência e degradação de serviço.'
+          text: 'Monitorei plataformas de negociação financeira e sistemas transacionais utilizando Grafana, Zabbix e Kibana, identificando sinais de degradação de serviços e oscilações de latência.'
         },
         {
-          text: 'Fiz diagnóstico de causa raiz e escalonei incidentes críticos com os times de engenharia e infraestrutura, ajudando a reduzir o MTTR.'
+          text: 'Investiguei incidentes operacionais por meio de análise de causa raiz, atuando na contenção de falhas e no escalonamento de incidentes críticos para os times de Engenharia de Software e Infraestrutura, com foco na redução do tempo médio de recuperação (MTTR).'
         },
         {
-          text: 'Montei dashboards operacionais, limites de telemetria e fluxos de alerta para acompanhar a saúde da produção em tempo real.'
+          text: 'Desenvolvi dashboards operacionais e configurei limites de telemetria e alertas para acompanhar a saúde dos sistemas em tempo real, apoiando a identificação de anomalias e a continuidade dos ambientes de produção.'
         }
       ],
       stack: ['Grafana', 'Zabbix', 'Kibana']
@@ -235,16 +238,19 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       id: 'lebes',
       company: 'Lojas Lebes',
       location: 'Eldorado do Sul, RS',
-      summary: 'Sistemas corporativos (ERP e CRM) de uma rede varejista gaúcha.',
-      roles: [{ title: 'Analista de Suporte a Sistemas', start: '2018-02', end: '2019-08' }],
+      summary:
+        'Atuação no suporte e na sustentação de sistemas corporativos, com foco na continuidade operacional, diagnóstico de falhas e integridade de dados em ambientes de produção.',
+      roles: [{ title: 'Technical Support Analyst', start: '2018-02', end: '2019-08' }],
       highlights: [
         {
-          text: 'Sustentei ambientes de missão crítica (ERP e CRM), garantindo a continuidade operacional e a integridade dos dados.'
+          text: 'Realizei a sustentação de sistemas corporativos, incluindo ERP e CRM, apoiando a continuidade operacional e a integridade dos fluxos de dados das rotinas de negócio.'
         },
         {
-          text: 'Analisei a causa raiz de falhas em servidores, integrações e rotinas de comunicação, reduzindo o tempo de indisponibilidade.'
+          text: 'Diagnostiquei falhas técnicas em servidores, integrações entre sistemas corporativos e rotinas de comunicação, conduzindo análises de causa raiz para reduzir o tempo de indisponibilidade operacional.'
         },
-        { text: 'Validei correções e homologuei melhorias junto aos times de TI e engenharia.' }
+        {
+          text: 'Validei correções técnicas, integridade de dados e melhorias em conjunto com equipes multidisciplinares de TI e Engenharia, contribuindo para a identificação e a mitigação de gargalos operacionais.'
+        }
       ],
       stack: ['ERP', 'CRM']
     }
@@ -314,13 +320,15 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
   skills: [
     {
       name: 'Frontend',
-      featured: ['TypeScript', 'React', 'Next.js', 'Tailwind CSS'],
+      featured: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
       items: [
         'JavaScript (ES6+)',
         'HTML e CSS',
         'Styled Components',
         'Design Systems',
         'Acessibilidade (WCAG 2.1 AA)',
+        'Web Performance',
+        'Vite',
         'Webpack'
       ]
     },
@@ -331,13 +339,22 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     },
     {
       name: 'Backend e IA',
-      featured: ['Python', 'Go', 'Node.js', '.NET'],
+      featured: ['.NET', 'Node.js', 'Go', 'Python'],
       items: ['C#', 'APIs REST', 'LLMs (function e tool calling)', 'SQL']
     },
     {
       name: 'Qualidade e DevOps',
       featured: ['Vitest', 'Docker', 'GitHub Actions'],
-      items: ['Jest', 'React Testing Library', 'Git', 'Azure DevOps', 'Microsoft Azure', 'OWASP Top 10']
+      items: [
+        'React Testing Library',
+        'Jest',
+        'Git',
+        'Azure DevOps',
+        'Microsoft Azure',
+        'OWASP Top 10',
+        'Grafana',
+        'Zabbix'
+      ]
     }
   ],
   education: [
@@ -474,166 +491,45 @@ export const CONTACT_API = {
 } as const;
 
 export const SITE_ORIGIN = 'https://pherls.dev';
-export const PROFILE_IMAGE_PATH = '/og.png';
 /** Revisão pública do perfil. Atualize quando os fatos do currículo mudarem. */
-export const PROFILE_UPDATED = '2026-10-18';
+export const PROFILE_UPDATED = '2026-10-21';
 
-export function generateJsonLdSchema(data: PortfolioData): object {
-  const { profile, project, featuredProjects } = data;
-  const pageUrl = `${SITE_ORIGIN}/`;
-  const personId = `${SITE_ORIGIN}/#person`;
-  const description = `${profile.headline} ${plainText(profile.summary)}`;
-  const hasPart = [
-    ...featuredProjects.map((item) => featuredProjectSchemaOrg(item)),
-    {
-      '@type': 'SoftwareSourceCode',
-      name: project.name,
-      description: project.tagline,
-      codeRepository: project.repoUrl,
-      programmingLanguage: project.language,
-      version: project.version
-    }
-  ];
-
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'ProfilePage',
-        '@id': `${SITE_ORIGIN}/#profilepage`,
-        url: pageUrl,
-        dateModified: PROFILE_UPDATED,
-        mainEntity: {
-          '@type': 'Person',
-          '@id': personId,
-          name: profile.name,
-          alternateName: profile.shortName,
-          url: pageUrl,
-          image: {
-            '@type': 'ImageObject',
-            url: `${SITE_ORIGIN}${PROFILE_IMAGE_PATH}`,
-            width: 1200,
-            height: 630
-          },
-          email: `mailto:${profile.email}`,
-          jobTitle: profile.jobTitle,
-          description,
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: 'Porto Alegre',
-            addressRegion: 'RS',
-            addressCountry: 'BR'
-          },
-          sameAs: [profile.linkedin, profile.github],
-          alumniOf: data.education.map((e) => ({ '@type': 'EducationalOrganization', name: e.school })),
-          knowsAbout: data.skills.flatMap(skillNames),
-          knowsLanguage: data.languages.map((l) => l.code),
-          hasCredential: data.certifications.map((cert) => ({
-            '@type': 'EducationalOccupationalCredential',
-            name: cert.name,
-            recognizedBy: { '@type': 'Organization', name: cert.issuer },
-            dateCreated: cert.year,
-            ...(cert.href ? { url: cert.href } : {})
-          }))
-        },
-        hasPart
-      },
-      {
-        '@type': 'WebSite',
-        '@id': `${SITE_ORIGIN}/#website`,
-        url: pageUrl,
-        name: `${profile.name} · ${profile.role}`,
-        description,
-        inLanguage: 'pt-BR',
-        publisher: { '@id': personId }
-      }
-    ]
-  };
+/** Normaliza texto para comparação insensível a acentos, caixa e pontuação de borda. */
+export function foldText(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 }
 
-function mdItem(label: string, href: string, note?: string): string {
-  return note ? `- [${label}](${href}): ${note}` : `- [${label}](${href})`;
+/** Extrai o conteúdo entre aspas ou crases (`"..."`, `'...'`, `“...”`, `` `...` ``). */
+export function extractQuotedText(text: string): string {
+  return Array.from(text.matchAll(/["'“”`]+([^"'“”`\n]{2,120})["'“”`]+/g), (match) => match[1]).join(' ');
 }
 
-export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): string {
-  const { profile, project, featuredProjects } = data;
-  const lines = [
-    `# ${profile.name} — ${profile.jobTitle}`,
-    '',
-    `> ${profile.headline} ${plainText(profile.summary)}`,
-    '',
-    '## Páginas',
-    mdItem('Portfólio', `${origin}/`, 'Página principal'),
-    mdItem('Currículo HTML', `${origin}/cv`, 'Versão para impressão'),
-    mdItem('Currículo PDF', `${origin}${profile.cvUrl}`, 'Download direto'),
-    mdItem('ai.json', `${origin}/ai.json`, 'Perfil estruturado para agentes'),
-    mdItem('pedro.md', `${origin}/pedro.md`, 'Perfil em Markdown'),
-    mdItem('AGENTS.md', `${origin}/AGENTS.md`, 'Como agentes devem ler este site e enviar contato'),
-    mdItem('resume.json', `${origin}/resume.json`, 'Currículo em JSON'),
-    mdItem('Mapa do site', `${origin}/sitemap.xml`),
-    '',
-    '## Contato',
-    mdItem('E-mail', `mailto:${profile.email}`),
-    mdItem('LinkedIn', profile.linkedin),
-    mdItem('GitHub', profile.github),
-    `- Local: ${profile.location}`,
-    `- Status: ${profile.status}`,
-    `- Senioridade: ${profile.seniority}`,
-    `- Formato: ${profile.workMode}`,
-    `- Pretensão salarial: ${profile.salary}`,
-    mdItem('Formulário no site', `${origin}/#contato`),
-    mdItem(
-      `${CONTACT_API.method} ${CONTACT_API.path}`,
-      `${origin}${CONTACT_API.path}`,
-      `${CONTACT_API.description} JSON { "name", "email", "message", "source": "agent" }. Campos: name (${CONTACT_API.body.name}); email (${CONTACT_API.body.email}); message (${CONTACT_API.body.message}). Resposta 200: { "ok": true }.`
-    ),
-    '',
-    '## Experiência',
-    ...data.experiences.flatMap((exp) => {
-      const span = experienceSpan(exp);
-      return [
-        `### ${exp.company} (${formatPeriod(span.start, span.end)})`,
-        exp.summary,
-        ...exp.roles.map((role) => `- Cargo: ${role.title} (${formatPeriod(role.start, role.end)})`),
-        ...exp.highlights.map((h) => `- ${h.metric ? `${h.metric}: ` : ''}${h.text}`),
-        `- Stack: ${exp.stack.join(', ')}`,
-        ''
-      ];
-    }),
-    '## Projetos em destaque (ferramentas e sites)',
-    ...featuredProjects.flatMap((item) => [
-      `### ${item.name}`,
-      item.tagline,
-      ...featuredProjectLlmsMdItems(item, mdItem),
-      `- Acesso: ${item.access === 'restricted' ? 'restrito (login)' : 'público'}`,
-      `- Stack: ${item.stack.join(', ')}`,
-      ''
-    ]),
-    `## Outro projeto: ${project.name} (${project.language}, ${project.version})`,
-    project.tagline,
-    mdItem('Repositório', project.repoUrl),
-    mdItem('Releases', project.releasesUrl, project.releasesPeriod),
-    ...project.cards.map((card) => `- ${card.title}: ${card.text}`),
-    `- Pacotes: ${project.modules.map((m) => `${m.name} (${m.description})`).join('; ')}`,
-    '',
-    '## Habilidades',
-    ...data.skills.map((group) => `- ${group.name}: ${skillNames(group).join(', ')}`),
-    '',
-    '## Formação',
-    ...data.education.map((e) => `- ${e.course}, ${e.school} (${e.period})`),
-    '',
-    '## Certificações',
-    ...data.certifications.map((c) =>
-      c.href ? mdItem(`${c.name} — ${c.issuer} (${c.year})`, c.href) : `- ${c.name} — ${c.issuer} (${c.year})`
-    ),
-    `- Outros cursos: ${data.otherCourses.join(', ')}`,
-    '',
-    '## Idiomas',
-    ...data.languages.map((l) => `- ${l.name}: ${l.level}`),
-    '',
-    '## Bastidores',
-    ...data.interests.map((i) => `- ${i.title}: ${i.text}`),
-    ...data.pets.map((p) => `- ${p.name} (${p.kind}): ${p.bio}`)
-  ];
-  return lines.join('\n');
+/** Verifica se `needle` ocorre como palavra/termo inteiro dentro de `haystack` (ambos normalizados com `foldText`). */
+export function hasWholeWord(haystack: string, needle: string): boolean {
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?:^|[^a-z0-9#+.])${escaped}(?:$|[^a-z0-9#+.])`, 'i').test(haystack);
 }
+
+export interface FeaturedProjectResolvedLink {
+  kind: 'repo' | 'live';
+  href: string;
+}
+
+/** Links públicos disponíveis para um projeto em destaque (`repoUrl` e/ou `href`). */
+export function featuredProjectLinks(project: Pick<FeaturedProject, 'repoUrl' | 'href'>): FeaturedProjectResolvedLink[] {
+  const out: FeaturedProjectResolvedLink[] = [];
+  const repo = project.repoUrl?.trim();
+  const live = project.href?.trim();
+  if (repo) out.push({ kind: 'repo', href: repo });
+  if (live && live !== repo) out.push({ kind: 'live', href: live });
+  return out;
+}
+
+export function featuredProjectPrimaryUrl(project: Pick<FeaturedProject, 'repoUrl' | 'href'>): string | undefined {
+  return featuredProjectLinks(project)[0]?.href;
+}
+
+export { generateJsonLdSchema, generateLlmsTxt } from './machineDocuments.ts';
