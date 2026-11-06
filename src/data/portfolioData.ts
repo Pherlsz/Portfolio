@@ -25,14 +25,8 @@ interface Project {
   name: string;
   tagline: string;
   repoUrl: string;
-  releasesUrl: string;
   language: string;
-  version: string;
-  spec: string;
-  releasesPeriod: string;
-  license: string;
   modules: { name: string; description: string }[];
-  cards: { title: string; text: string }[];
 }
 
 export interface FeaturedProject {
@@ -77,19 +71,6 @@ interface SkillGroup {
   items: string[];
 }
 
-interface Pet {
-  id: string;
-  name: string;
-  kind: 'gata' | 'gato';
-  bio: string;
-}
-
-interface Interest {
-  id: string;
-  title: string;
-  text: string;
-}
-
 export interface PortfolioData {
   profile: {
     name: string;
@@ -119,8 +100,6 @@ export interface PortfolioData {
   certifications: Certification[];
   otherCourses: string[];
   languages: Language[];
-  pets: Pet[];
-  interests: Interest[];
 }
 
 export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
@@ -128,11 +107,11 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     name: 'Pedro Henrique Lopes',
     shortName: 'Pedro Lopes',
     jobTitle: 'Software Engineer · Frontend',
-    headline: 'Transformo fluxos complexos em interfaces rápidas, acessíveis e fáceis de manter.',
+    headline: 'Mais de 4 anos desenvolvendo aplicações web em produção com React, Next.js e TypeScript.',
     summary:
-      'Mais de 5 anos desenvolvendo e evoluindo aplicações web em produção com React, Next.js e TypeScript: contribuição em Design System com ==30+ componentes (WCAG 2.1 AA)==, listagens com ==5.000+ registros== virtualizadas e interfaces para funcionalidades baseadas em LLMs.',
+      'Experiência prática em Design Systems (==30+ componentes WCAG 2.1 AA==), virtualização de listagens com ==5.000+ registros== e interfaces para recursos com LLMs, além de manutenção de serviços em C#/.NET Core.',
     trustCopy:
-      'Mais de 5 anos construindo frontend em produção, de estágio a Software Engineer. Busco posições Pleno em frontend, com foco em Design Systems, performance e produtos com IA.',
+      'Busco vagas Pleno em frontend (remoto ou em Porto Alegre), também aberto a contribuir em APIs e backend.',
     status: 'Aberto a oportunidades',
     location: 'Porto Alegre, RS',
     seniority: 'Pleno',
@@ -143,8 +122,9 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     github: 'https://github.com/Pherlsz',
     cvUrl: '/cv/Pedro-Henrique-Lopes-CV.pdf',
     about: [
-      'Minha atuação combina desenvolvimento frontend, componentização, performance e qualidade de software: criação de primitivos e componentes reutilizáveis com acessibilidade (WCAG 2.1 AA), organização de estado e dados com TanStack Query e Zustand, cobertura de testes em fluxos críticos e interfaces para funcionalidades baseadas em LLMs.',
-      'Participo de gincanas no RS, no Setor de Diversas. Parte dos projetos pessoais nasceu desse contexto. Treino com regularidade, jogo RPG e convivo com três gatos.'
+      'Comecei trabalhando com suporte técnico e monitoramento de sistemas críticos (NOC). Acompanhar ambientes de produção de perto me deu uma boa base para investigar incidentes, ler logs e achar a causa raiz antes de mexer no código.',
+      'Na transição para engenharia de software, evoluí do estágio a Software Engineer ao longo de mais de quatro anos atuando principalmente com React, Next.js e TypeScript, criando componentes de Design System, melhorando a performance de telas pesadas, construindo interfaces para recursos de IA e dando manutenção em serviços em C#/.NET Core.',
+      'Me adapto rápido a projetos em andamento e gosto de pegar problemas em que preciso aprender algo novo. Meu foco é frontend, mas também escrevo backend e APIs em .NET e Go quando faz sentido para o time.'
     ]
   },
   experiences: [
@@ -153,7 +133,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       company: 'Atlas Governance',
       location: 'Brasil',
       summary:
-        'Atuação no desenvolvimento e na evolução de aplicações web em produção, com foco em React, Next.js e TypeScript. Experiência em componentização, construção de componentes reutilizáveis, otimização de performance, gerenciamento de estado e dados e implementação de testes automatizados. Atuação complementar em backend com C#/.NET Core e em interfaces para funcionalidades baseadas em modelos de linguagem (LLMs).',
+        'Desenvolvimento do portal de governança corporativa com React, Next.js e TypeScript: componentes do Design System, otimização de telas com grandes volumes de dados, interfaces para recursos com LLMs e manutenção de serviços em C#/.NET Core.',
       roles: [
         { title: 'Software Engineer', start: '2021-11', end: '2026-07' },
         { title: 'Estágio em Engenharia de Software', start: '2021-03', end: '2021-11' }
@@ -161,36 +141,36 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       highlights: [
         {
           metric: '30+ componentes',
-          text: 'Primitivos e componentes customizados do Design System no Atlas PLG (React, Next.js e TypeScript), com foco em padronização visual e acessibilidade (WCAG 2.1 Level AA).'
+          text: 'Primitivos e componentes do Design System no Atlas PLG (React, Next.js e TypeScript), seguindo critérios de acessibilidade WCAG 2.1 Level AA e atuando em discussões técnicas com o time de arquitetura.'
         },
         {
           metric: '5.000+ registros',
-          text: 'Virtualização do DOM (TanStack Virtual) e code splitting no módulo Atlas Sign, eliminando gargalos de renderização e layout thrashing em listagens extensas.'
+          text: 'Virtualização do DOM (TanStack Virtual) e code splitting no módulo Atlas Sign, resolvendo travamentos e layout thrashing em listagens grandes.'
         },
         {
           metric: '10.000+ usuários',
-          text: 'Navegação em árvore e fluxos críticos de assinatura eletrônica com Error Boundaries para contenção de falhas e testes automatizados com Vitest e React Testing Library.'
+          text: 'Navegação em árvore e fluxos de assinatura eletrônica com Error Boundaries e testes automatizados (Vitest, Jest e React Testing Library).'
         },
         {
           metric: 'Interfaces de IA',
-          text: 'Interfaces para funcionalidades com modelos de linguagem (LLMs) em produção, incluindo chat interativo e exibição de relatórios gerados por IA.'
+          text: 'Chat interativo e telas de relatórios integrados a modelos de linguagem (LLMs) em produção.'
         },
         {
           metric: '1.000+ templates',
-          text: 'Refatoração da mensageria corporativa em C#/.NET Core, consolidando e-mails legados em modelos parametrizados com Docker e esteiras de CI/CD no Azure DevOps.'
+          text: 'Refatoração do serviço de envio de e-mails em C#/.NET Core e APIs REST, unificando templates legados com Docker e pipelines no Azure DevOps.'
         },
         {
           metric: '15+ fluxos',
-          text: 'Biblioteca padronizada de componentes com Styled Components e Context API no estágio, acelerando o desenvolvimento e reduzindo redundâncias.'
+          text: 'Biblioteca de componentes com Styled Components e Context API compartilhada entre módulos da plataforma.'
         },
         {
-          text: 'Aprimorei o gerenciamento de dados e estados da interface com TanStack Query, Zustand e Context API, utilizando cache e deduplicação de requisições para reduzir chamadas redundantes à rede e organizar o estado das aplicações.'
+          text: 'Organização de estado e cache de requisições com TanStack Query, Zustand e Context API, reduzindo chamadas repetidas à API.'
         },
         {
-          text: 'No estágio, desenvolvi e mantive interfaces corporativas e serviços transacionais com React, TypeScript e C#/.NET Core, contribuindo para a estabilidade operacional e a manutenção das regras de negócio em produção.'
+          text: 'Configuração e otimização de build frontend com Webpack e Vite para modularização de bundles, compatibilidade cross-browser e responsividade.'
         },
         {
-          text: 'Diagnostiquei e corrigi falhas nas camadas de frontend e na integração entre serviços com análise de causa raiz (RCA) e Azure DevOps, aplicando práticas alinhadas ao OWASP Top 10 na prevenção de XSS e sanitização segura de dados de entrada.'
+          text: 'Investigação de bugs em produção entre frontend e APIs (RCA) e correção de falhas de segurança e sanitização de inputs (OWASP Top 10 / XSS).'
         }
       ],
       stack: [
@@ -201,15 +181,19 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         'HTML e CSS',
         'Tailwind CSS',
         'Styled Components',
+        'Vite',
         'Webpack',
         'TanStack Query',
         'TanStack Virtual',
         'Zustand',
         'Context API',
         'Vitest',
+        'Jest',
         'React Testing Library',
         'C# / .NET Core',
+        'APIs REST',
         'SQL',
+        'Git',
         'Docker',
         'Azure DevOps'
       ]
@@ -219,17 +203,17 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       company: 'Nelogica',
       location: 'Porto Alegre, RS',
       summary:
-        'Atuação em operações de TI e monitoramento de sistemas transacionais de alta disponibilidade, com foco em observabilidade, diagnóstico de incidentes e continuidade dos ambientes de produção.',
+        'Monitoramento de plataformas de negociação financeira e resposta a incidentes em ambiente de produção.',
       roles: [{ title: 'Analista de Operações de TI (NOC)', start: '2019-08', end: '2020-09' }],
       highlights: [
         {
-          text: 'Monitorei plataformas de negociação financeira e sistemas transacionais utilizando Grafana, Zabbix e Kibana, identificando sinais de degradação de serviços e oscilações de latência.'
+          text: 'Acompanhamento de plataformas de negociação e serviços transacionais com Grafana, Zabbix e Kibana para identificar quedas e picos de latência.'
         },
         {
-          text: 'Investiguei incidentes operacionais por meio de análise de causa raiz, atuando na contenção de falhas e no escalonamento de incidentes críticos para os times de Engenharia de Software e Infraestrutura, com foco na redução do tempo médio de recuperação (MTTR).'
+          text: 'Investigação de incidentes via análise de causa raiz (RCA), contenção de falhas e acionamento dos times de Engenharia e Infraestrutura para reduzir o tempo médio de recuperação (MTTR).'
         },
         {
-          text: 'Desenvolvi dashboards operacionais e configurei limites de telemetria e alertas para acompanhar a saúde dos sistemas em tempo real, apoiando a identificação de anomalias e a continuidade dos ambientes de produção.'
+          text: 'Criação de dashboards e ajuste de alertas para acompanhar a saúde dos serviços em tempo real.'
         }
       ],
       stack: ['Grafana', 'Zabbix', 'Kibana']
@@ -239,17 +223,17 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       company: 'Lojas Lebes',
       location: 'Eldorado do Sul, RS',
       summary:
-        'Atuação no suporte e na sustentação de sistemas corporativos, com foco na continuidade operacional, diagnóstico de falhas e integridade de dados em ambientes de produção.',
-      roles: [{ title: 'Technical Support Analyst', start: '2018-02', end: '2019-08' }],
+        'Suporte técnico e sustentação de sistemas internos (ERP e CRM) das lojas e da matriz.',
+      roles: [{ title: 'Analista de Suporte a Sistemas', start: '2018-02', end: '2019-08' }],
       highlights: [
         {
-          text: 'Realizei a sustentação de sistemas corporativos, incluindo ERP e CRM, apoiando a continuidade operacional e a integridade dos fluxos de dados das rotinas de negócio.'
+          text: 'Sustentação de rotinas de ERP e CRM no dia a dia da operação.'
         },
         {
-          text: 'Diagnostiquei falhas técnicas em servidores, integrações entre sistemas corporativos e rotinas de comunicação, conduzindo análises de causa raiz para reduzir o tempo de indisponibilidade operacional.'
+          text: 'Diagnóstico de falhas em servidores, integrações entre sistemas e rotinas de comunicação.'
         },
         {
-          text: 'Validei correções técnicas, integridade de dados e melhorias em conjunto com equipes multidisciplinares de TI e Engenharia, contribuindo para a identificação e a mitigação de gargalos operacionais.'
+          text: 'Validação de correções e conferência de dados junto às equipes de TI e desenvolvimento.'
         }
       ],
       stack: ['ERP', 'CRM']
@@ -261,59 +245,43 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       name: 'Gymkhana Database',
       kicker: 'Aplicação web',
       tagline:
-        'Cadastro de pessoas, contas e documentos. Assistente de IA para busca e correlação de documentos com as tarefas. Tabela no estilo Excel, com fórmulas e filtros avançados.',
+        'Sistema web para organizar dados, contas e documentos, com planilha no estilo Excel (fórmulas e filtros) e assistente de IA para busca.',
       repoUrl: 'https://github.com/Pherlsz/Gymkhana-Database',
       access: 'public',
-      stack: ['React', 'TypeScript', 'Ant Design', 'Go'],
+      stack: ['React', 'TypeScript', 'Vite', 'Ant Design', 'Go', 'GitHub Actions'],
       image: '/projects/gymkhana-database-assistente.webp'
     }
   ],
   project: {
     name: 'Gymkhana Core',
     tagline:
-      'Uma base em Go, independente de linguagem e de provedor, para normalizar dados brasileiros, extrair informações de documentos e orquestrar modelos de IA.',
+      'Biblioteca em Go para padronização de dados, extração de texto de documentos e integração com modelos de IA.',
     repoUrl: 'https://github.com/Pherlsz/Gymkhana-Core',
-    releasesUrl: 'https://github.com/Pherlsz/Gymkhana-Core/releases',
     language: 'Go',
-    version: 'v0.7.0',
-    spec: 'Core Spec 0.4',
-    releasesPeriod: 'de julho a agosto de 2026',
-    license: 'Código público para leitura, licença proprietária.',
-    cards: [
-      {
-        title: 'Contexto',
-        text: 'Nasceu da operação de gincanas no Setor de Diversas: padronizar pessoas, documentos e endereços para consulta rápida.'
-      },
-      {
-        title: 'Especificação primeiro',
-        text: 'As regras ficam em spec/. Casos de teste em JSON garantem o mesmo resultado em qualquer linguagem.'
-      },
-      {
-        title: 'Assistente independente de provedor',
-        text: 'Tools, RAG e troca de modelo sem acoplamento ao SDK de um único fornecedor.'
-      }
-    ],
     modules: [
       {
         name: 'normalize',
-        description: 'Texto, nomes, endereços, CPF, CNPJ alfanumérico, CEP, e-mail e telefone em E.164.'
+        description: 'Padronização de nomes, documentos, endereços e contatos.'
       },
-      { name: 'civiltime', description: 'Datas civis e ano-mês sem fuso horário, com parsing estrito.' },
+      {
+        name: 'civiltime',
+        description: 'Datas e períodos sem dependência de fuso horário.'
+      },
       {
         name: 'fingerprint',
-        description: 'Impressões SHA-256 determinísticas, com separação por domínio.'
+        description: 'Hashes determinísticos para evitar registros duplicados.'
       },
       {
         name: 'portablejson',
-        description: 'JSON estrito e um JSON Schema portátil para validar saídas estruturadas.'
+        description: 'Validação de JSON e schemas.'
       },
       {
         name: 'assistant',
-        description: 'Assistente multimodal independente de provedor: tools, RAG, roteamento e chave própria.'
+        description: 'Chamadas a modelos de IA com suporte a tools e RAG.'
       },
       {
         name: 'ocr',
-        description: 'Extração de documentos guiada por schema, com evidências e revisão humana.'
+        description: 'Extração de dados a partir de documentos.'
       }
     ]
   },
@@ -334,13 +302,13 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     },
     {
       name: 'Estado e dados',
-      featured: ['TanStack Query', 'Redux'],
-      items: ['TanStack Virtual', 'Zustand', 'Context API']
+      featured: ['TanStack Query', 'Zustand'],
+      items: ['TanStack Virtual', 'Context API']
     },
     {
       name: 'Backend e IA',
-      featured: ['.NET', 'Node.js', 'Go', 'Python'],
-      items: ['C#', 'APIs REST', 'LLMs (function e tool calling)', 'SQL']
+      featured: ['.NET', 'Go'],
+      items: ['C#', 'APIs REST', 'Interfaces para IA (LLMs)', 'SQL']
     },
     {
       name: 'Qualidade e DevOps',
@@ -361,7 +329,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     {
       course: 'Tecnólogo em Análise e Desenvolvimento de Sistemas',
       school: 'Estácio',
-      period: '2022 – 2024'
+      period: 'ago 2022 – dez 2024'
     }
   ],
   certifications: [
@@ -385,44 +353,6 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     { name: 'Português', code: 'pt-BR', level: 'Nativo' },
     { name: 'Inglês', code: 'en', level: 'Intermediário, com leitura e escrita técnica' },
     { name: 'Espanhol', code: 'es', level: 'Intermediário' }
-  ],
-  pets: [
-    {
-      id: 'morcega',
-      name: 'Morcega',
-      kind: 'gata',
-      bio: 'A mais velha. Calma e observadora; costuma ficar por perto enquanto trabalho.'
-    },
-    {
-      id: 'banguela',
-      name: 'Banguela',
-      kind: 'gata',
-      bio: 'A menor das três. Independente e discreta.'
-    },
-    {
-      id: 'tomada',
-      name: 'Tomada',
-      kind: 'gato',
-      bio: 'O mais novo. Inquieto, circula o escritório o tempo todo.'
-    }
-  ],
-  interests: [
-    {
-      id: 'gincana',
-      title: 'Gincanas do RS',
-      text: 'Participo de gincanas no RS, no Setor de Diversas: localização de pessoas, documentos e informações com prazo curto.'
-    },
-    {
-      id: 'treino',
-      title: 'Academia',
-      text: 'Musculação cinco a seis vezes por semana.'
-    },
-    {
-      id: 'jogos',
-      title: 'RPG e jogos',
-      text: 'RPG de mesa, Baldur’s Gate 3, Dota 2 e Cities: Skylines.'
-    },
-    { id: 'cafe', title: 'Café', text: 'Café filtrado, diariamente.' }
   ]
 };
 
@@ -499,7 +429,7 @@ export const CONTACT_API = {
 
 export const SITE_ORIGIN = 'https://pherls.dev';
 /** Revisão pública do perfil. Atualize quando os fatos do currículo mudarem. */
-export const PROFILE_UPDATED = '2026-10-21';
+export const PROFILE_UPDATED = '2026-11-06';
 
 /** Normaliza texto para comparação insensível a acentos, caixa e pontuação de borda. */
 export function foldText(text: string): string {
@@ -509,14 +439,13 @@ export function foldText(text: string): string {
     .toLowerCase();
 }
 
-/** Extrai o conteúdo entre aspas ou crases (`"..."`, `'...'`, `“...”`, `` `...` ``). */
 /** Verifica se `needle` ocorre como palavra/termo inteiro dentro de `haystack` (ambos normalizados com `foldText`). */
 export function hasWholeWord(haystack: string, needle: string): boolean {
   const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp(`(?:^|[^a-z0-9#+.])${escaped}(?:$|[^a-z0-9#+.])`, 'i').test(haystack);
 }
 
-export interface FeaturedProjectResolvedLink {
+interface FeaturedProjectResolvedLink {
   kind: 'repo' | 'live';
   href: string;
 }

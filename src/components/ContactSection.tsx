@@ -33,7 +33,7 @@ function ContactForm({ email }: { email: string }) {
     };
 
     const openMailClient = () => {
-      const subject = encodeURIComponent(`Portfólio — ${payload.name}`);
+      const subject = encodeURIComponent(`Portfólio - ${payload.name}`);
       const body = encodeURIComponent(`Nome: ${payload.name}\nE-mail: ${payload.email}\n\n${payload.message}`);
       window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
       setStatus({ kind: 'fallback' });
@@ -168,10 +168,7 @@ export function ContactSection() {
       aria-labelledby="contato-titulo"
       className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24"
     >
-      <Reveal>
-        <p className="eyebrow">Vamos conversar?</p>
-      </Reveal>
-      <div className="mt-3 grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start">
+      <div className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start">
         <Reveal delay={0.04}>
           <h2 id="contato-titulo" className="display-wide text-[clamp(2.4rem,7vw,5rem)] leading-[0.9]">
             Entre em contato

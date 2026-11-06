@@ -5,7 +5,7 @@ import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
 import { handleSmoothScrollClick, Marked, Reveal } from './ui';
 
-/** Os stickers são decorativos e trazem o motion (drag/spring); carregam fora do bundle inicial. */
+/** Os stickers são decorativos; carregam fora do bundle inicial. */
 const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
 export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {

@@ -23,5 +23,5 @@ export const HISTORY_LIMIT = 6;
 export const SUGGESTED_QUESTIONS = [
   'Resumo rápido para recrutador',
   'Qual a stack principal?',
-  'O que ele fez com IA na Atlas?'
+  'Qual a experiência dele com IA?'
 ] as const;

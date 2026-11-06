@@ -87,8 +87,7 @@ export function generateJsonLdSchema(data: PortfolioData): object {
       name: project.name,
       description: project.tagline,
       codeRepository: project.repoUrl,
-      programmingLanguage: project.language,
-      version: project.version
+      programmingLanguage: project.language
     }
   ];
 
@@ -166,9 +165,11 @@ function buildExperienceMarkdown(data: PortfolioData): string[] {
 export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): string {
   const { profile, project, featuredProjects } = data;
   return [
-    `# ${profile.name} — ${profile.jobTitle}`,
+    `# ${profile.name} - ${profile.jobTitle}`,
     '',
     `> ${profile.headline} ${plainText(profile.summary)}`,
+    '',
+    ...profile.about,
     '',
     '## Páginas',
     mdItem('Portfólio', `${origin}/`, 'Página principal'),
@@ -202,12 +203,10 @@ export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): stri
       `- Stack: ${item.stack.join(', ')}`,
       ''
     ]),
-    `## Outro projeto: ${project.name} (${project.language}, ${project.version})`,
+    `## Outro projeto: ${project.name} (${project.language})`,
     project.tagline,
     mdItem('Repositório', project.repoUrl),
-    mdItem('Releases', project.releasesUrl, project.releasesPeriod),
-    ...project.cards.map((card) => `- ${card.title}: ${card.text}`),
-    `- Pacotes: ${project.modules.map((m) => `${m.name} (${m.description})`).join('; ')}`,
+    `- Módulos: ${project.modules.map((m) => `${m.name} (${m.description})`).join('; ')}`,
     '',
     '## Habilidades',
     ...data.skills.map((group) => `- ${group.name}: ${skillNames(group).join(', ')}`),
@@ -217,16 +216,12 @@ export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): stri
     '',
     '## Certificações',
     ...data.certifications.map((c) =>
-      c.href ? mdItem(`${c.name} — ${c.issuer} (${c.year})`, c.href) : `- ${c.name} — ${c.issuer} (${c.year})`
+      c.href ? mdItem(`${c.name} - ${c.issuer} (${c.year})`, c.href) : `- ${c.name} - ${c.issuer} (${c.year})`
     ),
     `- Outros cursos: ${data.otherCourses.join(', ')}`,
     '',
     '## Idiomas',
-    ...data.languages.map((l) => `- ${l.name}: ${l.level}`),
-    '',
-    '## Bastidores',
-    ...data.interests.map((i) => `- ${i.title}: ${i.text}`),
-    ...data.pets.map((p) => `- ${p.name} (${p.kind}): ${p.bio}`)
+    ...data.languages.map((l) => `- ${l.name}: ${l.level}`)
   ].join('\n');
 }
 
@@ -240,7 +235,7 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
   const experience = data.experiences
     .map((exp) => {
       const span = experienceSpan(exp);
-      return `<li><strong>${escHtml(exp.company)}</strong> — ${escHtml(formatRoleTimeline(exp))} (${escHtml(formatPeriod(span.start, span.end))}). ${escHtml(exp.summary)}</li>`;
+      return `<li><strong>${escHtml(exp.company)}</strong> - ${escHtml(formatRoleTimeline(exp))} (${escHtml(formatPeriod(span.start, span.end))}). ${escHtml(exp.summary)}</li>`;
     })
     .join('');
   const projects = [
@@ -249,10 +244,10 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
       const title = escHtml(item.name);
       const body = escHtml(item.tagline);
       return primary
-        ? `<li><a class="link" href="${escHtml(primary)}">${title}</a> — ${body}</li>`
-        : `<li><strong>${title}</strong> — ${body}</li>`;
+        ? `<li><a class="link" href="${escHtml(primary)}">${title}</a> - ${body}</li>`
+        : `<li><strong>${title}</strong> - ${body}</li>`;
     }),
-    `<li><a class="link" href="${escHtml(project.repoUrl)}">${escHtml(project.name)}</a> — ${escHtml(project.tagline)}</li>`
+    `<li><a class="link" href="${escHtml(project.repoUrl)}">${escHtml(project.name)}</a> - ${escHtml(project.tagline)}</li>`
   ].join('');
 
   return `<main id="conteudo" class="seo-only">

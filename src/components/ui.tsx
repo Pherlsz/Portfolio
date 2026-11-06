@@ -175,23 +175,17 @@ export function Marked({ text }: { text: string }) {
 
 export function SectionHeading({
   id,
-  eyebrow,
-  title,
-  intro
+  title
 }: {
   id: string;
-  eyebrow: string;
   title: string;
-  intro?: string;
 }) {
   return (
     <Reveal className="mb-10 max-w-3xl sm:mb-14">
       <header>
-        <p className="eyebrow">{eyebrow}</p>
-        <h2 id={id} className="display mt-2 text-[clamp(2rem,4.2vw,3rem)] leading-[1.02]">
+        <h2 id={id} className="display text-[clamp(2rem,4.2vw,3rem)] leading-[1.02]">
           {title}
         </h2>
-        {intro && <p className="mt-4 text-lg text-ink-soft">{intro}</p>}
       </header>
     </Reveal>
   );

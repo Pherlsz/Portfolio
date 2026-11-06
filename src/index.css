@@ -73,7 +73,6 @@
 }
 
 @theme inline {
-  --color-neutral-700: var(--neutral-700);
   --color-neutral-950: var(--neutral-950);
 
   --color-paper: var(--paper);
@@ -869,12 +868,6 @@
 
   .experience-details[open] .experience-chevron {
     transform: rotate(180deg);
-  }
-
-  .name-band .eyebrow,
-  .name-band .btn-ghost {
-    color: var(--on-band);
-    border-color: var(--on-band);
   }
 
   .lid li:has([data-pressed="true"]) {

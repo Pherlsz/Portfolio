@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { Download, X } from 'lucide-react';
+import { Download, Printer, X } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
+import { CvDocument } from './CvDocument';
 
 export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const frameRef = useRef<HTMLIFrameElement>(null);
   const { profile } = DEFAULT_PORTFOLIO_DATA;
 
   useEffect(() => {
@@ -16,18 +16,6 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
       closeRef.current?.focus();
     }
     if (!open && dialog.open) dialog.close();
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onBlur = () => {
-      window.setTimeout(() => {
-        const dialog = dialogRef.current;
-        if (dialog?.open && document.activeElement === frameRef.current) dialog.focus();
-      }, 0);
-    };
-    window.addEventListener('blur', onBlur);
-    return () => window.removeEventListener('blur', onBlur);
   }, [open]);
 
   const requestClose = () => {
@@ -55,10 +43,19 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
             Currículo
           </h2>
           <p id="cv-preview-desc" className="mt-1 text-sm text-ink-soft">
-            Visualização do PDF. Baixar PDF salva este mesmo arquivo.
+            Gerado dos mesmos dados do portfólio.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="/cv"
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-ghost min-h-11 px-3 text-sm"
+          >
+            <Printer className="size-4" aria-hidden="true" />
+            Imprimir / A4
+          </a>
           <a
             href={profile.cvUrl}
             download="Pedro-Henrique-Lopes-CV.pdf"
@@ -78,12 +75,9 @@ export function CvPreviewModal({ open, onClose }: { open: boolean; onClose: () =
           </button>
         </div>
       </header>
-      <iframe
-        ref={frameRef}
-        title="Currículo de Pedro Henrique Lopes em PDF"
-        src={`${profile.cvUrl}#navpanes=0&view=FitH`}
-        className="min-h-0 w-full flex-1 border-0 bg-neutral-700"
-      />
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-surface p-3 sm:p-6">
+        <CvDocument embedded />
+      </div>
     </dialog>
   );
 }

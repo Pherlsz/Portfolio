@@ -1,4 +1,5 @@
-import { ArrowUpRight, Github, X } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, ChevronDown, Github, X } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA, featuredProjectLinks, type FeaturedProject } from '../data/portfolioData';
 import { stackMatchesSkill, textMatchesSkill } from '../utils/skillUsage';
 import { CTA } from './CTA';
@@ -9,17 +10,12 @@ function GymkhanaCorePoster() {
 
   return (
     <div className="relative isolate flex aspect-[16/10] flex-col justify-between overflow-hidden bg-poster p-5 text-poster-ink">
-      <div className="flex items-start justify-between gap-4">
-        <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-marker">Biblioteca</p>
-        <p className="font-mono text-[0.7rem] text-poster-ink/80">{project.version}</p>
-      </div>
+      <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-marker">Biblioteca</p>
       <p className="display-wide text-[1.55rem] uppercase leading-[0.86]">
         Gymkhana
         <span className="block">Core</span>
       </p>
-      <p className="font-mono text-[0.7rem] text-poster-ink/80">
-        {project.language} · {project.spec}
-      </p>
+      <p className="font-mono text-[0.7rem] text-poster-ink/80">{project.language}</p>
     </div>
   );
 }
@@ -37,11 +33,11 @@ function FeaturedProjectLinkRow({ project }: { project: FeaturedProject }) {
             href={link.href}
             target="_blank"
             rel="noreferrer"
-            aria-label={`Código no GitHub: ${project.name}`}
+            aria-label={`GitHub: ${project.name}`}
             className="min-h-11 px-4"
             icon={<Github className="size-4" aria-hidden="true" />}
           >
-            Código no GitHub
+            GitHub
           </CTA>
         ) : (
           <CTA
@@ -71,6 +67,7 @@ export function ProjectSection({
 }) {
   const { featuredProjects, project } = DEFAULT_PORTFOLIO_DATA;
   const featured = featuredProjects[0];
+  const [coreOpen, setCoreOpen] = useState(false);
 
   const featuredMatched =
     selectedSkill && featured
@@ -78,14 +75,18 @@ export function ProjectSection({
         textMatchesSkill(`${featured.name} ${featured.tagline}`, selectedSkill)
       : false;
 
-  const coreMatched = selectedSkill
+  const coreDetailsMatched = selectedSkill
     ? textMatchesSkill(
-        `${project.language} ${project.name} ${project.tagline} ${project.modules
-          .map((m) => `${m.name} ${m.description}`)
-          .join(' ')}`,
+        project.modules.map((m) => `${m.name} ${m.description}`).join(' '),
         selectedSkill
       )
     : false;
+
+  const coreMatched = selectedSkill
+    ? coreDetailsMatched || textMatchesSkill(`${project.language} ${project.name} ${project.tagline}`, selectedSkill)
+    : false;
+
+  const isCoreOpen = coreOpen || coreDetailsMatched;
 
   return (
     <section
@@ -93,7 +94,7 @@ export function ProjectSection({
       className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-28"
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <SectionHeading id="projeto-titulo" eyebrow="Trabalho" title="Projetos" />
+        <SectionHeading id="projeto-titulo" title="Projetos" />
         {selectedSkill && (
           <div className="mb-10 flex items-center gap-2 sm:mb-14">
             <span className="eyebrow">Filtro ativo:</span>
@@ -111,9 +112,8 @@ export function ProjectSection({
 
       {featured && (
         <Reveal>
-          <h3 className="display text-xl">Em destaque</h3>
           <article
-            className={`mt-4 grid overflow-hidden rounded-[1.75rem] border bg-surface transition-all lg:grid-cols-2 ${
+            className={`grid overflow-hidden rounded-[1.75rem] border bg-surface transition-all lg:grid-cols-2 ${
               featuredMatched ? 'border-ink ring-2 ring-marker' : 'border-line'
             }`}
           >
@@ -121,15 +121,14 @@ export function ProjectSection({
               src={featured.image}
               alt={`Captura de tela da interface do projeto ${featured.name}`}
               width={960}
-              height={540}
+              height={576}
               loading="lazy"
               decoding="async"
               className="aspect-[16/10] h-full w-full object-cover object-left-top"
             />
             <div className="flex flex-col justify-between gap-5 p-5 sm:p-6">
               <div>
-                <p className="eyebrow">{featured.kicker}</p>
-                <h4 className="display mt-1 text-2xl">{featured.name}</h4>
+                <h3 className="display text-2xl">{featured.name}</h3>
                 <p className="mt-2 text-[0.9375rem] text-ink-soft">{featured.tagline}</p>
               </div>
               <div className="flex flex-col gap-3">
@@ -173,50 +172,87 @@ export function ProjectSection({
         </Reveal>
       )}
 
-      <Reveal delay={0.08} className="mt-14">
-        <h3 className="display text-xl">Outros projetos</h3>
+      <Reveal delay={0.08} className="mt-8">
         <article
-          className={`mt-4 overflow-hidden rounded-[1.75rem] border bg-surface transition-all sm:grid sm:grid-cols-[minmax(0,16rem)_1fr] ${
+          className={`overflow-hidden rounded-[1.75rem] border bg-surface transition-all ${
             coreMatched ? 'border-ink ring-2 ring-marker' : 'border-line'
           }`}
         >
-          <GymkhanaCorePoster />
-          <div className="flex flex-col justify-between gap-5 p-5 sm:p-6">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="eyebrow">Biblioteca em Go</p>
-                <button
-                  type="button"
-                  aria-pressed={selectedSkill === project.language}
-                  onClick={() =>
-                    onSelectSkill(selectedSkill === project.language ? null : project.language)
-                  }
-                  className={`cursor-pointer rounded-xs font-mono text-[0.75rem] px-1 -mx-1 transition-colors ${
-                    selectedSkill === project.language
-                      ? 'bg-marker text-on-marker'
-                      : 'text-muted underline decoration-line underline-offset-4 hover:decoration-ink hover:text-ink'
-                  }`}
-                >
-                  {project.language}
-                </button>
+          <div className="sm:grid sm:grid-cols-[minmax(0,16rem)_1fr]">
+            <GymkhanaCorePoster />
+            <div className="flex flex-col justify-between gap-5 p-5 sm:p-6">
+              <div>
+                <h3 className="display text-2xl">{project.name}</h3>
+                <p className="mt-2 text-[0.9375rem] text-ink-soft">{project.tagline}</p>
               </div>
-              <h4 className="display mt-1 text-2xl">{project.name}</h4>
-              <p className="mt-2 text-[0.9375rem] text-ink-soft">{project.tagline}</p>
-            </div>
-            <div className="flex min-h-11 flex-wrap items-center gap-2">
-              <CTA
-                variant="secondary"
-                href={project.repoUrl}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`Código no GitHub: ${project.name}`}
-                className="min-h-11 px-4"
-                icon={<Github className="size-4" aria-hidden="true" />}
-              >
-                Código no GitHub
-              </CTA>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                  <button
+                    type="button"
+                    aria-pressed={selectedSkill === project.language}
+                    onClick={() =>
+                      onSelectSkill(selectedSkill === project.language ? null : project.language)
+                    }
+                    className={`cursor-pointer rounded-xs font-mono text-[0.75rem] px-1 -mx-1 transition-colors ${
+                      selectedSkill === project.language
+                        ? 'bg-marker text-on-marker'
+                        : 'text-muted underline decoration-line underline-offset-4 hover:decoration-ink hover:text-ink'
+                    }`}
+                  >
+                    {project.language}
+                  </button>
+                </div>
+                <div className="flex min-h-11 flex-wrap items-center gap-2">
+                  <CTA
+                    variant="secondary"
+                    href={project.repoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`GitHub: ${project.name}`}
+                    className="min-h-11 px-4"
+                    icon={<Github className="size-4" aria-hidden="true" />}
+                  >
+                    GitHub
+                  </CTA>
+                </div>
+              </div>
             </div>
           </div>
+
+          <details
+            className="experience-details border-t border-line"
+            open={isCoreOpen}
+            onToggle={(event) => setCoreOpen(event.currentTarget.open)}
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-3.5 outline-offset-[-4px] transition-colors hover:bg-paper/60 sm:px-6 [&::-webkit-details-marker]:hidden">
+              <span className="text-sm font-semibold text-ink-soft">Ver módulos</span>
+              <span className="experience-chevron inline-flex size-9 shrink-0 items-center justify-center border border-line bg-paper">
+                <ChevronDown className="size-4" aria-hidden="true" />
+                <span className="sr-only">Ver ou ocultar módulos de {project.name}</span>
+              </span>
+            </summary>
+
+            <div className="border-t border-line px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+              <dl className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {project.modules.map((mod) => {
+                  const matched = selectedSkill
+                    ? textMatchesSkill(`${mod.name} ${mod.description}`, selectedSkill)
+                    : false;
+                  return (
+                    <div
+                      key={mod.name}
+                      className={`rounded-xl border px-3.5 py-2.5 transition-colors ${
+                        matched ? 'border-ink bg-marker/20' : 'border-line bg-paper/60'
+                      }`}
+                    >
+                      <dt className="font-mono text-xs font-bold text-ink">{mod.name}</dt>
+                      <dd className="mt-0.5 text-xs leading-relaxed text-ink-soft">{mod.description}</dd>
+                    </div>
+                  );
+                })}
+              </dl>
+            </div>
+          </details>
         </article>
       </Reveal>
     </section>

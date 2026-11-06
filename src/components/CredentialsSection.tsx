@@ -23,7 +23,7 @@ export function CredentialsSection({
       aria-labelledby="formacao-titulo"
       className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-28"
     >
-      <SectionHeading id="formacao-titulo" eyebrow="Ferramentas, estudo e idiomas" title="Formação e stack" />
+      <SectionHeading id="formacao-titulo" title="Formação e stack" />
 
       <div className="grid gap-14 lg:grid-cols-[1.4fr_1fr]">
         <div>
