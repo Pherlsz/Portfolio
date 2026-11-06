@@ -2,12 +2,7 @@ import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } fro
 import { ArrowUpRight, Briefcase, Check, Copy, Loader2, MessageSquare, RotateCcw, Send, Sparkles, X } from 'lucide-react';
 import { CTA } from './CTA';
 import { smoothScrollToSection } from './ui';
-import {
-  JOB_DESCRIPTION_LIMIT,
-  QUESTION_LIMIT,
-  type ChatMode
-} from '../utils/chatGuardrails';
-import { presetChipText, SUGGESTED_PRESET_IDS } from '../utils/presetQuestions';
+import { JOB_DESCRIPTION_LIMIT, QUESTION_LIMIT, SUGGESTED_QUESTIONS, type ChatMode } from '../utils/chat';
 import { AiReplyBadge } from './AiReplyBadge';
 import type { AssistantSession, ChatAction } from '../utils/assistantSession';
 
@@ -209,18 +204,6 @@ export function AssistantPanel({
     setJobQuestion('');
   };
 
-  const sendFollowUp = (text: string) => {
-    if (mode === 'jobfit' && activeJob) {
-      void send(text, 'jobfit', { job: activeJob });
-      return;
-    }
-    void send(text, 'chat');
-  };
-
-  const lastModelId = [...messages]
-    .reverse()
-    .find((msg) => msg.role === 'model' && msg.id !== 'welcome')?.id;
-
   const tabClass = (active: boolean) =>
     `inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 text-sm font-semibold transition-colors short-mobile:gap-1 short-mobile:px-2 short-mobile:text-xs ${
       active ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink'
@@ -340,21 +323,6 @@ export function AssistantPanel({
                   >
                     {action.label}
                     <ArrowUpRight className="size-3.5" aria-hidden="true" />
-                  </button>
-                ))}
-              </div>
-            )}
-            {msg.role === 'model' && !isLoading && msg.id === lastModelId && msg.followUps && msg.followUps.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {msg.followUps.map((followUp) => (
-                  <button
-                    key={followUp}
-                    type="button"
-                    onClick={() => sendFollowUp(followUp)}
-                    disabled={isLoading}
-                    className="inline-flex min-h-11 items-center border border-dashed border-control px-3 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
-                  >
-                    {followUp}
                   </button>
                 ))}
               </div>
@@ -480,15 +448,15 @@ export function AssistantPanel({
         <div className="shrink-0 border-t border-line p-4">
           {messages.length <= 1 && (
             <div className="flex gap-1.5 overflow-x-auto pb-3 [scrollbar-width:none]">
-              {SUGGESTED_PRESET_IDS.map((id) => (
+              {SUGGESTED_QUESTIONS.map((text) => (
                 <button
-                  key={id}
+                  key={text}
                   type="button"
-                  onClick={() => send(presetChipText(id), 'chat', { presetId: id })}
+                  onClick={() => send(text, 'chat')}
                   disabled={isLoading}
                   className="shrink-0 whitespace-nowrap border border-line px-3 py-1.5 text-sm text-ink-soft hover:border-ink hover:text-ink disabled:opacity-50"
                 >
-                  {presetChipText(id)}
+                  {text}
                 </button>
               ))}
             </div>

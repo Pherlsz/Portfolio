@@ -1,5 +1,5 @@
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
-import { StaticSticker, type StickerId } from './stickers';
+import { StaticSticker, type StickerId } from './stickerArt';
 import { Reveal, SectionHeading } from './ui';
 
 export function AboutSection() {

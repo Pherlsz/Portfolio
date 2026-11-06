@@ -26,7 +26,7 @@ const AI_AND_SEARCH_AGENTS = [
   'Applebot-Extended'
 ] as const;
 
-const SITEMAP_PATHS = ['/', '/cv', '/llms.txt', '/ai.json', '/pedro.md', '/AGENTS.md', '/resume.json'] as const;
+const SITEMAP_PATHS = ['/', '/cv', '/llms.txt'] as const;
 const PROFILE_IMAGE_PATH = '/og.png';
 
 function escHtml(value: string): string {
@@ -174,10 +174,6 @@ export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): stri
     mdItem('Portfólio', `${origin}/`, 'Página principal'),
     mdItem('Currículo HTML', `${origin}/cv`, 'Versão para impressão'),
     mdItem('Currículo PDF', `${origin}${profile.cvUrl}`, 'Download direto'),
-    mdItem('ai.json', `${origin}/ai.json`, 'Perfil estruturado para agentes'),
-    mdItem('pedro.md', `${origin}/pedro.md`, 'Perfil em Markdown'),
-    mdItem('AGENTS.md', `${origin}/AGENTS.md`, 'Como agentes devem ler este site e enviar contato'),
-    mdItem('resume.json', `${origin}/resume.json`, 'Currículo em JSON'),
     mdItem('Mapa do site', `${origin}/sitemap.xml`),
     '',
     '## Contato',
@@ -234,197 +230,6 @@ export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): stri
   ].join('\n');
 }
 
-export function generatePedroMd(data: PortfolioData, origin = SITE_ORIGIN): string {
-  const { profile, project, featuredProjects } = data;
-  return [
-    `# ${profile.name}`,
-    '',
-    `> Status: publicado. Gerado dos dados públicos do portfólio em ${origin}/ (revisão ${PROFILE_UPDATED}). Não é rascunho.`,
-    '',
-    `**${profile.jobTitle}** · ${profile.location}`,
-    '',
-    profile.headline,
-    '',
-    plainText(profile.summary),
-    '',
-    ...profile.about,
-    '',
-    `- Status profissional: ${profile.status}`,
-    `- ${availabilityLine(profile)}`,
-    '',
-    '## Experiência',
-    ...buildExperienceMarkdown(data),
-    '## Projetos',
-    ...featuredProjects.flatMap((item) => [
-      `### ${item.name}`,
-      item.tagline,
-      ...(item.href ? [`- App: ${item.href}`] : []),
-      ...(item.repoUrl ? [`- Repositório: ${item.repoUrl}`] : []),
-      `- Stack: ${item.stack.join(', ')}`,
-      ''
-    ]),
-    `### ${project.name}`,
-    `${project.tagline} (${project.language}, ${project.version})`,
-    `- Repositório: ${project.repoUrl}`,
-    '',
-    '## Formação e certificações',
-    ...data.education.map((item) => `- ${item.course}, ${item.school} (${item.period})`),
-    ...data.certifications.map((item) => `- ${item.name}, ${item.issuer} (${item.year})`),
-    '',
-    '## Habilidades',
-    ...data.skills.map((group) => `- ${group.name}: ${skillNames(group).join(', ')}`),
-    '',
-    '## Idiomas',
-    ...data.languages.map((item) => `- ${item.name}: ${item.level}`),
-    '',
-    '## Contato',
-    `- E-mail: ${profile.email}`,
-    `- LinkedIn: ${profile.linkedin}`,
-    `- GitHub: ${profile.github}`,
-    `- CV em PDF: ${origin}${profile.cvUrl}`,
-    '',
-    '## Outros arquivos',
-    `- ${origin}/llms.txt`,
-    `- ${origin}/ai.json`,
-    `- ${origin}/resume.json`,
-    `- ${origin}/AGENTS.md`,
-    ''
-  ].join('\n');
-}
-
-export function generateAgentsMd(origin = SITE_ORIGIN): string {
-  return [
-    '# Instruções para agentes',
-    '',
-    `> Status: publicado. Instruções estáveis para quem lê ${origin}/ (revisão ${PROFILE_UPDATED}). Não é rascunho.`,
-    '',
-    'Este site é o portfólio público de Pedro Henrique Lopes, Software Engineer · Frontend.',
-    '',
-    '## O que ler',
-    '',
-    `- [llms.txt](${origin}/llms.txt) — perfil longo em texto, formato llmstxt.org.`,
-    `- [pedro.md](${origin}/pedro.md) — o mesmo perfil em Markdown.`,
-    `- [resume.json](${origin}/resume.json) — currículo em JSON (campos no espírito do JSON Resume).`,
-    `- [ai.json](${origin}/ai.json) — perfil estruturado, contato de API e JSON-LD.`,
-    `- [sitemap.xml](${origin}/sitemap.xml) — URLs públicas.`,
-    '',
-    'Prefira esses arquivos ao HTML da página. A home é uma SPA: sem JavaScript o primeiro byte traz um resumo; o restante da interface só aparece depois do bundle.',
-    '',
-    '## Fatos',
-    '',
-    'Use somente o que estiver nestes arquivos ou na página. Não invente métricas, datas, senioridade, formato de trabalho, pretensão salarial ou disponibilidade.',
-    '',
-    '## Contato',
-    '',
-    `Pessoas e agentes enviam recado com \`${CONTACT_API.method} ${origin}${CONTACT_API.path}\`.`,
-    `\`Content-Type: ${CONTACT_API.contentType}\`.`,
-    '',
-    '```json',
-    '{',
-    '  "name": "Nome do remetente",',
-    '  "email": "remetente@dominio.com",',
-    '  "message": "O que o remetente pediu para dizer.",',
-    '  "source": "agent"',
-    '}',
-    '```',
-    '',
-    `${CONTACT_API.description} Campos: name (${CONTACT_API.body.name}); email (${CONTACT_API.body.email}); message (${CONTACT_API.body.message}); source (${CONTACT_API.body.source}).`,
-    'Resposta de sucesso: `200` com `{ "ok": true }`.',
-    '',
-    'Não escreva em nome do Pedro e não complete a mensagem com fatos que o remetente não pediu.',
-    '',
-    '## O que não fazer',
-    '',
-    '- Não trate HTML de um caminho desconhecido como documento. Fora da lista acima, a resposta pode ser o shell da SPA.',
-    '- Não contorne Cloudflare, autenticação ou limite de taxa.',
-    '- Não envie várias mensagens de contato para testar o endpoint.',
-    ''
-  ].join('\n');
-}
-
-function yearSpan(period: string): { startDate?: string; endDate?: string } {
-  const years = period.match(/\d{4}/g) ?? [];
-  if (!years[0]) return {};
-  return { startDate: years[0], endDate: years[1] ?? years[0] };
-}
-
-export function generateResumeJson(data: PortfolioData, origin = SITE_ORIGIN) {
-  const { profile, project, featuredProjects } = data;
-  return {
-    meta: {
-      canonical: `${origin}/resume.json`,
-      dateModified: PROFILE_UPDATED,
-      note: 'Publicado. Currículo gerado dos dados públicos do portfólio, com campos no espírito do JSON Resume (basics, work, education, skills, languages, certificates, projects). Não é um arquivo editado à parte nem um rascunho.'
-    },
-    basics: {
-      name: profile.name,
-      label: profile.jobTitle,
-      image: `${SITE_ORIGIN}/og.png`,
-      email: profile.email,
-      url: `${origin}/`,
-      summary: `${profile.headline} ${plainText(profile.summary)}`,
-      location: {
-        city: 'Porto Alegre',
-        region: 'RS',
-        countryCode: 'BR'
-      },
-      profiles: [
-        { network: 'LinkedIn', url: profile.linkedin },
-        { network: 'GitHub', username: 'Pherlsz', url: profile.github }
-      ]
-    },
-    work: data.experiences.flatMap((exp) =>
-      exp.roles.map((role, index) => ({
-        name: exp.company,
-        location: exp.location,
-        position: role.title,
-        startDate: role.start,
-        endDate: role.end,
-        ...(index === 0
-          ? {
-              summary: exp.summary,
-              highlights: exp.highlights.map((item) => (item.metric ? `${item.metric}: ${item.text}` : item.text))
-            }
-          : {})
-      }))
-    ),
-    education: data.education.map((item) => ({
-      institution: item.school,
-      area: item.course,
-      ...yearSpan(item.period)
-    })),
-    skills: data.skills.map((group) => ({
-      name: group.name,
-      keywords: skillNames(group)
-    })),
-    languages: data.languages.map((item) => ({
-      language: item.name,
-      fluency: item.level
-    })),
-    certificates: data.certifications.map((item) => ({
-      name: item.name,
-      issuer: item.issuer,
-      date: item.year,
-      ...(item.href ? { url: item.href } : {})
-    })),
-    projects: [
-      ...featuredProjects.map((item) => ({
-        name: item.name,
-        description: item.tagline,
-        ...(item.href?.trim() ? { url: item.href.trim() } : {}),
-        ...(item.repoUrl?.trim() ? { codeRepository: item.repoUrl.trim() } : {}),
-        keywords: item.stack
-      })),
-      {
-        name: project.name,
-        description: project.tagline,
-        url: project.repoUrl,
-        keywords: [project.language, project.version]
-      }
-    ]
-  };
-}
-
 /** Resumo no HTML inicial. O React substitui `#root` quando o JavaScript roda. */
 export function generateIndexableHomeHtml(data: PortfolioData): string {
   const { profile, project, featuredProjects } = data;
@@ -478,10 +283,6 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
         <p class="mt-4 max-w-3xl text-ink-soft">${escHtml(availabilityLine(profile))}</p>
         <ul class="mt-4 list-disc space-y-3 pl-4">
           <li><a class="link" href="/llms.txt">/llms.txt</a></li>
-          <li><a class="link" href="/ai.json">/ai.json</a></li>
-          <li><a class="link" href="/pedro.md">/pedro.md</a></li>
-          <li><a class="link" href="/AGENTS.md">/AGENTS.md</a></li>
-          <li><a class="link" href="/resume.json">/resume.json</a></li>
           <li><a class="link" href="/cv">/cv</a></li>
         </ul>
       </section>

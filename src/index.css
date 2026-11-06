@@ -270,14 +270,12 @@
 
 @layer components {
   dialog.cv-preview:not([open]),
-  dialog.assistant-dialog:not([open]),
-  dialog.inspector-dialog:not([open]) {
+  dialog.assistant-dialog:not([open]) {
     display: none;
   }
 
   dialog.cv-preview,
-  dialog.assistant-dialog,
-  dialog.inspector-dialog {
+  dialog.assistant-dialog {
     background: var(--surface);
     color: var(--ink);
     opacity: 0;
@@ -290,8 +288,7 @@
   }
 
   dialog.cv-preview[open],
-  dialog.assistant-dialog[open],
-  dialog.inspector-dialog[open] {
+  dialog.assistant-dialog[open] {
     opacity: 1;
     transform: scale(1);
     transition-duration: 200ms;
@@ -299,8 +296,7 @@
 
   @starting-style {
     dialog.cv-preview[open],
-    dialog.assistant-dialog[open],
-    dialog.inspector-dialog[open] {
+    dialog.assistant-dialog[open] {
       opacity: 0;
       transform: scale(0.95);
     }
@@ -334,10 +330,8 @@
   @media (prefers-reduced-motion: reduce) {
     dialog.cv-preview,
     dialog.assistant-dialog,
-    dialog.inspector-dialog,
     dialog.cv-preview[open],
-    dialog.assistant-dialog[open],
-    dialog.inspector-dialog[open] {
+    dialog.assistant-dialog[open] {
       opacity: 1;
       transform: none;
       transition: none;
@@ -1015,6 +1009,11 @@
 }
 
 @media print {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
   :root,
   html.dark {
     color-scheme: light;

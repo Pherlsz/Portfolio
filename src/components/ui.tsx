@@ -1,11 +1,37 @@
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { Check, Copy } from 'lucide-react';
-import { animate, motion, useReducedMotion } from 'motion/react';
 
-const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
+/** Mesmo easing de `cubic-bezier(0.23, 1, 0.32, 1)` (easeOutQuint). */
+const EASE_OUT_CSS = 'cubic-bezier(0.23, 1, 0.32, 1)';
+const easeOutQuint = (t: number) => 1 - (1 - t) ** 5;
 const DEFAULT_SCROLL_OFFSET_PX = 16;
 
 let activeScrollAnimation: { stop: () => void } | null = null;
+
+/** Interpola de 0 a 1 em `duration` segundos via rAF, sem depender de biblioteca de animação. */
+function tween(duration: number, onUpdate: (progress: number) => void, onComplete: () => void) {
+  let frame = 0;
+  let stopped = false;
+  const start = performance.now();
+  const step = (now: number) => {
+    if (stopped) return;
+    const t = Math.min(1, (now - start) / (duration * 1000));
+    onUpdate(easeOutQuint(t));
+    if (t < 1) frame = requestAnimationFrame(step);
+    else onComplete();
+  };
+  frame = requestAnimationFrame(step);
+  return {
+    stop: () => {
+      stopped = true;
+      cancelAnimationFrame(frame);
+    }
+  };
+}
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
 
 export function getStickyHeaderOffset(customOffset = DEFAULT_SCROLL_OFFSET_PX): number {
   const header = document.querySelector('header');
@@ -32,7 +58,7 @@ export function smoothScrollToSection(targetIdOrHash: string, customOffset = DEF
   const targetTop = computeTargetTop();
   const startTop = window.scrollY;
   const distance = Math.abs(targetTop - startTop);
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reducedMotion = prefersReducedMotion();
 
   history.pushState(null, '', `#${id}`);
 
@@ -60,20 +86,15 @@ export function smoothScrollToSection(targetIdOrHash: string, customOffset = DEF
   window.addEventListener('touchstart', cancelOnUserInput, { passive: true });
   window.addEventListener('keydown', cancelOnUserInput, { passive: true });
 
-  activeScrollAnimation = animate(0, 1, {
-    duration,
-    ease: EASE_OUT,
-    onUpdate: (progress) => {
-      const currentTarget = computeTargetTop();
-      const nextTop = startTop + (currentTarget - startTop) * progress;
-      window.scrollTo({ top: nextTop, behavior: 'instant' });
-    },
-    onComplete: () => {
-      cleanupListeners();
-      activeScrollAnimation = null;
-      window.scrollTo({ top: computeTargetTop(), behavior: 'instant' });
-      node.focus({ preventScroll: true });
-    }
+  activeScrollAnimation = tween(duration, (progress) => {
+    const currentTarget = computeTargetTop();
+    const nextTop = startTop + (currentTarget - startTop) * progress;
+    window.scrollTo({ top: nextTop, behavior: 'instant' });
+  }, () => {
+    cleanupListeners();
+    activeScrollAnimation = null;
+    window.scrollTo({ top: computeTargetTop(), behavior: 'instant' });
+    node.focus({ preventScroll: true });
   });
 }
 
@@ -107,22 +128,39 @@ export function Reveal({
   y?: number;
   className?: string;
 }) {
-  const reduceMotion = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const [reduceMotion] = useState(prefersReducedMotion);
+  const [shown, setShown] = useState(() => reduceMotion || typeof IntersectionObserver === 'undefined');
 
-  if (reduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
+  useEffect(() => {
+    if (shown) return;
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShown(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.14, rootMargin: '0px 0px -40px 0px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [shown]);
+
+  const style: CSSProperties | undefined = reduceMotion
+    ? undefined
+    : {
+        opacity: shown ? 1 : 0,
+        transform: shown ? 'none' : `translateY(${y}px)`,
+        transition: `opacity 0.55s ${EASE_OUT_CSS} ${delay}s, transform 0.55s ${EASE_OUT_CSS} ${delay}s`
+      };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.14, margin: '0px 0px -40px 0px' }}
-      transition={{ duration: 0.55, delay, ease: EASE_OUT }}
-      className={className}
-    >
+    <div ref={ref} data-reveal="" style={style} className={className}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 

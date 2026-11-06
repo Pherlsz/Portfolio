@@ -130,12 +130,12 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     jobTitle: 'Software Engineer · Frontend',
     headline: 'Transformo fluxos complexos em interfaces rápidas, acessíveis e fáceis de manter.',
     summary:
-      'Mais de 4 anos desenvolvendo e evoluindo aplicações web em produção com React, Next.js e TypeScript: contribuição em Design System com ==30+ componentes (WCAG 2.1 AA)==, listagens com ==5.000+ registros== virtualizadas e interfaces para funcionalidades baseadas em LLMs.',
+      'Mais de 5 anos desenvolvendo e evoluindo aplicações web em produção com React, Next.js e TypeScript: contribuição em Design System com ==30+ componentes (WCAG 2.1 AA)==, listagens com ==5.000+ registros== virtualizadas e interfaces para funcionalidades baseadas em LLMs.',
     trustCopy:
-      'Mais de 4 anos construindo frontend em produção, de estágio a júnior, com foco em componentização, performance, testes automatizados e interfaces para produtos com IA. Aberto a vagas pleno quando houver fit.',
+      'Mais de 5 anos construindo frontend em produção, de estágio a Software Engineer. Busco posições Pleno em frontend, com foco em Design Systems, performance e produtos com IA.',
     status: 'Aberto a oportunidades',
     location: 'Porto Alegre, RS',
-    seniority: 'Júnior/Pleno',
+    seniority: 'Pleno',
     workMode: 'Remoto, ou híbrido/presencial em Porto Alegre',
     salary: 'A combinar',
     email: 'phpherls@gmail.com',
@@ -476,6 +476,13 @@ export function availabilityLine(profile: PortfolioData['profile']): string {
   return `Senioridade ${profile.seniority}. ${profile.workMode}. Pretensão salarial: ${profile.salary}.`;
 }
 
+/** Limites do formulário e da API de contato (validados no servidor com zod). */
+export const CONTACT_LIMITS = {
+  name: { min: 2, max: 80 },
+  email: { max: 120 },
+  message: { min: 10, max: 2000 }
+} as const;
+
 export const CONTACT_API = {
   path: '/api/contact',
   method: 'POST',
@@ -483,9 +490,9 @@ export const CONTACT_API = {
   description:
     'Aceita recados de pessoas e de agentes de IA. Não invente o conteúdo: envie só o que o remetente pediu para dizer.',
   body: {
-    name: 'string, 2 a 80 caracteres',
+    name: `string, ${CONTACT_LIMITS.name.min} a ${CONTACT_LIMITS.name.max} caracteres`,
     email: 'string, e-mail válido do remetente',
-    message: 'string, 10 a 2000 caracteres',
+    message: `string, ${CONTACT_LIMITS.message.min} a ${CONTACT_LIMITS.message.max} caracteres`,
     source: '"form" | "agent" (opcional; use agent se você for um modelo)'
   }
 } as const;
@@ -503,10 +510,6 @@ export function foldText(text: string): string {
 }
 
 /** Extrai o conteúdo entre aspas ou crases (`"..."`, `'...'`, `“...”`, `` `...` ``). */
-export function extractQuotedText(text: string): string {
-  return Array.from(text.matchAll(/["'“”`]+([^"'“”`\n]{2,120})["'“”`]+/g), (match) => match[1]).join(' ');
-}
-
 /** Verifica se `needle` ocorre como palavra/termo inteiro dentro de `haystack` (ambos normalizados com `foldText`). */
 export function hasWholeWord(haystack: string, needle: string): boolean {
   const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -532,4 +535,3 @@ export function featuredProjectPrimaryUrl(project: Pick<FeaturedProject, 'repoUr
   return featuredProjectLinks(project)[0]?.href;
 }
 
-export { generateJsonLdSchema, generateLlmsTxt } from './machineDocuments.ts';

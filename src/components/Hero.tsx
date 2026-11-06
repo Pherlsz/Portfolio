@@ -1,9 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { FileText, ArrowDownRight } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { JobFitCta } from './JobFitCta';
-import { StickerLid } from './stickers';
 import { handleSmoothScrollClick, Marked, Reveal } from './ui';
+
+/** Os stickers são decorativos e trazem o motion (drag/spring); carregam fora do bundle inicial. */
+const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
 export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
@@ -42,7 +45,9 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
             </div>
           </div>
         </div>
-        <StickerLid />
+        <Suspense fallback={null}>
+          <StickerLid />
+        </Suspense>
       </div>
 
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-8 sm:py-12 lg:grid-cols-[1.35fr_1fr] lg:items-end lg:gap-12">
