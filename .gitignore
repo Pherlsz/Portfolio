@@ -10,3 +10,4 @@ coverage/
 .wrangler/
 worker-configuration.d.ts
 design/refs/
+.vscode/

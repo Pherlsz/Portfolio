@@ -19,6 +19,19 @@
 }
 
 @font-face {
+  font-family: "Archivo Display Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  ascent-override: 74%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+  src: url("@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
   font-family: "Archivo Variable";
   font-style: normal;
   font-display: swap;
@@ -60,25 +73,8 @@
 }
 
 @theme inline {
-  --color-neutral-0: var(--neutral-0);
-  --color-neutral-50: var(--neutral-50);
-  --color-neutral-200: var(--neutral-200);
-  --color-neutral-300: var(--neutral-300);
-  --color-neutral-400: var(--neutral-400);
-  --color-neutral-500: var(--neutral-500);
-  --color-neutral-600: var(--neutral-600);
   --color-neutral-700: var(--neutral-700);
-  --color-neutral-800: var(--neutral-800);
-  --color-neutral-900: var(--neutral-900);
   --color-neutral-950: var(--neutral-950);
-  --color-yellow-400: var(--yellow-400);
-  --color-yellow-500: var(--yellow-500);
-  --color-yellow-700: var(--yellow-700);
-  --color-yellow-800: var(--yellow-800);
-  --color-green-400: var(--green-400);
-  --color-green-600: var(--green-600);
-  --color-rose-400: var(--rose-400);
-  --color-rose-700: var(--rose-700);
 
   --color-paper: var(--paper);
   --color-surface: var(--surface);
@@ -98,7 +94,7 @@
   --color-valid: var(--valid);
   --color-invalid: var(--invalid);
 
-  --font-display: "Archivo Variable", "Archivo Display Fallback", "Archivo Fallback", system-ui, sans-serif;
+  --font-display: "Archivo Display Variable", "Archivo Variable", "Archivo Display Fallback", "Archivo Fallback", system-ui, sans-serif;
   --font-sans: "Archivo Variable", "Archivo Fallback", system-ui, sans-serif;
   --font-mono: "Atkinson Hyperlegible Mono Variable", ui-monospace, monospace;
 }
@@ -109,21 +105,15 @@
     --neutral-0: #ffffff;
     --neutral-50: #f4f4f1;
     --neutral-200: #d4d4cf;
-    --neutral-300: #c2c2bc;
-    --neutral-400: #9a9a94;
     --neutral-500: #6e6e68;
     --neutral-600: #5c5c56;
     --neutral-700: #3d3d38;
-    --neutral-800: #2a2a26;
-    --neutral-900: #1a1a18;
     --neutral-950: #111111;
     --yellow-400: #e7f25a;
     --yellow-500: #111111;
     --yellow-700: #3d3d38;
     --yellow-800: #3d3d38;
-    --green-400: #34d399;
     --green-600: #0f7a56;
-    --rose-400: #fb7185;
     --rose-700: #be123c;
 
     --paper: #f4f4f1;
@@ -141,7 +131,6 @@
     --status: #0f7a56;
     --valid: #0f7a56;
     --invalid: #be123c;
-    --focus: var(--ink);
     --band: #e7f25a;
     --on-band: #111111;
 
@@ -170,7 +159,6 @@
     --status: #34d399;
     --valid: #34d399;
     --invalid: #fb7185;
-    --focus: var(--ink);
     --band: #1c1c16;
     --on-band: #f4f4f1;
 
@@ -185,7 +173,7 @@
     background-color: var(--paper);
     color: var(--ink);
     overflow-y: scroll;
-    scroll-behavior: auto;
+    scroll-behavior: smooth;
     /* Sticky header is h-14 plus its 1px border. Extra pad keeps section titles clear. */
     scroll-padding-top: 4.25rem;
     -webkit-tap-highlight-color: transparent;
@@ -215,6 +203,13 @@
   ::selection {
     background-color: var(--marker);
     color: var(--on-marker);
+  }
+
+  html:not(.dark) .name-band ::selection,
+  .bg-marker::selection,
+  .bg-marker ::selection {
+    background-color: var(--on-marker);
+    color: var(--marker);
   }
 
   :focus-visible {
@@ -368,15 +363,6 @@
 
   .btn:active {
     transform: scale(0.97);
-  }
-
-  .btn-primary {
-    background-color: var(--ink);
-    color: var(--paper);
-  }
-
-  .btn-primary:hover {
-    background-color: color-mix(in srgb, var(--ink) 82%, var(--paper));
   }
 
   .btn-ghost {
@@ -965,93 +951,6 @@
         drop-shadow(0 16px 20px rgb(0 0 0 / 0.22));
     }
   }
-
-  .sticker-bubble {
-    pointer-events: none;
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 0.25rem);
-    translate: -50% 0.25rem;
-    z-index: 2;
-    white-space: nowrap;
-    border-radius: 9999px;
-    background-color: var(--ink);
-    color: var(--paper);
-    padding: 0.25rem 0.75rem;
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    opacity: 0;
-    transition-property: opacity, translate;
-    transition-duration: 150ms;
-  }
-
-  .group:focus-visible .sticker-bubble {
-    opacity: 1;
-    translate: -50% 0;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .group:hover .sticker-bubble {
-      opacity: 1;
-      translate: -50% 0;
-    }
-  }
-
-  .sticker-bubble[data-visible="true"] {
-    opacity: 1;
-    translate: -50% 0;
-  }
-
-  @media (pointer: coarse) {
-    .sticker-bubble {
-      left: auto;
-      bottom: auto;
-      translate: 0 0.25rem;
-    }
-
-    .sticker-bubble[data-caption-edge="above"] {
-      bottom: calc(100% + 0.25rem);
-      top: auto;
-    }
-
-    .sticker-bubble[data-caption-edge="below"] {
-      top: calc(100% + 0.25rem);
-      bottom: auto;
-    }
-
-    .sticker-bubble[data-caption-align="center"] {
-      left: 50%;
-      right: auto;
-      translate: calc(-50% + var(--caption-clamp-x, 0px)) 0.25rem;
-    }
-
-    .sticker-bubble[data-caption-align="start"] {
-      left: 0;
-      right: auto;
-      translate: var(--caption-clamp-x, 0px) 0.25rem;
-    }
-
-    .sticker-bubble[data-caption-align="end"] {
-      left: auto;
-      right: 0;
-      translate: var(--caption-clamp-x, 0px) 0.25rem;
-    }
-
-    .group:hover .sticker-bubble,
-    .group:focus-visible .sticker-bubble {
-      opacity: 0;
-      translate: var(--caption-clamp-x, 0px) 0.25rem;
-    }
-
-    .sticker-bubble[data-caption-align="center"][data-visible="true"] {
-      translate: calc(-50% + var(--caption-clamp-x, 0px)) 0;
-    }
-
-    .sticker-bubble[data-caption-align="start"][data-visible="true"],
-    .sticker-bubble[data-caption-align="end"][data-visible="true"] {
-      translate: var(--caption-clamp-x, 0px) 0;
-    }
-  }
 }
 
 @keyframes sticker-sleep {
@@ -1134,7 +1033,6 @@
     --status: var(--green-600);
     --valid: var(--green-600);
     --invalid: var(--rose-700);
-    --focus: var(--ink);
   }
 
   .no-print {

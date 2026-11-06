@@ -7,7 +7,7 @@ export type LidSlotId =
   | 'react'
   | 'nextjs';
 
-export type Rect = { x: number; y: number; w: number; h: number };
+type Rect = { x: number; y: number; w: number; h: number };
 
 export type ScatterSlot = {
   id: LidSlotId;
@@ -21,7 +21,7 @@ export type ScatterSlot = {
   fy: number;
 };
 
-export type StickerBox = { id: LidSlotId; w: number; h: number; artW: number };
+type StickerBox = { id: LidSlotId; w: number; h: number; artW: number };
 
 export const STICKER_ORDER: LidSlotId[] = [
   'morcega',

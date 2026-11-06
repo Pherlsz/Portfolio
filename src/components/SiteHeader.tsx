@@ -43,14 +43,11 @@ function useTheme() {
 const SECTION_IDS = ['inicio', ...NAV.map((item) => item.id)];
 
 function headerOffsetPx(): number {
-  const header = document.querySelector('header');
-  return (header?.getBoundingClientRect().height ?? 56) + 1;
+  return getStickyHeaderOffset(0) + 1;
 }
 
 function scrollLinePx() {
-  const pad = Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop);
-  const header = headerOffsetPx();
-  return (Number.isFinite(pad) ? Math.max(pad, header) : header) + 12;
+  return getStickyHeaderOffset(24);
 }
 
 function useActiveSection() {
@@ -132,12 +129,7 @@ function useActiveSection() {
   return active;
 }
 
-function focusSection(id: string) {
-  const node = document.getElementById(id);
-  node?.scrollIntoView({ block: 'start', behavior: 'instant' });
-  node?.focus();
-  history.pushState(null, '', `#${id}`);
-}
+import { getStickyHeaderOffset, handleSmoothScrollClick } from './ui';
 
 export function SiteHeader({
   onOpenAssistant,
@@ -152,35 +144,30 @@ export function SiteHeader({
 
   return (
     <header className="no-print sticky top-0 z-40 border-b border-line bg-paper">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-2 sm:gap-2 sm:px-8">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-2 sm:gap-3 sm:px-8">
         <a
           href="#inicio"
-          className="display inline-flex min-h-11 min-w-0 max-w-[4.75rem] items-center truncate px-2 text-[0.9375rem] leading-none sm:max-w-none"
+          onClick={(event) => handleSmoothScrollClick(event, 'inicio', 0)}
+          className="display inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-2 text-[0.9375rem] leading-none"
         >
           <span className="sm:hidden">{profile.shortName.split(' ')[0]}</span>
           <span className="hidden sm:inline">{profile.shortName}</span>
         </a>
 
-        <nav aria-label="Seções" className="site-nav min-w-0 flex-1">
+        <nav aria-label="Seções" className="site-nav min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <ul className="flex items-center">
-            {NAV.map((item) => {
-              const compact = item.id === 'projeto' || item.id === 'contato';
-              return (
-                <li key={item.id} className={compact ? undefined : 'hidden lg:block'}>
-                  <a
-                    href={`#${item.id}`}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      focusSection(item.id);
-                    }}
-                    aria-current={active === item.id ? 'location' : undefined}
-                    className="site-nav-link"
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              );
-            })}
+            {NAV.map((item) => (
+              <li key={item.id} className="shrink-0">
+                <a
+                  href={`#${item.id}`}
+                  onClick={(event) => handleSmoothScrollClick(event, item.id)}
+                  aria-current={active === item.id ? 'location' : undefined}
+                  className="site-nav-link whitespace-nowrap"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
 
@@ -190,9 +177,17 @@ export function SiteHeader({
             onClick={onOpenAssistant}
             aria-haspopup="dialog"
             aria-controls="assistente"
-            className="btn btn-ghost hidden min-h-11 px-3 text-sm md:inline-flex"
+            aria-keyshortcuts="Control+K Meta+K"
+            title="Abrir assistente (Atalho: Ctrl+K)"
+            className="btn btn-ghost hidden min-h-11 gap-1.5 px-3 text-sm md:inline-flex"
           >
-            Perguntar
+            <span>Perguntar</span>
+            <kbd
+              aria-hidden="true"
+              className="rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-[0.6875rem] leading-none text-muted"
+            >
+              Ctrl K
+            </kbd>
           </button>
           <button
             type="button"

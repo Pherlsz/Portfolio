@@ -60,6 +60,7 @@ export default defineConfig({
     cssCodeSplit: true
   },
   server: {
+    host: '::',
     port: 3000
   }
 });

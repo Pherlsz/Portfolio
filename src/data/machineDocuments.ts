@@ -1,12 +1,8 @@
 import {
-  featuredProjectPedroMdLines,
-  featuredProjectPrimaryUrl,
-  resumeFeaturedProjectEntry
-} from '../utils/featuredProjectLinks.ts';
-import {
   availabilityLine,
   CONTACT_API,
   experienceSpan,
+  featuredProjectPrimaryUrl,
   formatPeriod,
   formatRoleTimeline,
   plainText,
@@ -31,6 +27,7 @@ const AI_AND_SEARCH_AGENTS = [
 ] as const;
 
 const SITEMAP_PATHS = ['/', '/cv', '/llms.txt', '/ai.json', '/pedro.md', '/AGENTS.md', '/resume.json'] as const;
+const PROFILE_IMAGE_PATH = '/og.png';
 
 function escHtml(value: string): string {
   return value
@@ -44,8 +41,12 @@ function xmlEscape(value: string): string {
   return escHtml(value).replaceAll("'", '&apos;');
 }
 
+function mdItem(label: string, href: string, note?: string): string {
+  return note ? `- [${label}](${href}): ${note}` : `- [${label}](${href})`;
+}
+
 export function generateRobotsTxt(origin = SITE_ORIGIN): string {
-  const groups = [
+  return [
     '# Política do site: busca e crawlers de IA podem ler o conteúdo público.',
     '# Um 403 na borda (Bot Fight Mode, AI Crawl Control ou WAF) não se resolve aqui.',
     'User-agent: *',
@@ -54,21 +55,188 @@ export function generateRobotsTxt(origin = SITE_ORIGIN): string {
     ...AI_AND_SEARCH_AGENTS.flatMap((agent) => [`User-agent: ${agent}`, 'Allow: /', '']),
     `Sitemap: ${origin}/sitemap.xml`,
     ''
-  ];
-  return groups.join('\n');
+  ].join('\n');
 }
 
 export function generateSitemapXml(origin = SITE_ORIGIN): string {
   const urls = SITEMAP_PATHS.map(
-    (path) =>
-      `  <url><loc>${xmlEscape(`${origin}${path}`)}</loc><lastmod>${PROFILE_UPDATED}</lastmod></url>`
+    (path) => `  <url><loc>${xmlEscape(`${origin}${path}`)}</loc><lastmod>${PROFILE_UPDATED}</lastmod></url>`
   ).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
+export function generateJsonLdSchema(data: PortfolioData): object {
+  const { profile, project, featuredProjects } = data;
+  const pageUrl = `${SITE_ORIGIN}/`;
+  const personId = `${SITE_ORIGIN}/#person`;
+  const description = `${profile.headline} ${plainText(profile.summary)}`;
+  const hasPart = [
+    ...featuredProjects.map((item) => {
+      const site = item.href?.trim();
+      const repo = item.repoUrl?.trim();
+      return {
+        '@type': repo ? 'SoftwareSourceCode' : site ? 'WebApplication' : 'SoftwareApplication',
+        name: item.name,
+        description: item.tagline,
+        ...(repo ? { codeRepository: repo } : {}),
+        ...(site ? { url: site } : {})
+      };
+    }),
+    {
+      '@type': 'SoftwareSourceCode',
+      name: project.name,
+      description: project.tagline,
+      codeRepository: project.repoUrl,
+      programmingLanguage: project.language,
+      version: project.version
+    }
+  ];
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'ProfilePage',
+        '@id': `${SITE_ORIGIN}/#profilepage`,
+        url: pageUrl,
+        dateModified: PROFILE_UPDATED,
+        mainEntity: {
+          '@type': 'Person',
+          '@id': personId,
+          name: profile.name,
+          alternateName: profile.shortName,
+          url: pageUrl,
+          image: {
+            '@type': 'ImageObject',
+            url: `${SITE_ORIGIN}${PROFILE_IMAGE_PATH}`,
+            width: 1200,
+            height: 630
+          },
+          email: `mailto:${profile.email}`,
+          jobTitle: profile.jobTitle,
+          description,
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Porto Alegre',
+            addressRegion: 'RS',
+            addressCountry: 'BR'
+          },
+          sameAs: [profile.linkedin, profile.github],
+          alumniOf: data.education.map((e) => ({ '@type': 'EducationalOrganization', name: e.school })),
+          knowsAbout: data.skills.flatMap(skillNames),
+          knowsLanguage: data.languages.map((l) => l.code),
+          hasCredential: data.certifications.map((cert) => ({
+            '@type': 'EducationalOccupationalCredential',
+            name: cert.name,
+            recognizedBy: { '@type': 'Organization', name: cert.issuer },
+            dateCreated: cert.year,
+            ...(cert.href ? { url: cert.href } : {})
+          }))
+        },
+        hasPart
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_ORIGIN}/#website`,
+        url: pageUrl,
+        name: `${profile.name} · ${profile.jobTitle}`,
+        description,
+        inLanguage: 'pt-BR',
+        publisher: { '@id': personId }
+      }
+    ]
+  };
+}
+
+function buildExperienceMarkdown(data: PortfolioData): string[] {
+  return data.experiences.flatMap((exp) => {
+    const span = experienceSpan(exp);
+    return [
+      `### ${exp.company} (${formatPeriod(span.start, span.end)})`,
+      `${formatRoleTimeline(exp)} · ${exp.location}`,
+      '',
+      exp.summary,
+      ...exp.highlights.map((h) => `- ${h.metric ? `${h.metric}: ` : ''}${h.text}`),
+      `- Stack: ${exp.stack.join(', ')}`,
+      ''
+    ];
+  });
+}
+
+export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): string {
+  const { profile, project, featuredProjects } = data;
+  return [
+    `# ${profile.name} — ${profile.jobTitle}`,
+    '',
+    `> ${profile.headline} ${plainText(profile.summary)}`,
+    '',
+    '## Páginas',
+    mdItem('Portfólio', `${origin}/`, 'Página principal'),
+    mdItem('Currículo HTML', `${origin}/cv`, 'Versão para impressão'),
+    mdItem('Currículo PDF', `${origin}${profile.cvUrl}`, 'Download direto'),
+    mdItem('ai.json', `${origin}/ai.json`, 'Perfil estruturado para agentes'),
+    mdItem('pedro.md', `${origin}/pedro.md`, 'Perfil em Markdown'),
+    mdItem('AGENTS.md', `${origin}/AGENTS.md`, 'Como agentes devem ler este site e enviar contato'),
+    mdItem('resume.json', `${origin}/resume.json`, 'Currículo em JSON'),
+    mdItem('Mapa do site', `${origin}/sitemap.xml`),
+    '',
+    '## Contato',
+    mdItem('E-mail', `mailto:${profile.email}`),
+    mdItem('LinkedIn', profile.linkedin),
+    mdItem('GitHub', profile.github),
+    `- Local: ${profile.location}`,
+    `- Status: ${profile.status}`,
+    `- ${availabilityLine(profile)}`,
+    mdItem('Formulário no site', `${origin}/#contato`),
+    mdItem(
+      `${CONTACT_API.method} ${CONTACT_API.path}`,
+      `${origin}${CONTACT_API.path}`,
+      `${CONTACT_API.description} JSON { "name", "email", "message", "source": "agent" }. Campos: name (${CONTACT_API.body.name}); email (${CONTACT_API.body.email}); message (${CONTACT_API.body.message}). Resposta 200: { "ok": true }.`
+    ),
+    '',
+    '## Experiência',
+    ...buildExperienceMarkdown(data),
+    '## Projetos em destaque (ferramentas e sites)',
+    ...featuredProjects.flatMap((item) => [
+      `### ${item.name}`,
+      item.tagline,
+      ...(item.repoUrl ? [mdItem('Repositório', item.repoUrl)] : []),
+      ...(item.href ? [mdItem('App', item.href)] : []),
+      `- Acesso: ${item.access === 'restricted' ? 'restrito (login)' : 'público'}`,
+      `- Stack: ${item.stack.join(', ')}`,
+      ''
+    ]),
+    `## Outro projeto: ${project.name} (${project.language}, ${project.version})`,
+    project.tagline,
+    mdItem('Repositório', project.repoUrl),
+    mdItem('Releases', project.releasesUrl, project.releasesPeriod),
+    ...project.cards.map((card) => `- ${card.title}: ${card.text}`),
+    `- Pacotes: ${project.modules.map((m) => `${m.name} (${m.description})`).join('; ')}`,
+    '',
+    '## Habilidades',
+    ...data.skills.map((group) => `- ${group.name}: ${skillNames(group).join(', ')}`),
+    '',
+    '## Formação',
+    ...data.education.map((e) => `- ${e.course}, ${e.school} (${e.period})`),
+    '',
+    '## Certificações',
+    ...data.certifications.map((c) =>
+      c.href ? mdItem(`${c.name} — ${c.issuer} (${c.year})`, c.href) : `- ${c.name} — ${c.issuer} (${c.year})`
+    ),
+    `- Outros cursos: ${data.otherCourses.join(', ')}`,
+    '',
+    '## Idiomas',
+    ...data.languages.map((l) => `- ${l.name}: ${l.level}`),
+    '',
+    '## Bastidores',
+    ...data.interests.map((i) => `- ${i.title}: ${i.text}`),
+    ...data.pets.map((p) => `- ${p.name} (${p.kind}): ${p.bio}`)
+  ].join('\n');
+}
+
 export function generatePedroMd(data: PortfolioData, origin = SITE_ORIGIN): string {
   const { profile, project, featuredProjects } = data;
-  const lines = [
+  return [
     `# ${profile.name}`,
     '',
     `> Status: publicado. Gerado dos dados públicos do portfólio em ${origin}/ (revisão ${PROFILE_UPDATED}). Não é rascunho.`,
@@ -85,23 +253,13 @@ export function generatePedroMd(data: PortfolioData, origin = SITE_ORIGIN): stri
     `- ${availabilityLine(profile)}`,
     '',
     '## Experiência',
-    ...data.experiences.flatMap((exp) => {
-      const span = experienceSpan(exp);
-      return [
-        `### ${exp.company}`,
-        `${formatRoleTimeline(exp)} · ${formatPeriod(span.start, span.end)} · ${exp.location}`,
-        '',
-        exp.summary,
-        ...exp.highlights.map((item) => `- ${item.metric ? `${item.metric}: ` : ''}${item.text}`),
-        `- Stack: ${exp.stack.join(', ')}`,
-        ''
-      ];
-    }),
+    ...buildExperienceMarkdown(data),
     '## Projetos',
     ...featuredProjects.flatMap((item) => [
       `### ${item.name}`,
       item.tagline,
-      ...featuredProjectPedroMdLines(item),
+      ...(item.href ? [`- App: ${item.href}`] : []),
+      ...(item.repoUrl ? [`- Repositório: ${item.repoUrl}`] : []),
       `- Stack: ${item.stack.join(', ')}`,
       ''
     ]),
@@ -131,8 +289,7 @@ export function generatePedroMd(data: PortfolioData, origin = SITE_ORIGIN): stri
     `- ${origin}/resume.json`,
     `- ${origin}/AGENTS.md`,
     ''
-  ];
-  return lines.join('\n');
+  ].join('\n');
 }
 
 export function generateAgentsMd(origin = SITE_ORIGIN): string {
@@ -251,15 +408,13 @@ export function generateResumeJson(data: PortfolioData, origin = SITE_ORIGIN) {
       ...(item.href ? { url: item.href } : {})
     })),
     projects: [
-      ...featuredProjects.map((item) =>
-        resumeFeaturedProjectEntry({
-          name: item.name,
-          description: item.tagline,
-          href: item.href,
-          repoUrl: item.repoUrl,
-          keywords: item.stack
-        })
-      ),
+      ...featuredProjects.map((item) => ({
+        name: item.name,
+        description: item.tagline,
+        ...(item.href?.trim() ? { url: item.href.trim() } : {}),
+        ...(item.repoUrl?.trim() ? { codeRepository: item.repoUrl.trim() } : {}),
+        keywords: item.stack
+      })),
       {
         name: project.name,
         description: project.tagline,
@@ -288,15 +443,14 @@ export function generateIndexableHomeHtml(data: PortfolioData): string {
       const primary = featuredProjectPrimaryUrl(item);
       const title = escHtml(item.name);
       const body = escHtml(item.tagline);
-      if (primary) {
-        return `<li><a class="link" href="${escHtml(primary)}">${title}</a> — ${body}</li>`;
-      }
-      return `<li><strong>${title}</strong> — ${body}</li>`;
+      return primary
+        ? `<li><a class="link" href="${escHtml(primary)}">${title}</a> — ${body}</li>`
+        : `<li><strong>${title}</strong> — ${body}</li>`;
     }),
     `<li><a class="link" href="${escHtml(project.repoUrl)}">${escHtml(project.name)}</a> — ${escHtml(project.tagline)}</li>`
   ].join('');
 
-  return `<main id="conteudo">
+  return `<main id="conteudo" class="seo-only">
       <section id="inicio" class="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
         <p class="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1">${escHtml(profile.status)}<span class="hidden sm:inline" aria-hidden="true">·</span><span class="whitespace-nowrap basis-full sm:basis-auto">${escHtml(profile.location)}</span></p>
         <h1 id="inicio-titulo" class="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]">${name}</h1>

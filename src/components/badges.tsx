@@ -44,12 +44,24 @@ function VitestMark() {
   );
 }
 
-export function SkillBadge({ name }: { name: string }) {
+export function SkillBadge({
+  name,
+  active = false,
+  onSelect
+}: {
+  name: string;
+  active?: boolean;
+  onSelect?: (name: string) => void;
+}) {
   const icon = SKILL_ICONS[name];
-  const fill = !icon || icon.hex === '000000' ? 'currentColor' : `#${icon.hex}`;
+  const fill = active
+    ? 'currentColor'
+    : !icon || icon.hex === '000000'
+      ? 'currentColor'
+      : `#${icon.hex}`;
 
-  return (
-    <li className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[0.9375rem]">
+  const content = (
+    <>
       {name === 'Vitest' ? (
         <VitestMark />
       ) : icon ? (
@@ -57,7 +69,32 @@ export function SkillBadge({ name }: { name: string }) {
           <path d={icon.path} fill={fill} />
         </svg>
       ) : null}
-      {name}
+      <span>{name}</span>
+    </>
+  );
+
+  if (!onSelect) {
+    return (
+      <li className="inline-flex items-center gap-2 border border-line bg-surface px-3 py-1.5 text-[0.875rem] font-medium">
+        {content}
+      </li>
+    );
+  }
+
+  return (
+    <li>
+      <button
+        type="button"
+        aria-pressed={active}
+        onClick={() => onSelect(name)}
+        className={`inline-flex min-h-9 cursor-pointer items-center gap-2 border px-3 py-1.5 text-[0.875rem] font-medium transition-colors duration-150 ${
+          active
+            ? 'border-ink bg-marker text-on-marker'
+            : 'border-line bg-surface text-ink hover:border-ink'
+        }`}
+      >
+        {content}
+      </button>
     </li>
   );
 }
