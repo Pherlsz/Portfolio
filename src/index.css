@@ -173,7 +173,6 @@
     color: var(--ink);
     overflow-y: scroll;
     scroll-behavior: smooth;
-    /* Sticky header is h-14 plus its 1px border. Extra pad keeps section titles clear. */
     scroll-padding-top: 4.25rem;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -212,13 +211,11 @@
   }
 
   :focus-visible {
-    /* Dual ring so the 3:1 floor holds on paper, band, and dark surfaces. */
     outline: 3px solid #111111;
     outline-offset: 3px;
     box-shadow: 0 0 0 3px #ffffff;
   }
 
-  /* shortcut: region skip-targets are too large for a ring; upgrade if a heading-level :target style is designed */
   main:focus,
   main:focus-visible,
   [tabindex='-1']:focus,
@@ -522,7 +519,6 @@
   .field-area {
     min-height: 6.5rem;
     max-height: 16rem;
-    /* shortcut: field-sizing ignored on older Safari; rows+min-height remain until Baseline is everywhere */
     field-sizing: content;
     resize: vertical;
   }
@@ -603,7 +599,6 @@
     container-type: inline-size;
   }
 
-  /* Simey abYWJdX: rare holo v + vmax shine/glare. No gutters, no hard white stripe. */
   @keyframes holo-idle-orbit {
     0% {
       --mx: 0.32;
@@ -711,7 +706,6 @@
     pointer-events: none;
   }
 
-  /* Dark metallic underlayer so color-dodge has luminance to lift. Continuous, no hatch. */
   [data-holo='true'] .holo-foil {
     z-index: 0;
     background-image:
@@ -735,7 +729,6 @@
     opacity: var(--holo-ink);
   }
 
-  /* Rare holo v shine: grain + rainbow, color-dodge. Glare is a soft prismatic radial, not a white stripe. */
   [data-holo='true'] .holo-sheen {
     z-index: 2;
     isolation: isolate;
@@ -791,7 +784,6 @@
     opacity: 0.7;
   }
 
-  /* Die-cut prismatic rim — different from the aluminum sticker edge. */
   [data-holo='true'] .holo-edge {
     z-index: 3;
     background-image: repeating-linear-gradient(

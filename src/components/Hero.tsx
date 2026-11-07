@@ -2,13 +2,11 @@ import { lazy, Suspense } from 'react';
 import { FileText, ArrowDownRight } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
-import { JobFitCta } from './JobFitCta';
 import { handleSmoothScrollClick, Marked, Reveal } from './ui';
 
-/** Os stickers são decorativos; carregam fora do bundle inicial. */
 const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
-export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onOpenCv: () => void }) {
+export function Hero({ onOpenCv }: { onOpenCv: () => void }) {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const titleParts = profile.jobTitle.split(' · ');
   const role = titleParts[0];
@@ -79,7 +77,14 @@ export function Hero({ onOpenJobFit, onOpenCv }: { onOpenJobFit: () => void; onO
             >
               Ver CV
             </CTA>
-            <JobFitCta onOpenJobFit={onOpenJobFit} className="w-full sm:w-auto" />
+            <CTA
+              variant="secondary"
+              href="#experiencia"
+              onClick={(event) => handleSmoothScrollClick(event, 'experiencia')}
+              className="w-full sm:w-auto"
+            >
+              Ver experiência
+            </CTA>
             <CTA
               variant="tertiary"
               href="#contato"

@@ -43,12 +43,42 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type'
 };
 
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin'
+};
+
+const ALLOWED_CHAT_ORIGINS = new Set(['https://pherls.dev', 'http://localhost', 'http://127.0.0.1']);
+
+function isAllowedChatOrigin(request: Request): boolean {
+  const secFetchSite = request.headers.get('sec-fetch-site');
+  if (secFetchSite && secFetchSite !== 'same-origin' && secFetchSite !== 'none') {
+    return false;
+  }
+  const origin = request.headers.get('origin');
+  if (!origin) return true;
+  try {
+    const parsed = new URL(origin);
+    const reqOrigin = new URL(request.url).origin;
+    return parsed.origin === reqOrigin || ALLOWED_CHAT_ORIGINS.has(`${parsed.protocol}//${parsed.hostname}`);
+  } catch {
+    return false;
+  }
+}
+
+function hasJsonContentType(request: Request): boolean {
+  const ct = request.headers.get('content-type') ?? '';
+  return ct.toLowerCase().includes('application/json');
+}
+
 function json(status: number, body: unknown, extra: HeadersInit = {}): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      'X-Content-Type-Options': 'nosniff',
+      'Cache-Control': 'no-store',
+      ...SECURITY_HEADERS,
       ...extra
     }
   });
@@ -59,7 +89,7 @@ function text(status: number, body: string, contentType: string): Response {
     status,
     headers: {
       'Content-Type': contentType,
-      'X-Content-Type-Options': 'nosniff'
+      ...SECURITY_HEADERS
     }
   });
 }
@@ -83,10 +113,6 @@ async function allowed(
 
 type JsonBody = { ok: true; value: unknown } | { ok: false; status: 400 | 413 };
 
-/**
- * Lê o corpo como JSON com teto de bytes. O `content-length` pode faltar (chunked)
- * ou mentir, então o limite é aplicado durante a leitura do stream.
- */
 async function readJsonBody(request: Request): Promise<JsonBody> {
   if (!request.body) return { ok: false, status: 400 };
   const reader = request.body.getReader();
@@ -198,8 +224,9 @@ async function generateWithGemini(
           body: JSON.stringify({
             system_instruction: { parts: [{ text: systemInstruction }] },
             contents,
-            generationConfig: { temperature: 0.3 }
-          })
+            generationConfig: { temperature: 0.3, maxOutputTokens: 450 }
+          }),
+          signal: AbortSignal.timeout(12_000)
         }
       );
       if (!response.ok) {
@@ -245,7 +272,7 @@ function documentResponse(document: MachineDocument, method: string): Response {
   const bytes = new TextEncoder().encode(document.body);
   const headers = new Headers({
     'Content-Type': document.contentType,
-    'X-Content-Type-Options': 'nosniff',
+    ...SECURITY_HEADERS,
     'Content-Length': String(bytes.byteLength)
   });
   return new Response(method === 'HEAD' ? null : bytes, { status: 200, headers });
@@ -259,6 +286,12 @@ function chatReply(status: number, body: ChatResponse): Response {
 }
 
 async function handleChat(request: Request, env: PortfolioBindings): Promise<Response> {
+  if (!isAllowedChatOrigin(request)) {
+    return json(403, { error: 'Origem não autorizada.' });
+  }
+  if (!hasJsonContentType(request)) {
+    return json(415, { error: 'Use Content-Type: application/json.' });
+  }
   if (!(await allowed(env.CHAT_LIMIT, clientIp(request)))) {
     return chatReply(429, {
       reply: 'Muitas perguntas em pouco tempo. Tente de novo em alguns minutos ou fale direto com o Pedro por e-mail.',
@@ -300,6 +333,9 @@ async function handleChat(request: Request, env: PortfolioBindings): Promise<Res
 }
 
 async function handleContact(request: Request, env: PortfolioBindings): Promise<Response> {
+  if (!hasJsonContentType(request)) {
+    return json(415, { ok: false, error: 'Use Content-Type: application/json.' }, CORS);
+  }
   if (!(await allowed(env.CONTACT_LIMIT, clientIp(request)))) {
     return json(429, { ok: false, error: 'Muitas mensagens em pouco tempo. Tente de novo em alguns minutos.' }, CORS);
   }
@@ -314,7 +350,6 @@ async function handleContact(request: Request, env: PortfolioBindings): Promise<
     return json(400, { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos.' }, CORS);
   }
 
-  // Honeypot preenchido: responde como sucesso para não ensinar o bot, mas não grava.
   if (parsed.data.website?.trim()) {
     return json(200, { ok: true }, CORS);
   }
@@ -342,11 +377,12 @@ export async function handlePortfolioRequest(request: Request, env: PortfolioBin
   const url = new URL(request.url);
   const { pathname } = url;
 
-  if (request.method === 'OPTIONS' && pathname.startsWith('/api/')) {
+  if (request.method === 'OPTIONS' && pathname === '/api/contact') {
     return new Response(null, {
       status: 204,
       headers: {
         ...CORS,
+        ...SECURITY_HEADERS,
         'Access-Control-Max-Age': '86400'
       }
     });

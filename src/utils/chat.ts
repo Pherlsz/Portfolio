@@ -1,6 +1,3 @@
-/** Tipos e limites compartilhados entre o painel do assistente e a API. Sem dependências: entra no bundle do cliente. */
-
-export type ChatMode = 'chat' | 'jobfit';
 export type ChatSource = 'ai' | 'local';
 
 export interface ChatAction {
@@ -16,8 +13,7 @@ export interface ChatResponse {
   error?: string;
 }
 
-export const QUESTION_LIMIT = 600;
-export const JOB_DESCRIPTION_LIMIT = 5000;
+export const MESSAGE_LIMIT = 4000;
 export const HISTORY_LIMIT = 6;
 
 export const SUGGESTED_QUESTIONS = [

@@ -5,9 +5,7 @@ interface Highlight {
 
 interface Role {
   title: string;
-  /** YYYY-MM */
   start: string;
-  /** YYYY-MM */
   end: string;
 }
 
@@ -34,9 +32,7 @@ export interface FeaturedProject {
   name: string;
   kicker: string;
   tagline: string;
-  /** Live app URL. Omit when there is no public site. */
   href?: string;
-  /** GitHub repository URL. Omit when the code is not public. */
   repoUrl?: string;
   access: 'public' | 'restricted';
   stack: string[];
@@ -66,7 +62,6 @@ interface Language {
 
 interface SkillGroup {
   name: string;
-  /** Aparecem como selos com logo; o resto fica em texto corrido. */
   featured: string[];
   items: string[];
 }
@@ -77,9 +72,7 @@ export interface PortfolioData {
     shortName: string;
     jobTitle: string;
     headline: string;
-    /** Trechos entre ==sinais== aparecem com marca-texto. */
     summary: string;
-    /** Copy de confiança / senioridade (Hero e Contato). */
     trustCopy: string;
     status: string;
     location: string;
@@ -375,7 +368,6 @@ export function formatPeriod(start: string, end: string): string {
   return `${formatMonth(start)} – ${formatMonth(end)}`;
 }
 
-/** Duração inclusiva, no mesmo formato do LinkedIn ("5 anos e 5 meses"). */
 export function formatDuration(start: string, end: string): string {
   const [startYear, startMonth] = start.split('-').map(Number);
   const [endYear, endMonth] = end.split('-').map(Number);
@@ -394,7 +386,6 @@ export function experienceSpan(experience: Experience): { start: string; end: st
   return { start: starts[0], end: ends[ends.length - 1] };
 }
 
-/** Cargos com a data de cada um, para não parecer que o estágio durou o período inteiro. */
 export function formatRoleTimeline(experience: Experience): string {
   const dated = (role: Role) => `${role.title} (${formatPeriod(role.start, role.end)})`;
   if (experience.roles.length === 1) return dated(experience.roles[0]);
@@ -406,7 +397,6 @@ export function availabilityLine(profile: PortfolioData['profile']): string {
   return `Senioridade ${profile.seniority}. ${profile.workMode}. Pretensão salarial: ${profile.salary}.`;
 }
 
-/** Limites do formulário e da API de contato (validados no servidor com zod). */
 export const CONTACT_LIMITS = {
   name: { min: 2, max: 80 },
   email: { max: 120 },
@@ -428,10 +418,8 @@ export const CONTACT_API = {
 } as const;
 
 export const SITE_ORIGIN = 'https://pherls.dev';
-/** Revisão pública do perfil. Atualize quando os fatos do currículo mudarem. */
 export const PROFILE_UPDATED = '2026-11-06';
 
-/** Normaliza texto para comparação insensível a acentos, caixa e pontuação de borda. */
 export function foldText(text: string): string {
   return text
     .normalize('NFD')
@@ -439,7 +427,6 @@ export function foldText(text: string): string {
     .toLowerCase();
 }
 
-/** Verifica se `needle` ocorre como palavra/termo inteiro dentro de `haystack` (ambos normalizados com `foldText`). */
 export function hasWholeWord(haystack: string, needle: string): boolean {
   const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp(`(?:^|[^a-z0-9#+.])${escaped}(?:$|[^a-z0-9#+.])`, 'i').test(haystack);
@@ -450,7 +437,6 @@ interface FeaturedProjectResolvedLink {
   href: string;
 }
 
-/** Links públicos disponíveis para um projeto em destaque (`repoUrl` e/ou `href`). */
 export function featuredProjectLinks(project: Pick<FeaturedProject, 'repoUrl' | 'href'>): FeaturedProjectResolvedLink[] {
   const out: FeaturedProjectResolvedLink[] = [];
   const repo = project.repoUrl?.trim();

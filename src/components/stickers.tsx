@@ -29,7 +29,6 @@ export type StickerId = LidSlotId;
 interface StickerDef {
   label: string;
   src: string;
-  /** Tamanho real do arquivo em public/stickers, para reservar espaço sem layout shift. */
   width: number;
   height: number;
   animation: string;

@@ -1,4 +1,4 @@
-import type { ChatAction, ChatMode, ChatResponse, ChatSource } from './chat.ts';
+import type { ChatAction, ChatResponse, ChatSource } from './chat.ts';
 import { HISTORY_LIMIT } from './chat.ts';
 
 export type { ChatAction };
@@ -9,14 +9,13 @@ export interface ChatMessage {
   text: string;
   source?: ChatSource;
   actions?: ChatAction[];
-  /** Erro de validação: fica fora do histórico enviado ao modelo. */
   failed?: boolean;
 }
 
 export const WELCOME_MESSAGE: ChatMessage = {
   id: 'welcome',
   role: 'model',
-  text: 'Oi! Posso resumir a carreira do **Pedro**, falar dos projetos ou comparar o perfil dele com a sua vaga. Respondo só sobre ele.',
+  text: 'Oi! Posso resumir a experiência do **Pedro**, responder dúvidas sobre a stack e projetos ou comparar o perfil dele se você colar os requisitos de uma vaga.',
   actions: [
     { label: 'Ver experiência', type: 'navigate', value: '#experiencia' },
     { label: 'Ver projetos', type: 'navigate', value: '#projeto' },
@@ -25,15 +24,9 @@ export const WELCOME_MESSAGE: ChatMessage = {
 };
 
 export interface AssistantSessionState {
-  sessionId: string;
   open: boolean;
-  mode: ChatMode;
   messages: ChatMessage[];
   question: string;
-  jobDescription: string;
-  jobQuestion: string;
-  activeJob: string | null;
-  jobExpanded: boolean;
   isLoading: boolean;
 }
 
@@ -43,35 +36,19 @@ export interface AssistantSessionOptions {
 
 type Listener = () => void;
 
-function createSessionId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
 function createInitialState(): AssistantSessionState {
   return {
-    sessionId: createSessionId(),
     open: false,
-    mode: 'chat',
     messages: [WELCOME_MESSAGE],
     question: '',
-    jobDescription: '',
-    jobQuestion: '',
-    activeJob: null,
-    jobExpanded: false,
     isLoading: false
   };
 }
 
-/** Cliente HTTP da API de chat. Validação e prompt ficam no servidor. */
 export async function requestAssistantChat(
   payload: {
-    mode: ChatMode;
     message: string;
     history: Array<{ role: 'user' | 'model'; text: string }>;
-    job?: string;
   },
   fetchFn: typeof fetch = globalThis.fetch
 ): Promise<ChatResponse & { ok: boolean }> {
@@ -118,25 +95,8 @@ export function createAssistantSession(options: AssistantSessionOptions = {}) {
     setState((prev) => ({ ...prev, open }));
   };
 
-  const setMode = (mode: ChatMode) => {
-    if (state.mode === mode) return;
-    setState((prev) => ({ ...prev, mode }));
-  };
-
   const setQuestion = (question: string) => {
     setState((prev) => ({ ...prev, question }));
-  };
-
-  const setJobDescription = (jobDescription: string) => {
-    setState((prev) => ({ ...prev, jobDescription }));
-  };
-
-  const setJobQuestion = (jobQuestion: string) => {
-    setState((prev) => ({ ...prev, jobQuestion }));
-  };
-
-  const setJobExpanded = (jobExpanded: boolean) => {
-    setState((prev) => ({ ...prev, jobExpanded }));
   };
 
   const clearChat = () => {
@@ -144,10 +104,7 @@ export function createAssistantSession(options: AssistantSessionOptions = {}) {
     setState((prev) => ({
       ...prev,
       messages: [WELCOME_MESSAGE],
-      activeJob: null,
-      jobQuestion: '',
-      jobDescription: '',
-      jobExpanded: false,
+      question: '',
       isLoading: false
     }));
   };
@@ -164,27 +121,24 @@ export function createAssistantSession(options: AssistantSessionOptions = {}) {
       .map(({ role, text }) => ({ role, text }))
       .slice(-HISTORY_LIMIT);
 
-  const send = async (text: string, sendMode: ChatMode, opts?: { job?: string }): Promise<void> => {
+  const send = async (text: string): Promise<void> => {
     const trimmed = text.trim();
     if (!trimmed || state.isLoading) return;
 
     const history = buildHistory(state.messages);
     const userMsgId = `user-${nextMessageSeq++}`;
     const requestId = ++activeRequestId;
-    const isNewJob = sendMode === 'jobfit' && !opts?.job;
 
     setState((prev) => ({
       ...prev,
       messages: [...prev.messages, { id: userMsgId, role: 'user', text: trimmed }],
-      activeJob: isNewJob ? trimmed : prev.activeJob,
-      jobExpanded: isNewJob ? false : prev.jobExpanded,
       isLoading: true
     }));
 
     let reply: ChatMessage;
     try {
       const data = await requestAssistantChat(
-        { mode: sendMode, message: trimmed, history, ...(opts?.job ? { job: opts.job } : {}) },
+        { message: trimmed, history },
         options.fetchImpl ?? globalThis.fetch
       );
       reply = {
@@ -213,11 +167,7 @@ export function createAssistantSession(options: AssistantSessionOptions = {}) {
     getState,
     subscribe,
     setOpen,
-    setMode,
     setQuestion,
-    setJobDescription,
-    setJobQuestion,
-    setJobExpanded,
     clearChat,
     resetForPageNavigation,
     send

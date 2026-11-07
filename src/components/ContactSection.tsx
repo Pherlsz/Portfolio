@@ -8,9 +8,7 @@ type FormStatus =
   | { kind: 'idle' }
   | { kind: 'sending' }
   | { kind: 'sent' }
-  /** O servidor recusou (validação, tamanho ou limite de envios): mostra o motivo. */
   | { kind: 'rejected'; message: string }
-  /** Falha de rede ou do servidor: abre o app de e-mail com a mensagem pronta. */
   | { kind: 'fallback' };
 
 const REJECTED_STATUSES = new Set([400, 413, 429]);
@@ -124,7 +122,6 @@ function ContactForm({ email }: { email: string }) {
         {messageLength}/{CONTACT_LIMITS.message.max}
         <span className="sr-only"> caracteres, mínimo de {CONTACT_LIMITS.message.min}</span>
       </p>
-      {/* Honeypot: invisível para pessoas; bots que preenchem tudo são descartados no servidor. */}
       <div aria-hidden="true" className="sr-only">
         <label>
           Site

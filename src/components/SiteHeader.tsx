@@ -31,9 +31,7 @@ function useTheme() {
     syncThemeColor();
     try {
       localStorage.setItem('theme', next);
-    } catch {
-      // Sem armazenamento (modo privado): o tema vale só para esta visita.
-    }
+    } catch {}
     setTheme(next);
   };
 

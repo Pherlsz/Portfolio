@@ -12,7 +12,6 @@ import {
   type PortfolioData
 } from './portfolioData.ts';
 
-/** Crawlers que a política do site permite. O WAF da Cloudflare pode bloquear antes deste arquivo. */
 const AI_AND_SEARCH_AGENTS = [
   'GPTBot',
   'OAI-SearchBot',
@@ -225,7 +224,6 @@ export function generateLlmsTxt(data: PortfolioData, origin = SITE_ORIGIN): stri
   ].join('\n');
 }
 
-/** Resumo no HTML inicial. O React substitui `#root` quando o JavaScript roda. */
 export function generateIndexableHomeHtml(data: PortfolioData): string {
   const { profile, project, featuredProjects } = data;
   const name = profile.name

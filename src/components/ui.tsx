@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { Check, Copy } from 'lucide-react';
 
-/** Mesmo easing de `cubic-bezier(0.23, 1, 0.32, 1)` (easeOutQuint). */
 const EASE_OUT_CSS = 'cubic-bezier(0.23, 1, 0.32, 1)';
 const easeOutQuint = (t: number) => 1 - (1 - t) ** 5;
 const DEFAULT_SCROLL_OFFSET_PX = 16;
 
 let activeScrollAnimation: { stop: () => void } | null = null;
 
-/** Interpola de 0 a 1 em `duration` segundos via rAF, sem depender de biblioteca de animação. */
 function tween(duration: number, onUpdate: (progress: number) => void, onComplete: () => void) {
   let frame = 0;
   let stopped = false;
@@ -164,7 +162,6 @@ export function Reveal({
   );
 }
 
-/** Renderiza trechos entre ==sinais== com marca-texto. */
 export function Marked({ text }: { text: string }) {
   return (
     <>

@@ -22,7 +22,6 @@ function CvSection({ title, children }: { title: string; children: ReactNode }) 
   );
 }
 
-/** Versão A4 do currículo, gerada dos mesmos dados do site e impressa em /cv. */
 export function CvDocument({ embedded = false }: { embedded?: boolean } = {}) {
   const { profile, experiences, featuredProjects, project, skills, education, certifications, otherCourses, languages } =
     DEFAULT_PORTFOLIO_DATA;

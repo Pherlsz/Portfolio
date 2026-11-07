@@ -30,8 +30,7 @@ export default function App() {
   const [cvOpen, setCvOpen] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
-  const openAssistant = (mode?: 'chat' | 'jobfit') => {
-    if (mode) assistantSession.setMode(mode);
+  const openAssistant = () => {
     setHasOpenedAssistant(true);
     assistantSession.setOpen(true);
   };
@@ -86,21 +85,18 @@ export default function App() {
           type="button"
           className="skip-link"
           aria-keyshortcuts="Control+K Meta+K"
-          onClick={() => openAssistant()}
+          onClick={openAssistant}
         >
           Abrir assistente
         </button>
       </nav>
       <SiteHeader
-        onOpenAssistant={() => openAssistant('chat')}
+        onOpenAssistant={openAssistant}
         onOpenCv={() => setCvOpen(true)}
       />
 
       <main id="conteudo" tabIndex={-1} className="divide-y divide-line">
-        <Hero
-          onOpenJobFit={() => openAssistant('jobfit')}
-          onOpenCv={() => setCvOpen(true)}
-        />
+        <Hero onOpenCv={() => setCvOpen(true)} />
         <ExperienceSection selectedSkill={selectedSkill} onSelectSkill={setSelectedSkill} />
         <div id="projeto" tabIndex={-1}>
           <ProjectSection selectedSkill={selectedSkill} onSelectSkill={setSelectedSkill} />
@@ -121,7 +117,7 @@ export default function App() {
       {!assistantState.open && (
         <CTA
           variant="secondary"
-          onClick={() => openAssistant('chat')}
+          onClick={openAssistant}
           aria-haspopup="dialog"
           aria-expanded={false}
           aria-controls="assistente"
@@ -139,9 +135,7 @@ export default function App() {
           <AssistantPanel
             session={assistantSession}
             open={assistantState.open}
-            mode={assistantState.mode}
             onOpenChange={assistantSession.setOpen}
-            onModeChange={assistantSession.setMode}
             onOpenCv={() => setCvOpen(true)}
           />
         </Suspense>

@@ -16,10 +16,6 @@ interface SkillEvidenceItem {
   sectionId: 'experiencia' | 'projeto' | 'formacao';
 }
 
-/**
- * Sinônimos estritos da MESMA tecnologia (variações de grafia no portfólio),
- * sem associar uma ferramenta a outra diferente.
- */
 const STRICT_SYNONYMS: Record<string, string[]> = {
   '.NET': ['.net', '.net core', 'c# / .net core', 'c#/.net core'],
   'C#': ['c#', 'c# / .net core', 'c#/.net core'],
