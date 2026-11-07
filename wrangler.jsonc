@@ -40,13 +40,8 @@
     "run_worker_first": [
       "/api/*",
       "/llms.txt",
-      "/ai.json",
       "/robots.txt",
       "/sitemap.xml",
-      "/pedro.md",
-      "/AGENTS.md",
-      "/agents.md",
-      "/resume.json",
       "/.well-known/*"
     ]
   },

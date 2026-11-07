@@ -1,11 +1,22 @@
 import { useState, type FormEvent } from 'react';
 import { Github, Linkedin, Loader2 } from 'lucide-react';
-import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
+import { CONTACT_LIMITS, DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { CopyEmailButton, Reveal } from './ui';
 
+type FormStatus =
+  | { kind: 'idle' }
+  | { kind: 'sending' }
+  | { kind: 'sent' }
+  | { kind: 'rejected'; message: string }
+  | { kind: 'fallback' };
+
+const REJECTED_STATUSES = new Set([400, 413, 429]);
+
 function ContactForm({ email }: { email: string }) {
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [status, setStatus] = useState<FormStatus>({ kind: 'idle' });
+  const [messageLength, setMessageLength] = useState(0);
+  const sending = status.kind === 'sending';
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -15,32 +26,54 @@ function ContactForm({ email }: { email: string }) {
       name: String(data.get('name') ?? '').trim(),
       email: String(data.get('email') ?? '').trim(),
       message: String(data.get('message') ?? '').trim(),
+      website: String(data.get('website') ?? ''),
       source: 'form' as const
     };
 
-    setStatus('sending');
+    const openMailClient = () => {
+      const subject = encodeURIComponent(`Portfólio - ${payload.name}`);
+      const body = encodeURIComponent(`Nome: ${payload.name}\nE-mail: ${payload.email}\n\n${payload.message}`);
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+      setStatus({ kind: 'fallback' });
+    };
+
+    setStatus({ kind: 'sending' });
+    let response: Response;
     try {
-      const response = await fetch('/api/contact', {
+      response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!response.ok) throw new Error('fail');
-      form.reset();
-      setStatus('sent');
     } catch {
-      const subject = encodeURIComponent(`Portfólio — ${payload.name}`);
-      const body = encodeURIComponent(`Nome: ${payload.name}\nE-mail: ${payload.email}\n\n${payload.message}`);
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-      setStatus('error');
+      openMailClient();
+      return;
     }
+
+    if (response.ok) {
+      form.reset();
+      setMessageLength(0);
+      setStatus({ kind: 'sent' });
+      return;
+    }
+
+    if (REJECTED_STATUSES.has(response.status)) {
+      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      setStatus({ kind: 'rejected', message: body?.error ?? 'Confira os campos e tente de novo.' });
+      return;
+    }
+
+    openMailClient();
   };
 
   return (
     <form
       onSubmit={onSubmit}
-      aria-busy={status === 'sending'}
-      className="rounded-[1.75rem] border border-line bg-surface p-5 sm:p-6"
+      onInput={() => {
+        if (status.kind === 'rejected' || status.kind === 'sent') setStatus({ kind: 'idle' });
+      }}
+      aria-busy={sending}
+      className="relative rounded-[1.75rem] border border-line bg-surface p-5 sm:p-6"
     >
       <p className="font-bold">Ou escreva sua mensagem</p>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -50,6 +83,8 @@ function ContactForm({ email }: { email: string }) {
             name="name"
             type="text"
             required
+            minLength={CONTACT_LIMITS.name.min}
+            maxLength={CONTACT_LIMITS.name.max}
             autoComplete="name"
             placeholder="Seu nome"
             className="field"
@@ -61,6 +96,7 @@ function ContactForm({ email }: { email: string }) {
             name="email"
             type="email"
             required
+            maxLength={CONTACT_LIMITS.email.max}
             autoComplete="email"
             spellCheck={false}
             placeholder="nome@dominio.com"
@@ -73,28 +109,48 @@ function ContactForm({ email }: { email: string }) {
         <textarea
           name="message"
           required
+          minLength={CONTACT_LIMITS.message.min}
+          maxLength={CONTACT_LIMITS.message.max}
           rows={5}
           placeholder="Sobre o que você quer conversar?"
+          aria-describedby="contato-mensagem-contador"
+          onChange={(event) => setMessageLength(event.currentTarget.value.length)}
           className="field field-area"
         />
       </label>
+      <p id="contato-mensagem-contador" className="mt-1.5 text-right font-mono text-xs text-muted">
+        {messageLength}/{CONTACT_LIMITS.message.max}
+        <span className="sr-only"> caracteres, mínimo de {CONTACT_LIMITS.message.min}</span>
+      </p>
+      <div aria-hidden="true" className="sr-only">
+        <label>
+          Site
+          <input name="website" type="text" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
       <CTA
         type="submit"
         variant="secondary"
-        className="mt-5 w-full"
-        disabled={status === 'sending'}
-        icon={status === 'sending' ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : undefined}
+        className="mt-4 w-full"
+        disabled={sending}
+        icon={sending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : undefined}
       >
-        {status === 'sending' ? 'Enviando…' : 'Enviar'}
+        {sending ? 'Enviando…' : 'Enviar'}
       </CTA>
-      {status === 'sent' && (
+      {status.kind === 'sent' && (
         <p className="eyebrow mt-3 text-valid" role="status">
           Mensagem enviada.
         </p>
       )}
-      {status === 'error' && (
-        <p className="eyebrow mt-3 text-invalid" role="status">
-          Se o e-mail não abrir, copie o endereço ao lado.
+      {status.kind === 'rejected' && (
+        <p className="eyebrow mt-3 text-invalid" role="alert">
+          {status.message}
+        </p>
+      )}
+      {status.kind === 'fallback' && (
+        <p className="eyebrow mt-3 text-invalid" role="alert">
+          Não consegui enviar por aqui. Abri seu app de e-mail com a mensagem pronta; se ele não abrir, copie o
+          endereço ao lado.
         </p>
       )}
     </form>
@@ -109,10 +165,7 @@ export function ContactSection() {
       aria-labelledby="contato-titulo"
       className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24"
     >
-      <Reveal>
-        <p className="eyebrow">Vamos conversar?</p>
-      </Reveal>
-      <div className="mt-3 grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start">
+      <div className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start">
         <Reveal delay={0.04}>
           <h2 id="contato-titulo" className="display-wide text-[clamp(2.4rem,7vw,5rem)] leading-[0.9]">
             Entre em contato

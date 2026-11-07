@@ -10,7 +10,6 @@ const GLINTS = Array.from({ length: GLINT_COUNT }, (_, i) => ({
   phase: i * 0.41
 }));
 
-/** Sparse Canvas 2D sparkle. rAF only while on-screen, visible, and tilting. */
 export function HoloSparkleCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
 

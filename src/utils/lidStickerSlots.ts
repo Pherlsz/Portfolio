@@ -225,7 +225,6 @@ function orderSlots(slots: ScatterSlot[]) {
   );
 }
 
-// shortcut: last-resort even grid may sit on text; upgrade if pack fails at a real breakpoint
 function evenGrid(sizes: StickerBox[], playable: Rect): ScatterSlot[] {
   const n = Math.max(1, sizes.length);
   const cols = Math.min(n, Math.max(1, Math.floor((playable.w + STICKER_GAP) / (MIN_HIT + STICKER_GAP))));
@@ -283,7 +282,6 @@ function nearestPlace(
   return fallbackPlace(size, playable, forbidden, placed);
 }
 
-// shortcut: 48 random tries then a 6px grid; upgrade if a new breakpoint still cannot pack with an 8px gap
 function pack(
   sizes: StickerBox[],
   playable: Rect,

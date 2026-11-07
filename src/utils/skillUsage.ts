@@ -16,10 +16,6 @@ interface SkillEvidenceItem {
   sectionId: 'experiencia' | 'projeto' | 'formacao';
 }
 
-/**
- * Sinônimos estritos da MESMA tecnologia (variações de grafia no portfólio),
- * sem associar uma ferramenta a outra diferente.
- */
 const STRICT_SYNONYMS: Record<string, string[]> = {
   '.NET': ['.net', '.net core', 'c# / .net core', 'c#/.net core'],
   'C#': ['c#', 'c# / .net core', 'c#/.net core'],
@@ -27,12 +23,14 @@ const STRICT_SYNONYMS: Record<string, string[]> = {
   'Acessibilidade (WCAG 2.1 AA)': ['wcag 2.1 aa', 'wcag 2.1 level aa', 'wcag 2.1'],
   'Web Performance': ['performance', 'virtualizacao do dom', 'code splitting', 'layout thrashing'],
   'Design Systems': ['design system'],
-  'LLMs (function e tool calling)': [
+  'Interfaces para IA (LLMs)': [
     'modelos de linguagem (llms)',
+    'interfaces de ia',
     'function calling',
     'tool calling',
     'modelos de ia',
     'assistente de ia',
+    'tools e rag',
     'tools, rag'
   ],
   'APIs REST': ['apis rest'],
@@ -114,22 +112,14 @@ export function getSkillUsage(skill: string, data: PortfolioData = DEFAULT_PORTF
   const matchingCoreModules = core.modules
     .filter((m) => textMatchesSkill(`${m.name} ${m.description}`, skill))
     .map((m) => `${m.name}: ${m.description}`);
-  const matchingCoreCards = core.cards
-    .filter((c) => textMatchesSkill(`${c.title} ${c.text}`, skill))
-    .map((c) => `${c.title}: ${c.text}`);
 
-  if (inCoreLang || matchingCoreModules.length > 0 || matchingCoreCards.length > 0) {
+  if (inCoreLang || matchingCoreModules.length > 0) {
     items.push({
       id: 'proj-gymkhana-core',
       kind: 'project',
-      title: `${core.name} (${core.version})`,
-      subtitle: `Biblioteca em ${core.language} · ${core.spec}`,
-      details:
-        matchingCoreModules.length > 0
-          ? matchingCoreModules
-          : matchingCoreCards.length > 0
-            ? matchingCoreCards
-            : [core.tagline],
+      title: core.name,
+      subtitle: `Biblioteca em ${core.language}`,
+      details: matchingCoreModules.length > 0 ? matchingCoreModules : [core.tagline],
       sectionId: 'projeto'
     });
   }

@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from 'react';
 import { Sparkles } from 'lucide-react';
-import { DEFAULT_PORTFOLIO_DATA } from './data/portfolioData';
 import { createAssistantSession } from './utils/assistantSession';
 import { AboutSection } from './components/AboutSection';
 import { ContactSection } from './components/ContactSection';
@@ -16,11 +15,6 @@ import { handleSmoothScrollClick, smoothScrollToSection } from './components/ui'
 const AssistantPanel = lazy(() =>
   import('./components/AssistantPanel').then((module) => ({ default: module.AssistantPanel }))
 );
-const AiFriendlyInspectorModal = lazy(() =>
-  import('./components/AiFriendlyInspectorModal').then((module) => ({
-    default: module.AiFriendlyInspectorModal
-  }))
-);
 const CvPreviewModal = lazy(() =>
   import('./components/CvPreviewModal').then((module) => ({ default: module.CvPreviewModal }))
 );
@@ -33,12 +27,10 @@ export default function App() {
     assistantSession.getState
   );
   const [hasOpenedAssistant, setHasOpenedAssistant] = useState(false);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
-  const openAssistant = (mode?: 'chat' | 'jobfit') => {
-    if (mode) assistantSession.setMode(mode);
+  const openAssistant = () => {
     setHasOpenedAssistant(true);
     assistantSession.setOpen(true);
   };
@@ -64,7 +56,7 @@ export default function App() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing) return;
-      if (cvOpen || inspectorOpen) return;
+      if (cvOpen) return;
 
       const hasCommandModifier = (event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey;
       if (!hasCommandModifier || event.key.toLowerCase() !== 'k') return;
@@ -77,7 +69,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [assistantSession, cvOpen, inspectorOpen]);
+  }, [assistantSession, cvOpen]);
 
   return (
     <>
@@ -93,21 +85,18 @@ export default function App() {
           type="button"
           className="skip-link"
           aria-keyshortcuts="Control+K Meta+K"
-          onClick={() => openAssistant()}
+          onClick={openAssistant}
         >
           Abrir assistente
         </button>
       </nav>
       <SiteHeader
-        onOpenAssistant={() => openAssistant('chat')}
+        onOpenAssistant={openAssistant}
         onOpenCv={() => setCvOpen(true)}
       />
 
       <main id="conteudo" tabIndex={-1} className="divide-y divide-line">
-        <Hero
-          onOpenJobFit={() => openAssistant('jobfit')}
-          onOpenCv={() => setCvOpen(true)}
-        />
+        <Hero onOpenCv={() => setCvOpen(true)} />
         <ExperienceSection selectedSkill={selectedSkill} onSelectSkill={setSelectedSkill} />
         <div id="projeto" tabIndex={-1}>
           <ProjectSection selectedSkill={selectedSkill} onSelectSkill={setSelectedSkill} />
@@ -123,12 +112,12 @@ export default function App() {
         </div>
       </main>
 
-      <SiteFooter onOpenInspector={() => setInspectorOpen(true)} />
+      <SiteFooter />
 
       {!assistantState.open && (
         <CTA
           variant="secondary"
-          onClick={() => openAssistant('chat')}
+          onClick={openAssistant}
           aria-haspopup="dialog"
           aria-expanded={false}
           aria-controls="assistente"
@@ -146,9 +135,7 @@ export default function App() {
           <AssistantPanel
             session={assistantSession}
             open={assistantState.open}
-            mode={assistantState.mode}
             onOpenChange={assistantSession.setOpen}
-            onModeChange={assistantSession.setMode}
             onOpenCv={() => setCvOpen(true)}
           />
         </Suspense>
@@ -156,15 +143,6 @@ export default function App() {
       {cvOpen ? (
         <Suspense fallback={null}>
           <CvPreviewModal open={cvOpen} onClose={() => setCvOpen(false)} />
-        </Suspense>
-      ) : null}
-      {inspectorOpen ? (
-        <Suspense fallback={null}>
-          <AiFriendlyInspectorModal
-            open={inspectorOpen}
-            onClose={() => setInspectorOpen(false)}
-            portfolioData={DEFAULT_PORTFOLIO_DATA}
-          />
         </Suspense>
       ) : null}
     </>

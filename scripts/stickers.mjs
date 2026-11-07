@@ -5,14 +5,8 @@ import sharp from 'sharp';
 const SOURCE_DIR = 'design/raw';
 const OUTPUT_DIR = 'public/stickers';
 const MAX_SIZE = 512;
-
-// A pixel is background when it sits on the color line between the flat
-// background and the white die-cut border. Sticker art is off that line, so the
-// flood fill from the image edges stops at the border instead of leaking inside.
 const MAX_WHITENESS = 0.85;
 const MAX_OFF_LINE = 70;
-// Enclosed holes (a mug handle) only count as background when their pixels are
-// almost exactly the background color and they are ringed by the white border.
 const MAX_HOLE_DISTANCE = 35;
 const MIN_HOLE_WHITE_RING = 0.8;
 
@@ -68,7 +62,6 @@ async function cutOut(file) {
     passable[i] = onLine[i] && a < MAX_WHITENESS ? 1 : 0;
     nearBackground[i] = Math.hypot(d0, d1, d2) < MAX_HOLE_DISTANCE ? 1 : 0;
 
-    // Generated images sometimes carry a stray 1–2 px line on the edges; it is always background.
     const x = i % width;
     const y = (i - x) / width;
     if (x < 2 || y < 2 || x >= width - 2 || y >= height - 2) {
@@ -85,7 +78,6 @@ async function cutOut(file) {
     if (i < total - width) visit(i + width);
   };
 
-  // 1 = background reached from the image edges or an enclosed hole, 2 = rejected hole.
   const visited = new Uint8Array(total);
   const stack = new Int32Array(total);
   const fill = (seeds, mark) => {
@@ -127,7 +119,6 @@ async function cutOut(file) {
       data[o + 3] = Math.round(255 * Math.min(1, Math.max(0, whiteness[i] / MAX_WHITENESS)));
       continue;
     }
-    // Remove the background tint from the outermost ring of the white border.
     const x = i % width;
     const touchesBackground =
       (x > 0 && visited[i - 1] === 1) ||
@@ -154,7 +145,6 @@ async function cutOut(file) {
     }
   }
 
-  // The bounding box only counts solid pixels; the padding keeps the anti-aliased border edge.
   const pad = 4;
   const left = Math.max(0, minX - pad);
   const top = Math.max(0, minY - pad);

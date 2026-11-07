@@ -4,19 +4,12 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   type RefObject
 } from 'react';
-import {
-  animate,
-  MotionConfig,
-  motion,
-  useDragControls,
-  useMotionValue,
-  useReducedMotion
-} from 'motion/react';
 import { HoloSparkleCanvas } from './HoloSparkleCanvas';
 import { useStickerHoloPointer } from '../utils/holoPointer';
-import { holoMaskUrl, isStickerHoloActive, useHoloRoulette } from '../utils/stickerHolo';
+import { holoMaskUrl, isStickerHoloActive, prefersReducedMotion, useHoloRoulette } from '../utils/stickerHolo';
 import {
   localPadded,
   nudgeConflicts,
@@ -33,31 +26,9 @@ import {
 
 export type StickerId = LidSlotId;
 
-interface AxisDragConstraints {
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
-}
-
-const ZERO_DRAG_CONSTRAINTS: AxisDragConstraints = { left: 0, right: 0, top: 0, bottom: 0 };
-
-function roomToDragConstraints(
-  space: { left: number; right: number; up: number; down: number },
-  offset: { x: number; y: number }
-): AxisDragConstraints {
-  return {
-    left: offset.x + space.left,
-    right: offset.x + space.right,
-    top: offset.y + space.up,
-    bottom: offset.y + space.down
-  };
-}
-
 interface StickerDef {
   label: string;
   src: string;
-  /** Tamanho real do arquivo em public/stickers, para reservar espaço sem layout shift. */
   width: number;
   height: number;
   animation: string;
@@ -138,13 +109,11 @@ function StickerArt({
   id,
   reactionKey,
   face,
-  eager = false,
   holoFoil = false
 }: {
   id: StickerId;
   reactionKey: number | null;
   face?: number;
-  eager?: boolean;
   holoFoil?: boolean;
 }) {
   const def = STICKERS[id];
@@ -159,7 +128,7 @@ function StickerArt({
           alt=""
           draggable={false}
           decoding="async"
-          loading={eager ? 'eager' : 'lazy'}
+          loading="eager"
           className="sticker-art relative z-[1] block h-auto w-full select-none"
         />
         {holoFoil && (
@@ -179,29 +148,32 @@ function StickerArt({
   );
 }
 
-export function StaticSticker({ id, className = '' }: { id: StickerId; className?: string }) {
-  const { reactionKey, react, face } = useStickerReaction(id);
-  return (
-    <button type="button" onClick={react} aria-label={STICKERS[id].label} className={`group relative block ${className}`}>
-      <StickerArt id={id} reactionKey={reactionKey} face={face} />
-    </button>
-  );
+interface AxisDragConstraints {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
 }
-
-const SPRING = { type: 'spring', stiffness: 260, damping: 24 } as const;
 
 function applyAxisConstraints(
   constraints: AxisDragConstraints,
-  offset: { x: number; y: number },
   deltaX: number,
   deltaY: number
 ) {
-  const nextX = offset.x + deltaX;
-  const nextY = offset.y + deltaY;
   return {
-    x: Math.min(Math.max(nextX, constraints.left), constraints.right),
-    y: Math.min(Math.max(nextY, constraints.top), constraints.bottom)
+    x: Math.min(Math.max(deltaX, constraints.left), constraints.right),
+    y: Math.min(Math.max(deltaY, constraints.top), constraints.bottom)
   };
+}
+
+interface ActiveDrag {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  lastX: number;
+  lastTime: number;
+  constraints: AxisDragConstraints;
+  moved: boolean;
 }
 
 function LidSticker({
@@ -222,62 +194,109 @@ function LidSticker({
   const def = STICKERS[slot.id];
   const maskUrl = holoActive ? holoMaskUrl(slot.id) : undefined;
   const ref = useRef<HTMLButtonElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const rotate = useMotionValue(slot.rotate);
-  const dragged = useRef(false);
-  const dragControls = useDragControls();
-  const dragConstraints = useRef<AxisDragConstraints>({ ...ZERO_DRAG_CONSTRAINTS }).current;
+  const tiltRef = useRef<HTMLSpanElement>(null);
+  const offsetRef = useRef({ x: 0, y: 0 });
+  const dragRef = useRef<ActiveDrag | null>(null);
+  const suppressClickRef = useRef(false);
   const [pressed, setPressed] = useState(false);
   const { reactionKey, react, face } = useStickerReaction(slot.id);
-  const reduceMotion = useReducedMotion() === true;
-  const baseRotate = useRef(slot.rotate);
   useStickerHoloPointer(ref, holoActive);
 
   useLayoutEffect(() => {
-    x.set(0);
-    y.set(0);
-    rotate.set(slot.rotate);
-    baseRotate.current = slot.rotate;
-  }, [slot.x, slot.y, slot.rotate, rotate, x, y]);
+    offsetRef.current = { x: 0, y: 0 };
+    if (ref.current) {
+      ref.current.style.transform = '';
+    }
+    if (tiltRef.current) {
+      tiltRef.current.style.transform = `rotate(${slot.rotate}deg) scale(1)`;
+    }
+  }, [slot.x, slot.y, slot.rotate]);
 
-  const room = () => {
-    const lid = lidRef.current?.getBoundingClientRect();
-    const box = ref.current?.getBoundingClientRect();
-    if (!lid || !box) return null;
+  const room = (): AxisDragConstraints | null => {
+    const lid = lidRef.current;
+    if (!lid) return null;
     return {
-      left: lid.left - box.left,
-      right: lid.right - box.right,
-      up: lid.top - box.top,
-      down: lid.bottom - box.bottom
+      left: -slot.x,
+      right: lid.clientWidth - (slot.x + slot.w),
+      top: -slot.y,
+      bottom: lid.clientHeight - (slot.y + slot.h)
     };
   };
 
-  const syncDragConstraints = () => {
-    const space = room();
-    if (!space) return;
-    const next = roomToDragConstraints(space, { x: x.get(), y: y.get() });
-    dragConstraints.left = next.left;
-    dragConstraints.right = next.right;
-    dragConstraints.top = next.top;
-    dragConstraints.bottom = next.bottom;
+  const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0) return;
+    const constraints = room();
+    if (!constraints) return;
+    onFront();
+    setPressed(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      lastTime: performance.now(),
+      constraints,
+      moved: false
+    };
   };
 
-  const releasePressed = () => setPressed(false);
+  const handlePointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const rawDx = event.clientX - drag.startX;
+    const rawDy = event.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(rawDx, rawDy) < 4) return;
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const stopDrag = () => {
-      dragControls.stop();
-    };
-    node.addEventListener('lostpointercapture', stopDrag);
-    node.addEventListener('pointercancel', stopDrag);
-    return () => {
-      node.removeEventListener('lostpointercapture', stopDrag);
-      node.removeEventListener('pointercancel', stopDrag);
-    };
-  }, [dragControls]);
+    drag.moved = true;
+    suppressClickRef.current = true;
+    const next = applyAxisConstraints(drag.constraints, rawDx, rawDy);
+    offsetRef.current = next;
+    onOffset(slot.id, next.x, next.y);
+
+    const now = performance.now();
+    const dt = Math.max(1, now - drag.lastTime);
+    const vx = ((event.clientX - drag.lastX) / dt) * 1000;
+    drag.lastX = event.clientX;
+    drag.lastTime = now;
+
+    const reduceMotion = prefersReducedMotion();
+    const extraRotate = reduceMotion ? 0 : Math.max(-14, Math.min(14, vx / 160));
+    const scale = reduceMotion ? 1 : 1.06;
+
+    if (ref.current) {
+      ref.current.style.transform = `translate3d(${next.x}px, ${next.y}px, 0)`;
+    }
+    if (tiltRef.current) {
+      tiltRef.current.style.transition = 'none';
+      tiltRef.current.style.transform = `rotate(${slot.rotate + extraRotate}deg) scale(${scale})`;
+    }
+  };
+
+  const finishDrag = (pointerId?: number) => {
+    const drag = dragRef.current;
+    if (!drag || (pointerId !== undefined && drag.pointerId !== pointerId)) {
+      setPressed(false);
+      return;
+    }
+    dragRef.current = null;
+    setPressed(false);
+
+    if (drag.moved) {
+      const { x, y } = offsetRef.current;
+      offsetRef.current = { x: 0, y: 0 };
+      if (tiltRef.current) {
+        tiltRef.current.style.transition = prefersReducedMotion()
+          ? 'none'
+          : 'transform 200ms cubic-bezier(0.22, 1, 0.36, 1)';
+        tiltRef.current.style.transform = `rotate(${slot.rotate}deg) scale(1)`;
+      }
+      onSettle(slot.id, slot.x + x, slot.y + y);
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
+    }
+  };
 
   const nudge = (event: KeyboardEvent<HTMLButtonElement>) => {
     const step = event.shiftKey ? 48 : 16;
@@ -288,64 +307,27 @@ function LidSticker({
       ArrowDown: [0, step]
     };
     const move = moves[event.key];
-    const space = move && room();
-    if (!move || !space) return;
+    const constraints = move && room();
+    if (!move || !constraints) return;
     event.preventDefault();
     onFront();
-    const constraints = roomToDragConstraints(space, { x: x.get(), y: y.get() });
-    const next = applyAxisConstraints(constraints, { x: x.get(), y: y.get() }, move[0], move[1]);
-    x.set(next.x);
-    y.set(next.y);
+    const next = applyAxisConstraints(constraints, move[0], move[1]);
     onSettle(slot.id, slot.x + next.x, slot.y + next.y);
   };
 
   const holoVars: Record<string, string> = maskUrl ? { '--holo-mask': `url("${maskUrl}")` } : {};
 
   return (
-    <motion.button
+    <button
       ref={ref}
       type="button"
-      drag
-      dragControls={dragControls}
-      dragConstraints={dragConstraints}
-      dragElastic={0}
-      dragMomentum={false}
-      whileDrag={reduceMotion ? undefined : { scale: 1.06 }}
-      onPointerDown={() => {
-        onFront();
-        setPressed(true);
-        syncDragConstraints();
-      }}
-      onPointerUp={releasePressed}
-      onPointerCancel={releasePressed}
-      onLostPointerCapture={releasePressed}
-      onDragStart={() => {
-        dragged.current = true;
-        onFront();
-        setPressed(true);
-        syncDragConstraints();
-        baseRotate.current = rotate.get();
-      }}
-      onDrag={(_event, info) => {
-        onOffset(slot.id, x.get(), y.get());
-        if (reduceMotion) return;
-        const extra = Math.max(-14, Math.min(14, info.velocity.x / 160));
-        rotate.set(baseRotate.current + extra);
-      }}
-      onDragEnd={() => {
-        releasePressed();
-        onSettle(slot.id, slot.x + x.get(), slot.y + y.get());
-        if (reduceMotion) {
-          rotate.set(baseRotate.current);
-        } else {
-          void animate(rotate, baseRotate.current, SPRING);
-        }
-        window.setTimeout(() => {
-          dragged.current = false;
-        });
-      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={(e) => finishDrag(e.pointerId)}
+      onPointerCancel={(e) => finishDrag(e.pointerId)}
+      onLostPointerCapture={() => finishDrag()}
       onClick={() => {
-        if (dragged.current) return;
+        if (suppressClickRef.current) return;
         react();
       }}
       onKeyDown={nudge}
@@ -357,9 +339,6 @@ function LidSticker({
       data-holo-state={holoActive ? 'idle' : undefined}
       className="group pointer-events-auto absolute flex cursor-grab touch-none items-center justify-center active:cursor-grabbing"
       style={{
-        x,
-        y,
-        rotate,
         left: slot.x,
         top: slot.y,
         width: slot.w,
@@ -367,16 +346,14 @@ function LidSticker({
         ...holoVars
       }}
     >
-      <span className="block" style={{ width: slot.artW }}>
-        <StickerArt
-          id={slot.id}
-          reactionKey={reactionKey}
-          face={face}
-          eager
-          holoFoil={holoActive}
-        />
+      <span
+        ref={tiltRef}
+        className="block"
+        style={{ width: slot.artW }}
+      >
+        <StickerArt id={slot.id} reactionKey={reactionKey} face={face} holoFoil={holoActive} />
       </span>
-    </motion.button>
+    </button>
   );
 }
 
@@ -481,37 +458,35 @@ export function StickerLid() {
   }, []);
 
   return (
-    <MotionConfig reducedMotion="user">
-      <div className="pointer-events-none absolute inset-0 z-[2] no-print">
-        <div ref={lidRef} className="lid absolute inset-0">
-          <ul
-            aria-label="Stickers"
-            data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
-          >
-            {slots.map((slot) => (
-              <li
-                key={slot.id}
-                className="pointer-events-none absolute inset-0"
-                style={{ zIndex: order.indexOf(slot.id) + 1 }}
-              >
-                <LidSticker
-                  slot={slot}
-                  lidRef={lidRef}
-                  holoActive={isStickerHoloActive(holo, slot.id)}
-                  onFront={() => bringToFront(slot.id)}
-                  onOffset={(id, x, y) => {
-                    offsetsRef.current[id] = { x, y };
-                  }}
-                  onSettle={settle}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p id="tampa-ajuda" className="sr-only">
-          Arraste os stickers ou use as setas. Clique no D20 para rolar.
-        </p>
+    <div className="pointer-events-none absolute inset-0 z-[2] no-print">
+      <div ref={lidRef} className="lid absolute inset-0">
+        <ul
+          aria-label="Stickers"
+          data-sticker-holo={holo.mode === 'none' ? undefined : holo.mode}
+        >
+          {slots.map((slot) => (
+            <li
+              key={slot.id}
+              className="pointer-events-none absolute inset-0"
+              style={{ zIndex: order.indexOf(slot.id) + 1 }}
+            >
+              <LidSticker
+                slot={slot}
+                lidRef={lidRef}
+                holoActive={isStickerHoloActive(holo, slot.id)}
+                onFront={() => bringToFront(slot.id)}
+                onOffset={(id, x, y) => {
+                  offsetsRef.current[id] = { x, y };
+                }}
+                onSettle={settle}
+              />
+            </li>
+          ))}
+        </ul>
       </div>
-    </MotionConfig>
+      <p id="tampa-ajuda" className="sr-only">
+        Arraste os stickers ou use as setas. Clique no D20 para rolar.
+      </p>
+    </div>
   );
 }

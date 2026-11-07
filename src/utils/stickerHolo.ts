@@ -2,11 +2,7 @@ import { useEffect, useState } from 'react';
 
 const STICKER_HOLO_STORAGE_KEY = 'pherls:sticker-holo';
 const HOLO_SCHEMA_VERSION = 2 as const;
-
-/** Production all-three odds. Locked 2026-10-15. */
 const ALL_ODDS = 1 / 100;
-
-/** Lid cat stickers only — never d20 / typescript / react / nextjs. */
 const HOLO_ELIGIBLE_LID_STICKER_IDS = ['morcega', 'banguela', 'tomada'] as const;
 
 type HoloEligibleId = (typeof HOLO_ELIGIBLE_LID_STICKER_IDS)[number];
@@ -35,11 +31,6 @@ function randomUnit(): number {
   return Math.random();
 }
 
-/**
- * Holo roulette: one roll per browser tab, persisted in `pherls:sticker-holo` v:2.
- * - Production: 1/100 all three cats together; otherwise none.
- * - DEV: `?holo=1` / `?holo=all` force all three and do not write sessionStorage.
- */
 function rollHolo(random: () => number = randomUnit): HoloState {
   if (random() < ALL_ODDS) {
     return ALL;
@@ -72,12 +63,9 @@ function writeStickerHoloToSession(state: HoloState): void {
   if (typeof window === 'undefined') return;
   try {
     sessionStorage.setItem(STICKER_HOLO_STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    /* quota / private mode */
-  }
+  } catch {}
 }
 
-/** DEV-only: `?holo=1` and `?holo=all` force all cats. Ignored in production. Never writes storage. */
 function devHoloOverride(): HoloState | null {
   if (!import.meta.env.DEV || typeof window === 'undefined') return null;
   const param = new URLSearchParams(window.location.search).get('holo');

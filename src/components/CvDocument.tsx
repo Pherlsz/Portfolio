@@ -5,6 +5,7 @@ import {
   featuredProjectPrimaryUrl,
   formatPeriod,
   plainText,
+  SITE_ORIGIN,
   skillNames
 } from '../data/portfolioData';
 
@@ -21,12 +22,12 @@ function CvSection({ title, children }: { title: string; children: ReactNode }) 
   );
 }
 
-/** Versão A4 do currículo, gerada dos mesmos dados do site e impressa em /cv. */
-export function CvDocument() {
+export function CvDocument({ embedded = false }: { embedded?: boolean } = {}) {
   const { profile, experiences, featuredProjects, project, skills, education, certifications, otherCourses, languages } =
     DEFAULT_PORTFOLIO_DATA;
 
   useEffect(() => {
+    if (embedded) return;
     const prevTitle = document.title;
     const wasDark = document.documentElement.classList.contains('dark');
     document.title = `${profile.name} · Currículo`;
@@ -35,10 +36,32 @@ export function CvDocument() {
       document.title = prevTitle;
       if (wasDark) document.documentElement.classList.add('dark');
     };
-  }, [profile.name]);
+  }, [embedded, profile.name]);
+
+  const Wrapper = embedded ? 'div' : 'main';
 
   return (
-    <main className="mx-auto max-w-[210mm] bg-paper px-[16mm] py-[14mm] text-[10pt] leading-[1.45] text-ink print:p-0">
+    <Wrapper
+      className={
+        embedded
+          ? 'mx-auto max-w-[210mm] border border-line bg-paper px-5 py-6 text-[10pt] leading-[1.45] text-ink shadow-lg sm:px-[16mm] sm:py-[14mm]'
+          : 'mx-auto max-w-[210mm] bg-paper px-[16mm] py-[14mm] text-[10pt] leading-[1.45] text-ink print:p-0'
+      }
+    >
+      {!embedded && (
+        <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+          <a href="/" className="link font-mono text-xs font-semibold">
+            ← Voltar ao portfólio
+          </a>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="cta cta-primary min-h-9 px-3 py-1.5 text-xs"
+          >
+            Imprimir / Salvar PDF
+          </button>
+        </div>
+      )}
       <header>
         <h1 className="display-wide text-[24pt] uppercase leading-none">{profile.name}</h1>
         <p className="mt-2 font-mono text-[9.5pt]">
@@ -46,7 +69,21 @@ export function CvDocument() {
         </p>
         <p className="mt-1 font-mono text-[9pt] text-muted">{profile.workMode}</p>
         <p className="mt-1 text-[9.5pt]">
-          {profile.email} · {shortUrl(profile.linkedin)} · {shortUrl(profile.github)}
+          <a href={`mailto:${profile.email}`} className="underline underline-offset-2">
+            {profile.email}
+          </a>{' '}
+          ·{' '}
+          <a href={profile.linkedin} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+            {shortUrl(profile.linkedin)}
+          </a>{' '}
+          ·{' '}
+          <a href={profile.github} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+            {shortUrl(profile.github)}
+          </a>{' '}
+          ·{' '}
+          <a href={SITE_ORIGIN} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+            {shortUrl(SITE_ORIGIN)}
+          </a>
         </p>
       </header>
 
@@ -94,7 +131,13 @@ export function CvDocument() {
             <li key={item.id} className="break-inside-avoid">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
                 <h3 className="text-[11pt] font-bold">{item.name}</h3>
-                {primary ? <p className="font-mono text-[9pt]">{shortUrl(primary)}</p> : null}
+                {primary ? (
+                  <p className="font-mono text-[9pt]">
+                    <a href={primary} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                      {shortUrl(primary)}
+                    </a>
+                  </p>
+                ) : null}
               </div>
               <p>{item.tagline}</p>
             </li>
@@ -103,9 +146,13 @@ export function CvDocument() {
           <li className="break-inside-avoid">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
               <h3 className="text-[11pt] font-bold">
-                {project.name} · {project.language} · {project.version}
+                {project.name} · {project.language}
               </h3>
-              <p className="font-mono text-[9pt]">{shortUrl(project.repoUrl)}</p>
+              <p className="font-mono text-[9pt]">
+                <a href={project.repoUrl} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                  {shortUrl(project.repoUrl)}
+                </a>
+              </p>
             </div>
             <p>{project.tagline}</p>
           </li>
@@ -123,7 +170,7 @@ export function CvDocument() {
         </dl>
       </CvSection>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid gap-6 sm:grid-cols-3 print:grid-cols-3">
         <CvSection title="Formação">
           {education.map((e) => (
             <p key={e.course}>
@@ -153,6 +200,6 @@ export function CvDocument() {
           </ul>
         </CvSection>
       </div>
-    </main>
+    </Wrapper>
   );
 }

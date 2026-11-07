@@ -1,13 +1,7 @@
-import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData.ts';
-import { JobDescriptionSchema, QuestionSchema, type ChatMode } from './chatGuardrails.ts';
-import { ChatResponseSchema, type ChatSource } from './chatResponseSchema.ts';
-import { presetIdForChipText } from './presetQuestions.ts';
+import type { ChatAction, ChatResponse, ChatSource } from './chat.ts';
+import { HISTORY_LIMIT } from './chat.ts';
 
-export interface ChatAction {
-  label: string;
-  type: 'navigate' | 'export_cv';
-  value: string;
-}
+export type { ChatAction };
 
 export interface ChatMessage {
   id: string;
@@ -15,14 +9,13 @@ export interface ChatMessage {
   text: string;
   source?: ChatSource;
   actions?: ChatAction[];
-  followUps?: string[];
-  blockedByGuardrail?: boolean;
+  failed?: boolean;
 }
 
 export const WELCOME_MESSAGE: ChatMessage = {
   id: 'welcome',
   role: 'model',
-  text: 'Oi! Posso resumir a carreira do **Pedro**, falar dos projetos ou comparar o perfil dele com a sua vaga. Respondo só sobre ele.',
+  text: 'Oi! Posso resumir a experiência do **Pedro**, responder dúvidas sobre a stack e projetos ou comparar o perfil dele se você colar os requisitos de uma vaga.',
   actions: [
     { label: 'Ver experiência', type: 'navigate', value: '#experiencia' },
     { label: 'Ver projetos', type: 'navigate', value: '#projeto' },
@@ -31,80 +24,47 @@ export const WELCOME_MESSAGE: ChatMessage = {
 };
 
 export interface AssistantSessionState {
-  sessionId: string;
   open: boolean;
-  mode: ChatMode;
   messages: ChatMessage[];
   question: string;
-  jobDescription: string;
-  jobQuestion: string;
-  activeJob: string | null;
-  jobExpanded: boolean;
   isLoading: boolean;
 }
 
 export interface AssistantSessionOptions {
   fetchImpl?: typeof fetch;
-  ownerName?: string;
 }
 
 type Listener = () => void;
 
-function createSessionId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
 function createInitialState(): AssistantSessionState {
   return {
-    sessionId: createSessionId(),
     open: false,
-    mode: 'chat',
     messages: [WELCOME_MESSAGE],
     question: '',
-    jobDescription: '',
-    jobQuestion: '',
-    activeJob: null,
-    jobExpanded: false,
     isLoading: false
   };
 }
 
-/**
- * Cliente HTTP da API de chat: envia a requisição e interpreta erros/schemas de resposta,
- * mantendo as regras de negócio e segurança no servidor.
- */
 export async function requestAssistantChat(
   payload: {
-    mode: ChatMode;
     message: string;
     history: Array<{ role: 'user' | 'model'; text: string }>;
-    job?: string;
-    presetId?: string;
   },
   fetchFn: typeof fetch = globalThis.fetch
-) {
+): Promise<ChatResponse & { ok: boolean }> {
   const response = await fetchFn('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
-
-  const raw: unknown = await response.json();
-  const parsed = ChatResponseSchema.safeParse(raw);
-  if (!parsed.success) {
-    throw new Error('Resposta inválida');
+  const data = (await response.json()) as Partial<ChatResponse>;
+  if (typeof data.reply !== 'string' || !data.reply) {
+    throw new Error(data.error ?? 'Resposta inválida');
   }
-  if (!response.ok && !parsed.data.reply) {
-    throw new Error(parsed.data.error ?? 'Erro ao consultar o assistente');
-  }
-  return parsed.data;
+  return { ok: response.ok, reply: data.reply, source: data.source ?? 'local', actions: data.actions };
 }
 
 export function createAssistantSession(options: AssistantSessionOptions = {}) {
-  const ownerName = options.ownerName ?? DEFAULT_PORTFOLIO_DATA.profile.name;
   let state: AssistantSessionState = createInitialState();
   let nextMessageSeq = 1;
   let activeRequestId = 0;
@@ -135,25 +95,8 @@ export function createAssistantSession(options: AssistantSessionOptions = {}) {
     setState((prev) => ({ ...prev, open }));
   };
 
-  const setMode = (mode: ChatMode) => {
-    if (state.mode === mode) return;
-    setState((prev) => ({ ...prev, mode }));
-  };
-
   const setQuestion = (question: string) => {
     setState((prev) => ({ ...prev, question }));
-  };
-
-  const setJobDescription = (jobDescription: string) => {
-    setState((prev) => ({ ...prev, jobDescription }));
-  };
-
-  const setJobQuestion = (jobQuestion: string) => {
-    setState((prev) => ({ ...prev, jobQuestion }));
-  };
-
-  const setJobExpanded = (jobExpanded: boolean) => {
-    setState((prev) => ({ ...prev, jobExpanded }));
   };
 
   const clearChat = () => {
@@ -161,10 +104,7 @@ export function createAssistantSession(options: AssistantSessionOptions = {}) {
     setState((prev) => ({
       ...prev,
       messages: [WELCOME_MESSAGE],
-      activeJob: null,
-      jobQuestion: '',
-      jobDescription: '',
-      jobExpanded: false,
+      question: '',
       isLoading: false
     }));
   };
@@ -175,128 +115,59 @@ export function createAssistantSession(options: AssistantSessionOptions = {}) {
     notify();
   };
 
-  const buildSafeHistory = (messages: ChatMessage[]) => {
-    const eligible: Array<{ role: 'user' | 'model'; text: string }> = [];
-    for (let i = 0; i < messages.length; i += 1) {
-      const current = messages[i];
-      if (current.id === 'welcome' || current.blockedByGuardrail) continue;
-      const next = messages[i + 1];
-      if (current.role === 'user' && next?.role === 'model' && next.blockedByGuardrail) {
-        continue;
-      }
-      eligible.push({ role: current.role, text: current.text });
-    }
-    return eligible.slice(-6);
-  };
+  const buildHistory = (messages: ChatMessage[]) =>
+    messages
+      .filter((message, i) => message.id !== 'welcome' && !message.failed && !messages[i + 1]?.failed)
+      .map(({ role, text }) => ({ role, text }))
+      .slice(-HISTORY_LIMIT);
 
-  const send = async (
-    text: string,
-    sendMode: ChatMode,
-    opts?: { job?: string; presetId?: string }
-  ): Promise<void> => {
+  const send = async (text: string): Promise<void> => {
     const trimmed = text.trim();
     if (!trimmed || state.isLoading) return;
 
-    const history = buildSafeHistory(state.messages);
+    const history = buildHistory(state.messages);
     const userMsgId = `user-${nextMessageSeq++}`;
-    const inputMode: ChatMode = opts?.job ? 'chat' : sendMode;
-
-    // O cliente valida apenas limites estruturais (tamanho/formato). A política de segurança roda no backend.
-    const structural = (inputMode === 'jobfit' ? JobDescriptionSchema : QuestionSchema).safeParse(trimmed);
-    if (!structural.success) {
-      const modelMsgId = `model-${nextMessageSeq++}`;
-      const errorMsg = structural.error.issues[0]?.message ?? 'Entrada inválida.';
-      setState((prev) => ({
-        ...prev,
-        messages: [
-          ...prev.messages,
-          { id: userMsgId, role: 'user', text: trimmed, blockedByGuardrail: true },
-          {
-            id: modelMsgId,
-            role: 'model',
-            text: `**${errorMsg}**\n\nRespondo só sobre a carreira, os projetos, a stack e os bastidores do **${ownerName}**.`,
-            blockedByGuardrail: true
-          }
-        ]
-      }));
-      return;
-    }
-
-    const sanitizedText = structural.data;
     const requestId = ++activeRequestId;
 
     setState((prev) => ({
       ...prev,
       messages: [...prev.messages, { id: userMsgId, role: 'user', text: trimmed }],
-      activeJob: sendMode === 'jobfit' && !opts?.job ? sanitizedText : prev.activeJob,
-      jobExpanded: sendMode === 'jobfit' && !opts?.job ? false : prev.jobExpanded,
       isLoading: true
     }));
 
+    let reply: ChatMessage;
     try {
-      const presetId = opts?.presetId ?? presetIdForChipText(sanitizedText);
       const data = await requestAssistantChat(
-        {
-          mode: sendMode,
-          message: sanitizedText,
-          history,
-          ...(opts?.job ? { job: opts.job } : {}),
-          ...(presetId ? { presetId } : {})
-        },
+        { message: trimmed, history },
         options.fetchImpl ?? globalThis.fetch
       );
-
-      if (requestId !== activeRequestId) {
-        return;
-      }
-
-      const modelMsgId = `model-${nextMessageSeq++}`;
-      setState((prev) => ({
-        ...prev,
-        messages: [
-          ...prev.messages,
-          {
-            id: modelMsgId,
-            role: 'model',
-            text: data.reply ?? '',
-            source: data.source,
-            actions: data.actions,
-            followUps: data.followUps,
-            blockedByGuardrail: Boolean(data.blockedByZod)
-          }
-        ],
-        isLoading: false
-      }));
+      reply = {
+        id: `model-${nextMessageSeq++}`,
+        role: 'model',
+        text: data.reply,
+        source: data.source,
+        actions: data.actions,
+        failed: !data.ok
+      };
     } catch {
-      if (requestId !== activeRequestId) {
-        return;
-      }
-      const modelMsgId = `model-${nextMessageSeq++}`;
-      setState((prev) => ({
-        ...prev,
-        messages: [
-          ...prev.messages,
-          {
-            id: modelMsgId,
-            role: 'model',
-            text: 'Não consegui responder agora. As seções de **Experiência** e **Projeto** têm o resumo completo, e o CV está a um clique.',
-            actions: WELCOME_MESSAGE.actions
-          }
-        ],
-        isLoading: false
-      }));
+      reply = {
+        id: `model-${nextMessageSeq++}`,
+        role: 'model',
+        text: 'Não consegui responder agora. As seções de **Experiência** e **Projetos** têm o resumo completo, e o CV está a um clique.',
+        actions: WELCOME_MESSAGE.actions,
+        failed: true
+      };
     }
+
+    if (requestId !== activeRequestId) return;
+    setState((prev) => ({ ...prev, messages: [...prev.messages, reply], isLoading: false }));
   };
 
   return {
     getState,
     subscribe,
     setOpen,
-    setMode,
     setQuestion,
-    setJobDescription,
-    setJobQuestion,
-    setJobExpanded,
     clearChat,
     resetForPageNavigation,
     send

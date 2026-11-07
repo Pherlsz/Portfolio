@@ -22,10 +22,6 @@ function setIdle(el: HTMLElement): void {
   el.style.removeProperty('--hyp');
 }
 
-/**
- * Pointer-relative --mx/--my/--hyp on each holographic sticker.
- * Hover and mouse-drag both enter `tilt` (3D + strong foil). Touch skips tilt.
- */
 export function useStickerHoloPointer(ref: RefObject<HTMLElement | null>, enabled: boolean): void {
   useEffect(() => {
     if (!enabled) return;

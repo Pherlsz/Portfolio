@@ -4,11 +4,8 @@ import {
   siGithubactions,
   siGo,
   siNextdotjs,
-  siNodedotjs,
-  siPython,
   siReact,
   siReactquery,
-  siRedux,
   siTailwindcss,
   siTypescript
 } from 'simple-icons';
@@ -20,14 +17,24 @@ const SKILL_ICONS: Record<string, { path: string; hex: string }> = {
   'Next.js': siNextdotjs,
   'Tailwind CSS': siTailwindcss,
   'TanStack Query': siReactquery,
-  Redux: siRedux,
-  Python: siPython,
   Go: siGo,
-  'Node.js': siNodedotjs,
   '.NET': siDotnet,
   Docker: siDocker,
   'GitHub Actions': siGithubactions
 };
+
+function ZustandMark() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-3.5 shrink-0" aria-hidden="true">
+      <circle cx="6.5" cy="7" r="3" fill="#764abc" />
+      <circle cx="17.5" cy="7" r="3" fill="#764abc" />
+      <ellipse cx="12" cy="13.5" rx="7.5" ry="6.5" fill="#9b6fd6" />
+      <circle cx="9.25" cy="12.5" r="1.15" fill="#111111" />
+      <circle cx="14.75" cy="12.5" r="1.15" fill="#111111" />
+      <ellipse cx="12" cy="15.25" rx="2.1" ry="1.35" fill="#493323" />
+    </svg>
+  );
+}
 
 function VitestMark() {
   return (
@@ -64,6 +71,8 @@ export function SkillBadge({
     <>
       {name === 'Vitest' ? (
         <VitestMark />
+      ) : name === 'Zustand' ? (
+        <ZustandMark />
       ) : icon ? (
         <svg viewBox="0 0 24 24" className="size-3.5 shrink-0" aria-hidden="true">
           <path d={icon.path} fill={fill} />

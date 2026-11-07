@@ -3,8 +3,8 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite';
-import { generateIndexableHomeHtml } from './src/data/machineDocuments.ts';
-import { DEFAULT_PORTFOLIO_DATA, generateJsonLdSchema } from './src/data/portfolioData.ts';
+import { generateIndexableHomeHtml, generateJsonLdSchema } from './src/data/machineDocuments.ts';
+import { DEFAULT_PORTFOLIO_DATA } from './src/data/portfolioData.ts';
 
 function htmlHead(): Plugin {
   return {

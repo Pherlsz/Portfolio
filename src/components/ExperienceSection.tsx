@@ -24,12 +24,13 @@ function ExperienceItem({
   const span = experienceSpan(experience);
   const metrics = experience.highlights.filter((h) => h.metric);
   const notes = experience.highlights.filter((h) => !h.metric);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(index === 0);
 
   const hasSkillMatch = selectedSkill
     ? stackMatchesSkill(experience.stack, selectedSkill) ||
       experience.highlights.some((h) => textMatchesSkill(`${h.metric ?? ''} ${h.text}`, selectedSkill))
     : false;
+  const isOpen = open || Boolean(selectedSkill && hasSkillMatch);
 
   return (
     <li>
@@ -54,7 +55,7 @@ function ExperienceItem({
 
         <details
           className="experience-details min-w-0"
-          open={open}
+          open={isOpen}
           onToggle={(event) => setOpen(event.currentTarget.open)}
         >
           <summary className="flex cursor-pointer list-none items-start justify-between gap-4 rounded-xl outline-offset-4 [&::-webkit-details-marker]:hidden">
@@ -166,9 +167,6 @@ export function ExperienceSection({
   onSelectSkill: (skill: string | null) => void;
 }) {
   const { experiences } = DEFAULT_PORTFOLIO_DATA;
-  const years = experiences.flatMap((e) => e.roles.flatMap((r) => [r.start, r.end])).sort();
-  const firstYear = years[0].slice(0, 4);
-  const lastYear = years[years.length - 1].slice(0, 4);
 
   return (
     <section
@@ -178,12 +176,7 @@ export function ExperienceSection({
       className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-28"
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <SectionHeading
-          id="experiencia-titulo"
-          eyebrow={`${firstYear} — ${lastYear}`}
-          title="Experiência"
-          intro="Comecei em suporte e no monitoramento de sistemas de alta disponibilidade. Depois passei a construir as interfaces, com o mesmo cuidado com estabilidade."
-        />
+        <SectionHeading id="experiencia-titulo" title="Experiência" />
         {selectedSkill && (
           <div className="mb-10 flex items-center gap-2 sm:mb-14">
             <span className="eyebrow">Filtro ativo:</span>
