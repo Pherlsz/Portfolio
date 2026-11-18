@@ -118,13 +118,19 @@ function tooClose(a: Rect, b: Rect, gap: number) {
   return a.x < b.x + b.w + gap && a.x + a.w + gap > b.x && a.y < b.y + b.h + gap && a.y + a.h + gap > b.y;
 }
 
-function allowed(slot: ScatterSlot, playable: Rect, forbidden: Rect[], placed: ScatterSlot[]) {
+function allowed(
+  slot: ScatterSlot,
+  playable: Rect,
+  forbidden: Rect[],
+  placed: ScatterSlot[],
+  stickerGap = STICKER_GAP
+) {
   const box = aabbOf(slot);
   if (box.x < playable.x - 0.5 || box.y < playable.y - 0.5) return false;
   if (box.x + box.w > playable.x + playable.w + 0.5) return false;
   if (box.y + box.h > playable.y + playable.h + 0.5) return false;
   for (const block of forbidden) if (tooClose(box, block, 0)) return false;
-  for (const other of placed) if (tooClose(box, aabbOf(other), STICKER_GAP)) return false;
+  for (const other of placed) if (tooClose(box, aabbOf(other), stickerGap)) return false;
   return true;
 }
 
@@ -186,21 +192,36 @@ function verticalGaps(x: number, w: number, h: number, playable: Rect, blocked: 
   return gaps;
 }
 
+function scaleStickerBox(box: StickerBox, factor: number): StickerBox {
+  if (factor >= 0.999) return box;
+  const artW = Math.max(26, Math.round(box.artW * factor));
+  const artH = Math.max(26, Math.round(artW * ART_H_OVER_W[box.id]));
+  const minHit = factor < 0.85 ? 32 : MIN_HIT;
+  return {
+    id: box.id,
+    artW,
+    w: Math.max(minHit, artW),
+    h: Math.max(minHit, artH)
+  };
+}
+
 function gridPlace(
   size: StickerBox,
   rotate: number,
   playable: Rect,
   forbidden: Rect[],
-  placed: ScatterSlot[]
+  placed: ScatterSlot[],
+  step = GRID,
+  stickerGap = STICKER_GAP
 ): ScatterSlot | undefined {
   const aabb = rotSize(size.w, size.h, rotate);
   const maxX = playable.x + playable.w - aabb.w;
   const maxY = playable.y + playable.h - aabb.h;
   if (maxX < playable.x || maxY < playable.y) return undefined;
-  for (let y = playable.y; y <= maxY; y += GRID) {
-    for (let x = playable.x; x <= maxX; x += GRID) {
+  for (let y = maxY; y >= playable.y; y -= step) {
+    for (let x = maxX; x >= playable.x; x -= step) {
       const slot = fromAabb(size, rotate, x, y);
-      if (allowed(slot, playable, forbidden, placed)) return slot;
+      if (allowed(slot, playable, forbidden, placed, stickerGap)) return slot;
     }
   }
   return undefined;
@@ -210,10 +231,11 @@ function fallbackPlace(
   size: StickerBox,
   playable: Rect,
   forbidden: Rect[],
-  placed: ScatterSlot[]
+  placed: ScatterSlot[],
+  stickerGap = STICKER_GAP
 ): ScatterSlot | undefined {
   for (const rotate of [FALLBACK_ROTATE[size.id], 0]) {
-    const found = gridPlace(size, rotate, playable, forbidden, placed);
+    const found = gridPlace(size, rotate, playable, forbidden, placed, GRID, stickerGap);
     if (found) return found;
   }
   return undefined;
@@ -225,24 +247,81 @@ function orderSlots(slots: ScatterSlot[]) {
   );
 }
 
-function evenGrid(sizes: StickerBox[], playable: Rect): ScatterSlot[] {
-  const n = Math.max(1, sizes.length);
-  const cols = Math.min(n, Math.max(1, Math.floor((playable.w + STICKER_GAP) / (MIN_HIT + STICKER_GAP))));
-  const rows = Math.ceil(n / cols);
-  const cellW = playable.w / cols;
-  const cellH = playable.h / rows;
-  return sizes.map((size, i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    return {
-      ...size,
-      x: playable.x + col * cellW + Math.max(0, (cellW - size.w) / 2),
-      y: playable.y + row * cellH + Math.max(0, (cellH - size.h) / 2),
-      rotate: 0,
-      fx: 0,
-      fy: 0
-    };
-  });
+function findForbiddenFreeSpot(
+  size: StickerBox,
+  playable: Rect,
+  forbidden: Rect[],
+  placed: ScatterSlot[]
+): ScatterSlot {
+  for (const factor of [1, 0.82, 0.68, 0.56]) {
+    const scaled = scaleStickerBox(size, factor);
+    for (const gap of [4, 2, 0]) {
+      const hit = gridPlace(scaled, 0, playable, forbidden, placed, 4, gap);
+      if (hit) return hit;
+    }
+  }
+  const compact = scaleStickerBox(size, 0.56);
+  let bestSlot: ScatterSlot | undefined;
+  let bestClearance = -Infinity;
+  const maxX = Math.max(playable.x, playable.x + playable.w - compact.w);
+  const maxY = Math.max(playable.y, playable.y + playable.h - compact.h);
+  for (let y = maxY; y >= playable.y; y -= 6) {
+    for (let x = maxX; x >= playable.x; x -= 6) {
+      const candidate = fromAabb(compact, 0, x, y);
+      const box = aabbOf(candidate);
+      if (forbidden.some((block) => tooClose(box, block, 0))) continue;
+      let minDist = Infinity;
+      for (const other of placed) {
+        const ob = aabbOf(other);
+        const dx = (box.x + box.w / 2) - (ob.x + ob.w / 2);
+        const dy = (box.y + box.h / 2) - (ob.y + ob.h / 2);
+        minDist = Math.min(minDist, Math.hypot(dx, dy));
+      }
+      if (minDist > bestClearance) {
+        bestClearance = minDist;
+        bestSlot = candidate;
+      }
+    }
+  }
+  if (bestSlot) return bestSlot;
+  return {
+    ...compact,
+    x: maxX,
+    y: maxY,
+    rotate: 0,
+    fx: 0,
+    fy: 0
+  };
+}
+
+function safeForbiddenGrid(
+  sizes: StickerBox[],
+  playable: Rect,
+  forbidden: Rect[]
+): ScatterSlot[] {
+  for (const factor of [0.82, 0.68, 0.58]) {
+    const scaledSizes = sizes.map((box) => scaleStickerBox(box, factor));
+    const ordered = [...scaledSizes].sort((a, b) => b.w * b.h - a.w * a.h);
+    const out: ScatterSlot[] = [];
+    let allFit = true;
+    for (const box of ordered) {
+      const placed =
+        fallbackPlace(box, playable, forbidden, out, 4) ??
+        gridPlace(box, 0, playable, forbidden, out, 4, 2);
+      if (!placed) {
+        allFit = false;
+        break;
+      }
+      out.push(placed);
+    }
+    if (allFit) return orderSlots(out);
+  }
+
+  const emergency: ScatterSlot[] = [];
+  for (const box of [...sizes].sort((a, b) => b.w * b.h - a.w * a.h)) {
+    emergency.push(findForbiddenFreeSpot(box, playable, forbidden, emergency));
+  }
+  return orderSlots(emergency);
 }
 
 function nearestPlace(
@@ -338,9 +417,13 @@ export function scatterStickers(
   fieldH: number,
   rng: () => number = Math.random
 ): ScatterSlot[] {
-  const packed =
-    pack(sizes, playable, forbidden, rng) ?? pack(sizes, playable, forbidden, rng) ?? evenGrid(sizes, playable);
-  return tagFracs(packed, fieldW, fieldH);
+  for (const factor of [1, 0.82, 0.68]) {
+    const scaled = factor === 1 ? sizes : sizes.map((box) => scaleStickerBox(box, factor));
+    const packed =
+      pack(scaled, playable, forbidden, rng) ?? pack(scaled, playable, forbidden, rng);
+    if (packed) return tagFracs(packed, fieldW, fieldH);
+  }
+  return tagFracs(safeForbiddenGrid(sizes, playable, forbidden), fieldW, fieldH);
 }
 
 export function relayoutForWidth(
@@ -399,11 +482,15 @@ export function nudgeConflicts(
     else rest.push({ last, box });
   }
   for (const item of rest) {
-    const moved =
-      nearestPlace(item.last, item.box, playable, forbidden, keep) ??
-      fallbackPlace(item.box, playable, forbidden, keep) ??
-      evenGrid([item.box], playable)[0];
-    if (moved) keep.push(moved);
+    let moved: ScatterSlot | undefined;
+    for (const factor of [1, 0.82, 0.68]) {
+      const scaled = scaleStickerBox(item.box, factor);
+      moved =
+        nearestPlace(item.last, scaled, playable, forbidden, keep) ??
+        fallbackPlace(scaled, playable, forbidden, keep);
+      if (moved) break;
+    }
+    keep.push(moved ?? findForbiddenFreeSpot(item.box, playable, forbidden, keep));
   }
   return tagFracs(orderSlots(keep), fieldW, fieldH);
 }

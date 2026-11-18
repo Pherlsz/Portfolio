@@ -172,17 +172,20 @@ export function Marked({ text }: { text: string }) {
 
 export function SectionHeading({
   id,
-  title
+  title,
+  action
 }: {
   id: string;
   title: string;
+  action?: ReactNode;
 }) {
   return (
-    <Reveal className="mb-10 max-w-3xl sm:mb-14">
-      <header>
-        <h2 id={id} className="display text-[clamp(2rem,4.2vw,3rem)] leading-[1.02]">
+    <Reveal className="mb-10 sm:mb-14">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <h2 id={id} className="display max-w-3xl text-[clamp(2rem,4.2vw,3rem)] leading-[1.02]">
           {title}
         </h2>
+        {action}
       </header>
     </Reveal>
   );
@@ -207,6 +210,8 @@ export function CopyEmailButton({
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const [liveMsg, setLiveMsg] = useState('');
+  const lastLiveRef = useRef('');
   const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -217,27 +222,47 @@ export function CopyEmailButton({
       window.location.href = `mailto:${email}`;
       return;
     }
-    setCopied(true);
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setCopied(false), 2000);
+    setCopied(true);
+    let nextMsg = 'E-mail copiado';
+    if (nextMsg === lastLiveRef.current) nextMsg += '\u00A0';
+    lastLiveRef.current = nextMsg;
+    setLiveMsg(nextMsg);
+    timer.current = window.setTimeout(() => {
+      setCopied(false);
+      setLiveMsg('');
+    }, 2000);
   };
 
+  const accessibleLabel = copied
+    ? label
+      ? 'Copiado para a área de transferência'
+      : `E-mail copiado: ${email}`
+    : label
+      ? `${label}: ${email}`
+      : `Copiar ${email}`;
+
   return (
-    <button
-      type="button"
-      onClick={copy}
-      aria-label={copied ? 'E-mail copiado' : `Copiar ${email}`}
-      className={['inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap', className].filter(Boolean).join(' ')}
-    >
-      {copied ? (
-        <Check className="size-4 shrink-0" aria-hidden="true" />
-      ) : (
-        <Copy className="size-4 shrink-0" aria-hidden="true" />
-      )}
-      {label ? <span>{copied ? 'Copiado' : label}</span> : <span translate="no">{email}</span>}
-      <span className="sr-only" aria-live="polite">
-        {copied ? 'E-mail copiado' : ''}
+    <>
+      <button
+        type="button"
+        onClick={copy}
+        data-copied={copied ? '' : undefined}
+        aria-label={accessibleLabel}
+        className={['inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap', className]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {copied ? (
+          <Check className="size-4 shrink-0" aria-hidden="true" />
+        ) : (
+          <Copy className="size-4 shrink-0" aria-hidden="true" />
+        )}
+        {label ? <span>{copied ? 'Copiado' : label}</span> : <span translate="no">{email}</span>}
+      </button>
+      <span role="status" aria-live="polite" className="sr-only">
+        {liveMsg}
       </span>
-    </button>
+    </>
   );
 }

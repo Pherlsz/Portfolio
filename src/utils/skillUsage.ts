@@ -3,11 +3,11 @@ import {
   experienceSpan,
   foldText,
   formatPeriod,
-  hasWholeWord,
+  skillNames,
   type PortfolioData
 } from '../data/portfolioData.ts';
 
-interface SkillEvidenceItem {
+export interface SkillEvidenceItem {
   id: string;
   kind: 'experience' | 'project' | 'certification';
   title: string;
@@ -17,12 +17,63 @@ interface SkillEvidenceItem {
 }
 
 const STRICT_SYNONYMS: Record<string, string[]> = {
-  '.NET': ['.net', '.net core', 'c# / .net core', 'c#/.net core'],
-  'C#': ['c#', 'c# / .net core', 'c#/.net core'],
-  'C# / .NET Core': ['c#', '.net', '.net core', 'c# / .net core', 'c#/.net core'],
-  'Acessibilidade (WCAG 2.1 AA)': ['wcag 2.1 aa', 'wcag 2.1 level aa', 'wcag 2.1'],
-  'Web Performance': ['performance', 'virtualizacao do dom', 'code splitting', 'layout thrashing'],
-  'Design Systems': ['design system'],
+  '.NET': ['.net', '.net core', 'c# / .net core', 'c#/.net core', 'dotnet', 'asp.net', 'aspnet'],
+  'C#': ['c#', 'c# / .net core', 'c#/.net core', 'csharp'],
+  'C# / .NET Core': ['c#', '.net', '.net core', 'c# / .net core', 'c#/.net core', 'csharp', 'dotnet', 'asp.net'],
+  React: ['react', 'reactjs', 'react.js'],
+  'Next.js': ['next.js', 'nextjs'],
+  TypeScript: ['typescript'],
+  'JavaScript (ES6+)': ['javascript', 'es6', 'es6+', 'ecmascript'],
+  'HTML e CSS': ['html', 'html5', 'css', 'css3', 'html/css', 'html & css', 'html and css'],
+  'Tailwind CSS': ['tailwind css', 'tailwindcss', 'tailwind'],
+  'Styled Components': ['styled components', 'styled-components', 'css-in-js'],
+  'Design Systems': [
+    'design systems',
+    'design system',
+    'component library',
+    'biblioteca de componentes',
+    'ui library',
+    'design tokens'
+  ],
+  'Acessibilidade (WCAG 2.1 AA)': [
+    'wcag 2.1 aa',
+    'wcag 2.1 level aa',
+    'wcag 2.1',
+    'wcag',
+    'acessibilidade',
+    'accessibility',
+    'a11y',
+    'aria'
+  ],
+  'Web Performance': [
+    'web performance',
+    'performance',
+    'core web vitals',
+    'cwv',
+    'lcp',
+    'cls',
+    'inp',
+    'virtualizacao do dom',
+    'virtualizacao',
+    'virtualization',
+    'code splitting',
+    'layout thrashing',
+    'otimizacao de performance'
+  ],
+  Vite: ['vite', 'vitejs'],
+  'TanStack Query': ['tanstack query', 'react query', 'react-query'],
+  'TanStack Virtual': [
+    'tanstack virtual',
+    'react-virtual',
+    'virtualizacao',
+    'virtualization',
+    'virtualizacao do dom',
+    'virtual scroll'
+  ],
+  Zustand: ['zustand', 'state management', 'gerenciamento de estado'],
+  'Context API': ['context api', 'react context', 'state management', 'gerenciamento de estado'],
+  Go: ['go', 'golang'],
+  'APIs REST': ['apis rest', 'api rest', 'rest api', 'rest apis', 'restful'],
   'Interfaces para IA (LLMs)': [
     'modelos de linguagem (llms)',
     'interfaces de ia',
@@ -31,22 +82,71 @@ const STRICT_SYNONYMS: Record<string, string[]> = {
     'modelos de ia',
     'assistente de ia',
     'tools e rag',
-    'tools, rag'
+    'tools, rag',
+    'llm',
+    'llms',
+    'genai',
+    'gen ai',
+    'generative ai',
+    'ia generativa',
+    'inteligencia artificial',
+    'ai'
   ],
-  'APIs REST': ['apis rest'],
-  'Microsoft Azure': ['azure fundamentals', 'azure cloud computing'],
-  Docker: ['docker', 'container fundamentals']
+  Vitest: [
+    'vitest',
+    'unit tests',
+    'unit testing',
+    'testes unitarios',
+    'teste unitario',
+    'testes automatizados',
+    'automated tests'
+  ],
+  Jest: [
+    'jest',
+    'unit tests',
+    'unit testing',
+    'testes unitarios',
+    'testes automatizados',
+    'automated tests'
+  ],
+  'React Testing Library': [
+    'react testing library',
+    'testing library',
+    'testes de componentes',
+    'component testing'
+  ],
+  'GitHub Actions': ['github actions', 'ci/cd', 'cicd', 'ci cd'],
+  'Azure DevOps': ['azure devops', 'ci/cd', 'cicd', 'ci cd', 'pipelines'],
+  'Microsoft Azure': ['azure fundamentals', 'azure cloud computing', 'az-900'],
+  'OWASP Top 10': ['owasp top 10', 'owasp', 'xss', 'sanitizacao', 'seguranca web', 'web security'],
+  Grafana: ['grafana', 'observability', 'observabilidade', 'monitoring', 'monitoramento'],
+  Zabbix: ['zabbix', 'observability', 'observabilidade', 'monitoring', 'monitoramento'],
+  Docker: ['docker', 'container fundamentals', 'containers'],
+  Git: ['git', 'controle de versao', 'version control']
 };
 
 function normalize(value: string): string {
   return foldText(value).trim();
 }
 
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildWholeTermRegex(needle: string): RegExp {
+  const escaped = escapeRegex(needle);
+  const chars = 'a-z0-9#+.';
+  return new RegExp(
+    `(?:^|[^${chars}])${escaped}(?:$|[^${chars}]|\\.(?![a-zA-Z0-9]))`,
+    'i'
+  );
+}
+
 function containsWholeTerm(haystack: string, term: string): boolean {
   const normHaystack = normalize(haystack);
   const normTerm = normalize(term);
   if (!normTerm) return false;
-  return hasWholeWord(normHaystack, normTerm);
+  return buildWholeTermRegex(normTerm).test(normHaystack);
 }
 
 function getSkillSearchTerms(skill: string): string[] {

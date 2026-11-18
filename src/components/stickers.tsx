@@ -360,6 +360,7 @@ function LidSticker({
 function measureForbidden(field: DOMRectReadOnly) {
   const identity = document.getElementById('hero-identity');
   const nodes: (Element | null)[] = [
+    identity,
     document.getElementById('inicio-titulo'),
     identity?.children[1] ?? null,
     identity?.children[2] ?? null,

@@ -932,6 +932,49 @@
   }
 }
 
+@keyframes theme-circle-reveal {
+  from {
+    clip-path: circle(0px at var(--vt-x, 100%) var(--vt-y, 0px));
+  }
+  to {
+    clip-path: circle(var(--vt-r, 150vmax) at var(--vt-x, 100%) var(--vt-y, 0px));
+  }
+}
+
+html[data-theme-transition]::view-transition-old(root),
+html[data-theme-transition]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme-transition]::view-transition-new(root) {
+    animation: theme-circle-reveal 360ms var(--ease-out) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .btn:active,
+  .cta:active,
+  .icon-btn:active,
+  .experience-chevron,
+  .group:focus-visible .sticker-art,
+  .group:hover .sticker-art {
+    transform: none;
+    transition: none;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 @keyframes sticker-sleep {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.06, 0.96); }
@@ -969,22 +1012,13 @@
 }
 
 @layer utilities {
-  .animate-sleep { animation: sticker-sleep 1.6s ease-in-out 2; }
-  .animate-buzz { animation: sticker-buzz 0.18s linear 5; }
-  .animate-munch { animation: sticker-munch 0.5s ease-in-out 2; }
-  .animate-roll { animation: sticker-roll 0.7s cubic-bezier(0.3, 0.7, 0.3, 1); }
-  .animate-wiggle { animation: sticker-wiggle 0.4s ease-in-out 2; }
-  .animate-pop { animation: sticker-pop 0.4s ease-out; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  @media (prefers-reduced-motion: no-preference) {
+    .animate-sleep { animation: sticker-sleep 1.6s ease-in-out 2; }
+    .animate-buzz { animation: sticker-buzz 0.18s linear 5; }
+    .animate-munch { animation: sticker-munch 0.5s ease-in-out 2; }
+    .animate-roll { animation: sticker-roll 0.7s cubic-bezier(0.3, 0.7, 0.3, 1); }
+    .animate-wiggle { animation: sticker-wiggle 0.4s ease-in-out 2; }
+    .animate-pop { animation: sticker-pop 0.4s ease-out; }
   }
 }
 

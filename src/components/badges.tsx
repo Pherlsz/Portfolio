@@ -167,7 +167,7 @@ export function CertBadge({ cert }: { cert: Certification }) {
   );
 
   return (
-    <li className="overflow-hidden rounded-2xl border border-line bg-surface">
+    <li className="overflow-hidden border border-line bg-surface">
       {cert.href ? (
         <a href={cert.href} target="_blank" rel="noreferrer" className="block hover:bg-paper/60">
           {inner}

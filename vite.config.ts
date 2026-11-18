@@ -21,7 +21,7 @@ function htmlHead(): Plugin {
           {
             tag: 'script',
             attrs: { type: 'application/ld+json' },
-            children: JSON.stringify(generateJsonLdSchema(DEFAULT_PORTFOLIO_DATA)),
+            children: JSON.stringify(generateJsonLdSchema(DEFAULT_PORTFOLIO_DATA)).replaceAll('<', '\\u003c'),
             injectTo: 'head'
           }
         ];

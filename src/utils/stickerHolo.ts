@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
 const STICKER_HOLO_STORAGE_KEY = 'pherls:sticker-holo';
-const HOLO_SCHEMA_VERSION = 2 as const;
-const ALL_ODDS = 1 / 100;
+const HOLO_SCHEMA_VERSION = 3 as const;
+const ALL_ODDS = 1;
 const HOLO_ELIGIBLE_LID_STICKER_IDS = ['morcega', 'banguela', 'tomada'] as const;
 
 type HoloEligibleId = (typeof HOLO_ELIGIBLE_LID_STICKER_IDS)[number];
@@ -13,9 +13,9 @@ const HOLO_MASK_SRC: Record<HoloEligibleId, string> = {
   tomada: '/holo-masks/tomada-cut.png'
 };
 
-type HoloMode = 'all' | 'none';
+export type HoloMode = 'all' | 'none';
 
-interface HoloState {
+export interface HoloState {
   mode: HoloMode;
   id: null;
   v: typeof HOLO_SCHEMA_VERSION;
@@ -72,6 +72,9 @@ function devHoloOverride(): HoloState | null {
   if (param === 'all' || param === '1') {
     return ALL;
   }
+  if (param === 'none' || param === '0') {
+    return NONE;
+  }
   return null;
 }
 
@@ -80,7 +83,7 @@ function initialHoloState(): HoloState {
   if (dev) return dev;
   const stored = readStickerHoloFromSession();
   if (stored) return stored;
-  return NONE;
+  return ALL_ODDS >= 1 ? ALL : NONE;
 }
 
 function resolveStickerHolo(): HoloState {
