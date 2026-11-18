@@ -26,7 +26,7 @@ function renderFormattedText(text: string) {
       }
       if (part.startsWith('`') && part.endsWith('`')) {
         return (
-          <code key={pIdx} className="rounded bg-paper px-1.5 py-0.5 font-mono text-[0.8125rem]">
+          <code key={pIdx} className="border border-line bg-surface px-1.5 py-0.5 font-mono text-[0.8125rem]">
             {part.slice(1, -1)}
           </code>
         );
@@ -172,9 +172,9 @@ export function AssistantPanel({
         {messages.map((msg) => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div
-              className={`group relative max-w-[90%] rounded-2xl px-4 py-3 text-[0.9375rem] leading-relaxed ${
+              className={`group relative max-w-[90%] px-4 py-3 text-[0.9375rem] leading-relaxed ${
                 msg.role === 'user'
-                  ? 'bg-ink text-paper'
+                  ? 'border border-ink bg-ink text-paper'
                   : 'border border-line bg-paper pr-10 text-ink-soft'
               }`}
             >
@@ -214,7 +214,7 @@ export function AssistantPanel({
         ))}
         {isLoading && (
           <div className="flex items-start">
-            <div className="inline-flex items-center gap-2.5 rounded-2xl border border-line bg-paper px-4 py-3 text-sm text-ink-soft">
+            <div className="inline-flex items-center gap-2.5 border border-line bg-paper px-4 py-3 text-sm text-ink-soft">
               <Loader2 className="size-4 animate-spin text-ink" aria-hidden="true" />
               <span>Consultando o portfólio…</span>
             </div>
@@ -251,6 +251,9 @@ export function AssistantPanel({
             maxLength={MESSAGE_LIMIT}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.nativeEvent.isComposing && e.key === 'Enter') e.preventDefault();
+            }}
             placeholder="Pergunte sobre experiência, stack ou projetos…"
             className="min-h-11 w-full border border-control bg-paper px-4 text-[0.9375rem] placeholder:text-muted"
           />

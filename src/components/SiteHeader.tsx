@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { Moon, Sun } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
+import { getStickyHeaderOffset, handleSmoothScrollClick } from './ui';
 
 const NAV = [
   { id: 'experiencia', label: 'Experiência' },
@@ -20,19 +22,74 @@ function useTheme() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
     document.documentElement.classList.contains('dark') ? 'dark' : 'light'
   );
+  const transitionSeqRef = useRef(0);
 
   useEffect(() => {
     syncThemeColor();
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== 'theme') return;
+      if (event.newValue !== 'light' && event.newValue !== 'dark') return;
+      document.documentElement.classList.toggle('dark', event.newValue === 'dark');
+      syncThemeColor();
+      setTheme(event.newValue);
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
+  const applyTheme = (next: 'light' | 'dark', syncDomState = false) => {
     document.documentElement.classList.toggle('dark', next === 'dark');
     syncThemeColor();
     try {
       localStorage.setItem('theme', next);
     } catch {}
-    setTheme(next);
+    if (syncDomState) {
+      flushSync(() => setTheme(next));
+    } else {
+      setTheme(next);
+    }
+  };
+
+  const toggleTheme = (event: MouseEvent<HTMLButtonElement>) => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    const reducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reducedMotion || typeof document.startViewTransition !== 'function') {
+      applyTheme(next);
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = rect.width > 0 ? rect.left + rect.width / 2 : window.innerWidth;
+    const y = rect.height > 0 ? rect.top + rect.height / 2 : 0;
+    const radius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    const root = document.documentElement;
+    const seq = ++transitionSeqRef.current;
+    root.style.setProperty('--vt-x', `${x}px`);
+    root.style.setProperty('--vt-y', `${y}px`);
+    root.style.setProperty('--vt-r', `${Math.ceil(radius)}px`);
+    root.dataset.themeTransition = 'true';
+
+    const transition = document.startViewTransition(() => {
+      applyTheme(next, true);
+    });
+
+    void transition.finished
+      .catch(() => {})
+      .finally(() => {
+        if (transitionSeqRef.current !== seq) return;
+        delete root.dataset.themeTransition;
+        root.style.removeProperty('--vt-x');
+        root.style.removeProperty('--vt-y');
+        root.style.removeProperty('--vt-r');
+      });
   };
 
   return { theme, toggleTheme };
@@ -127,8 +184,6 @@ function useActiveSection() {
   return active;
 }
 
-import { getStickyHeaderOffset, handleSmoothScrollClick } from './ui';
-
 export function SiteHeader({
   onOpenAssistant,
   onOpenCv
@@ -182,7 +237,7 @@ export function SiteHeader({
             <span>Perguntar</span>
             <kbd
               aria-hidden="true"
-              className="rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-[0.6875rem] leading-none text-muted"
+              className="border border-line bg-surface px-1.5 py-0.5 font-mono text-[0.6875rem] leading-none text-muted"
             >
               Ctrl K
             </kbd>
@@ -210,7 +265,6 @@ export function SiteHeader({
           </button>
         </div>
       </div>
-
     </header>
   );
 }

@@ -9,9 +9,9 @@ function GymkhanaCorePoster() {
   const { project } = DEFAULT_PORTFOLIO_DATA;
 
   return (
-    <div className="relative isolate flex aspect-[16/10] flex-col justify-between overflow-hidden bg-poster p-5 text-poster-ink">
+    <div className="relative isolate flex aspect-[16/10] flex-col justify-between overflow-hidden bg-poster p-5 text-poster-ink sm:aspect-auto sm:h-full sm:p-6">
       <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-marker">Biblioteca</p>
-      <p className="display-wide text-[1.55rem] uppercase leading-[0.86]">
+      <p className="display-wide my-4 text-[1.55rem] uppercase leading-[0.86]">
         Gymkhana
         <span className="block">Core</span>
       </p>
@@ -93,28 +93,31 @@ export function ProjectSection({
       aria-labelledby="projeto-titulo"
       className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-28"
     >
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <SectionHeading id="projeto-titulo" title="Projetos" />
-        {selectedSkill && (
-          <div className="mb-10 flex items-center gap-2 sm:mb-14">
-            <span className="eyebrow">Filtro ativo:</span>
-            <button
-              type="button"
-              onClick={() => onSelectSkill(null)}
-              className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 border border-ink bg-marker px-3 py-1 font-mono text-xs font-bold text-on-marker"
-            >
-              <span>{selectedSkill}</span>
-              <X className="size-3.5" aria-hidden="true" />
-            </button>
-          </div>
-        )}
-      </div>
+      <SectionHeading
+        id="projeto-titulo"
+        title="Projetos"
+        action={
+          selectedSkill ? (
+            <div className="flex items-center gap-2">
+              <span className="eyebrow">Filtro ativo:</span>
+              <button
+                type="button"
+                onClick={() => onSelectSkill(null)}
+                className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 border border-ink bg-marker px-3 py-1 font-mono text-xs font-bold text-on-marker transition-colors hover:bg-ink hover:text-marker"
+              >
+                <span>{selectedSkill}</span>
+                <X className="size-3.5" aria-hidden="true" />
+              </button>
+            </div>
+          ) : undefined
+        }
+      />
 
       {featured && (
         <Reveal>
           <article
-            className={`grid overflow-hidden rounded-[1.75rem] border bg-surface transition-all lg:grid-cols-2 ${
-              featuredMatched ? 'border-ink ring-2 ring-marker' : 'border-line'
+            className={`grid overflow-hidden border bg-surface transition-colors lg:grid-cols-2 ${
+              featuredMatched ? 'border-ink ring-2 ring-marker' : 'border-line hover:border-ink'
             }`}
           >
             <img
@@ -126,7 +129,7 @@ export function ProjectSection({
               decoding="async"
               className="aspect-[16/10] h-full w-full object-cover object-left-top"
             />
-            <div className="flex flex-col justify-between gap-5 p-5 sm:p-6">
+            <div className="flex flex-col justify-between gap-5 border-t border-line p-5 sm:p-6 lg:border-t-0 lg:border-l">
               <div>
                 <h3 className="display text-2xl">{featured.name}</h3>
                 <p className="mt-2 text-[0.9375rem] text-ink-soft">{featured.tagline}</p>
@@ -148,10 +151,10 @@ export function ProjectSection({
                           type="button"
                           aria-pressed={isSelected}
                           onClick={() => onSelectSkill(selectedSkill === tech ? null : tech)}
-                          className={`cursor-pointer rounded-xs px-1 -mx-1 transition-colors ${
+                          className={`cursor-pointer px-1 -mx-1 transition-colors ${
                             isSelected
                               ? 'bg-marker text-on-marker'
-                              : 'hover:text-ink underline decoration-line underline-offset-4 hover:decoration-ink'
+                              : 'underline decoration-line underline-offset-4 hover:decoration-ink hover:text-ink'
                           }`}
                         >
                           {tech}
@@ -174,13 +177,13 @@ export function ProjectSection({
 
       <Reveal delay={0.08} className="mt-8">
         <article
-          className={`overflow-hidden rounded-[1.75rem] border bg-surface transition-all ${
-            coreMatched ? 'border-ink ring-2 ring-marker' : 'border-line'
+          className={`overflow-hidden border bg-surface transition-colors ${
+            coreMatched ? 'border-ink ring-2 ring-marker' : 'border-line hover:border-ink'
           }`}
         >
           <div className="sm:grid sm:grid-cols-[minmax(0,16rem)_1fr]">
             <GymkhanaCorePoster />
-            <div className="flex flex-col justify-between gap-5 p-5 sm:p-6">
+            <div className="flex flex-col justify-between gap-5 border-t border-line p-5 sm:border-t-0 sm:border-l sm:p-6">
               <div>
                 <h3 className="display text-2xl">{project.name}</h3>
                 <p className="mt-2 text-[0.9375rem] text-ink-soft">{project.tagline}</p>
@@ -193,7 +196,7 @@ export function ProjectSection({
                     onClick={() =>
                       onSelectSkill(selectedSkill === project.language ? null : project.language)
                     }
-                    className={`cursor-pointer rounded-xs font-mono text-[0.75rem] px-1 -mx-1 transition-colors ${
+                    className={`cursor-pointer font-mono text-[0.75rem] px-1 -mx-1 transition-colors ${
                       selectedSkill === project.language
                         ? 'bg-marker text-on-marker'
                         : 'text-muted underline decoration-line underline-offset-4 hover:decoration-ink hover:text-ink'
@@ -222,11 +225,14 @@ export function ProjectSection({
           <details
             className="experience-details border-t border-line"
             open={isCoreOpen}
-            onToggle={(event) => setCoreOpen(event.currentTarget.open)}
+            onToggle={(event) => {
+              const next = event.currentTarget.open;
+              if (next !== isCoreOpen) setCoreOpen(next);
+            }}
           >
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-3.5 outline-offset-[-4px] transition-colors hover:bg-paper/60 sm:px-6 [&::-webkit-details-marker]:hidden">
+            <summary className="group flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-3.5 outline-offset-[-4px] transition-colors hover:bg-paper/60 sm:px-6 [&::-webkit-details-marker]:hidden">
               <span className="text-sm font-semibold text-ink-soft">Ver módulos</span>
-              <span className="experience-chevron inline-flex size-9 shrink-0 items-center justify-center border border-line bg-paper">
+              <span className="experience-chevron inline-flex size-9 shrink-0 items-center justify-center border border-line bg-paper transition-colors group-hover:border-ink">
                 <ChevronDown className="size-4" aria-hidden="true" />
                 <span className="sr-only">Ver ou ocultar módulos de {project.name}</span>
               </span>
@@ -241,8 +247,8 @@ export function ProjectSection({
                   return (
                     <div
                       key={mod.name}
-                      className={`rounded-xl border px-3.5 py-2.5 transition-colors ${
-                        matched ? 'border-ink bg-marker/20' : 'border-line bg-paper/60'
+                      className={`border px-3.5 py-2.5 transition-colors ${
+                        matched ? 'border-ink bg-marker/20' : 'border-line bg-paper/60 hover:border-ink'
                       }`}
                     >
                       <dt className="font-mono text-xs font-bold text-ink">{mod.name}</dt>

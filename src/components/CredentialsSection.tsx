@@ -25,7 +25,7 @@ export function CredentialsSection({
     >
       <SectionHeading id="formacao-titulo" title="Formação e stack" />
 
-      <div className="grid gap-14 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid gap-14 lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <div>
           <Reveal className="flex flex-wrap items-baseline justify-between gap-2">
             <div>
@@ -51,7 +51,7 @@ export function CredentialsSection({
               role="region"
               aria-live="polite"
               aria-label={`Aplicações práticas de ${selectedSkill}`}
-              className="mt-5 rounded-2xl border border-ink bg-surface p-4 sm:p-5"
+              className="mt-5 border-2 border-ink bg-surface p-4 sm:p-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -133,7 +133,7 @@ export function CredentialsSection({
                             type="button"
                             aria-pressed={isActive}
                             onClick={() => toggleSkill(item)}
-                            className={`cursor-pointer rounded-xs px-1 -mx-1 transition-colors ${
+                            className={`cursor-pointer px-1 -mx-1 transition-colors ${
                               isActive
                                 ? 'bg-marker text-on-marker'
                                 : 'underline decoration-line underline-offset-4 hover:decoration-ink hover:text-ink'

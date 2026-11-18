@@ -1,5 +1,10 @@
 import assert from 'node:assert/strict';
 import { test, afterEach } from 'node:test';
+import {
+  generateIndexableHomeHtml,
+  generateJsonLdSchema
+} from '../src/data/machineDocuments.ts';
+import { DEFAULT_PORTFOLIO_DATA, skillNames } from '../src/data/portfolioData.ts';
 import { handlePortfolioRequest } from '../src/server/portfolioApi.ts';
 import { buildUserPrompt, isSafeReply } from '../src/server/assistant.ts';
 import { createAssistantSession } from '../src/utils/assistantSession.ts';
@@ -161,13 +166,94 @@ test('contato: validação, honeypot, armazenamento e limite', async () => {
   assert.equal(limited?.status, 429);
 });
 
-test('documentos: llms.txt, robots e sitemap respondem; formatos removidos não', async () => {
+test('documentos: llms.txt, robots e sitemap respondem; formatos removidos retornam null', async () => {
   for (const path of ['/llms.txt', '/robots.txt', '/sitemap.xml']) {
     const response = await handlePortfolioRequest(new Request(`http://localhost${path}`), {});
     assert.equal(response?.status, 200, path);
   }
-  for (const path of ['/ai.json', '/pedro.md', '/AGENTS.md', '/resume.json']) {
+  for (const path of ['/llms-full.txt', '/ai.json', '/pedro.md', '/AGENTS.md', '/resume.json']) {
     assert.equal(await handlePortfolioRequest(new Request(`http://localhost${path}`), {}), null, path);
+  }
+
+  const llmsRes = await handlePortfolioRequest(new Request('http://localhost/llms.txt'), {});
+  assert.equal(llmsRes?.headers.get('content-type'), 'text/plain; charset=utf-8');
+  const llmsText = await llmsRes.text();
+  assert.match(llmsText, /## Summary \(English\)/);
+  assert.match(llmsText, /30\+ componentes/);
+  assert.match(llmsText, /5\.000\+ registros/);
+  assert.match(llmsText, /"source": "agent"/);
+  assert.doesNotMatch(llmsText, /\/llms-full\.txt/);
+  assert.doesNotMatch(llmsText, /\u2014/);
+
+  const headLlms = await handlePortfolioRequest(
+    new Request('http://localhost/llms.txt', { method: 'HEAD' }),
+    {}
+  );
+  assert.equal(headLlms?.status, 200);
+  assert.ok(Number(headLlms?.headers.get('content-length')) > 500);
+  assert.equal(await headLlms?.text(), '');
+
+  const robotsText = await (await handlePortfolioRequest(new Request('http://localhost/robots.txt'), {})).text();
+  for (const agent of [
+    'GPTBot',
+    'ClaudeBot',
+    'PerplexityBot',
+    'GoogleOther',
+    'Perplexity-User',
+    'Amazonbot',
+    'Meta-ExternalAgent',
+    'DuckAssistBot',
+    'YouBot',
+    'Cohere-ai',
+    'MistralAI-User'
+  ]) {
+    assert.match(robotsText, new RegExp(`User-agent: ${agent}`), agent);
+  }
+  assert.match(robotsText, /# LLMs: http:\/\/localhost\/llms\.txt/);
+  assert.doesNotMatch(robotsText, /LLMs-Full/);
+
+  const sitemapText = await (await handlePortfolioRequest(new Request('http://localhost/sitemap.xml'), {})).text();
+  assert.match(sitemapText, /<loc>http:\/\/localhost\/<\/loc>/);
+  assert.match(sitemapText, /<loc>http:\/\/localhost\/cv<\/loc>/);
+  assert.match(sitemapText, /<loc>http:\/\/localhost\/llms\.txt<\/loc>/);
+  assert.doesNotMatch(sitemapText, /llms-full\.txt/);
+});
+
+test('seo: JSON-LD e HTML indexável contêm ocupação, métricas, skills e certificações sem slop', () => {
+  const schema = generateJsonLdSchema(DEFAULT_PORTFOLIO_DATA);
+  const schemaJson = JSON.stringify(schema);
+  assert.doesNotMatch(schemaJson, /\u2014/);
+
+  const graph = schema['@graph'];
+  const profilePage = graph.find((node) => node['@type'] === 'ProfilePage');
+  const webSite = graph.find((node) => node['@type'] === 'WebSite');
+  const faqPage = graph.find((node) => node['@type'] === 'FAQPage');
+  assert.ok(profilePage, 'Missing ProfilePage node');
+  assert.ok(webSite, 'Missing WebSite node');
+  assert.equal(faqPage, undefined);
+  assert.equal(profilePage.mainEntity.hasOccupation['@type'], 'Occupation');
+  assert.equal(profilePage.mainEntity.hasOccupation.name, DEFAULT_PORTFOLIO_DATA.profile.jobTitle);
+  assert.ok(profilePage.mainEntity.worksFor.some((role) => role.worksFor?.name === 'Atlas Governance'));
+  assert.ok(profilePage.mainEntity.knowsLanguage.some((lang) => lang.alternateName === 'en'));
+  assert.equal(profilePage.hasPart.some((part) => part.name === 'pherls.dev'), false);
+
+  const html = generateIndexableHomeHtml(DEFAULT_PORTFOLIO_DATA);
+  assert.doesNotMatch(html, /\u2014/);
+  assert.doesNotMatch(html, /llms-full\.txt/);
+  assert.doesNotMatch(html, /pherls\.dev/);
+  assert.match(html, /<time datetime="2021-03">/);
+  assert.match(html, /<time datetime="2026-07">/);
+  assert.match(html, /30\+ componentes/);
+  assert.match(html, /5\.000\+ registros/);
+  assert.match(html, /10\.000\+ usuários/);
+  assert.match(html, /1\.000\+ templates/);
+  assert.match(html, /Microsoft Certified: Azure Fundamentals/);
+  assert.match(html, /href="\/llms\.txt"/);
+  assert.match(html, /href="\/cv"/);
+  for (const group of DEFAULT_PORTFOLIO_DATA.skills) {
+    for (const skill of skillNames(group)) {
+      assert.ok(html.includes(skill), `Indexable HTML missing skill ${skill}`);
+    }
   }
 });
 
