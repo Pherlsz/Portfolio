@@ -1,0 +1,487 @@
+/*
+ * pherls.dev v2 design tokens.
+ * Import AFTER `@import "tailwindcss";` (e.g. in src/index.css):
+ *   @import "./styles/tokens.css";
+ *   @import "./styles/animations.css";
+ * Raw tokens live on :root (light) and html.dark (dark). Tailwind utilities
+ * (bg-surface, text-muted, border-border, rounded-card, shadow-card, text-ui...)
+ * are generated from the @theme blocks below. See src/styles/DESIGN.md.
+ */
+
+/* Static scales: emitted as real CSS variables and as utilities (rounded-sheet, text-ui, ease-spring). */
+@theme static {
+  --radius-sheet: 26px;
+  --radius-card: 22px;
+  --radius-inner: 18px;
+  --radius-control: 14px;
+  --radius-pill: 9999px;
+
+  /* Type scale. Generous floor for effortless reading in sans and mono. */
+  --text-micro: 0.8125rem; /* 13px: meta, mono labels, budgets */
+  --text-micro--line-height: 1.5;
+  --text-ui: 0.875rem; /* 14px: buttons, pills, nav, chips */
+  --text-ui--line-height: 1.45;
+  --text-body: 0.96875rem; /* 15.5px: chat messages, card body */
+  --text-body--line-height: 1.65;
+  --text-lead: 1.0625rem; /* 17px: intros, card titles */
+  --text-lead--line-height: 1.5;
+  --text-title: 1.375rem; /* 22px: section titles */
+  --text-title--line-height: 1.25;
+  --text-hero: clamp(1.75rem, 1.2rem + 2.2vw, 2.625rem); /* empty-state greeting */
+  --text-hero--line-height: 1.08;
+  --text-poster: clamp(2.15rem, 1.35rem + 3vw, 3.55rem); /* editorial poster headers */
+  --text-poster--line-height: 0.98;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Theme-dependent values: mapped inline so they follow html.dark at runtime. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-rail: var(--rail);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-soft: var(--surface-soft);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-lime: var(--lime);
+  --color-on-lime: var(--on-lime);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-code-bg: var(--code-bg);
+  --color-code-ink: var(--code-ink);
+
+  --shadow-card: var(--elevation-card);
+  --shadow-float: var(--elevation-float);
+  --shadow-pop: var(--elevation-pop);
+
+  --font-display: "Archivo Display Variable", "Archivo Variable", "Archivo Display Fallback", "Archivo Fallback", system-ui, sans-serif;
+  --font-sans: "Archivo Variable", "Archivo Fallback", system-ui, sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono Variable", ui-monospace, monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    scrollbar-color: var(--border-strong) transparent;
+    scrollbar-width: thin;
+
+    /* Layers, back to front: bg (app) > rail (sidebar) > canvas (sheet) > surface (cards) */
+    --bg: #ecebe6;
+    --rail: #ecebe6;
+    --canvas: #f7f7f3;
+    --surface: #ffffff;
+    --surface-hover: #f2f2ed;
+    --surface-soft: #f1f0eb;
+    --border: rgb(20 20 18 / 0.09);
+    --border-strong: rgb(20 20 18 / 0.16);
+
+    --ink: #141513;
+    --ink-soft: #262824;
+    --muted: #4a4e47; /* > 6.8:1 on --rail, > 7.5:1 on --canvas */
+
+    /* Primary action. Charcoal in light keeps AA contrast; lime is the brand highlight. */
+    --accent: #141513;
+    --on-accent: #f7f7f3;
+    --accent-soft: rgb(20 20 18 / 0.06);
+    --lime: #e7f25a;
+    --on-lime: #141513;
+
+    --ok: #0f7a56;
+    --warn: #a14a07;
+    --warn-soft: rgb(180 83 9 / 0.08);
+    --danger: #be123c;
+
+    --code-bg: #111317;
+    --code-ink: #e4e4df;
+    --dot: rgb(20 20 18 / 0.13);
+    --focus-ring: #141513;
+    --focus-halo: rgb(20 20 18 / 0.14);
+
+    --elevation-card: 0 1px 2px rgb(20 20 18 / 0.04), 0 10px 26px -14px rgb(20 20 18 / 0.1);
+    --elevation-float: 0 2px 6px rgb(20 20 18 / 0.05), 0 18px 44px -16px rgb(20 20 18 / 0.16);
+    --elevation-pop: 0 4px 12px rgb(20 20 18 / 0.06), 0 28px 60px -20px rgb(20 20 18 / 0.24);
+    --ambient: radial-gradient(620px 290px at 50% 12%, rgb(217 238 70 / 0.24), transparent 72%);
+
+    /* Editorial Art Direction room tokens */
+    --room-wash: radial-gradient(760px 340px at 50% -4%, rgb(217 238 70 / 0.22), transparent 72%);
+    --room-numeral: #4a4e47;
+    --room-mark: rgb(231 242 90 / 0.78);
+    --room-lift-shadow: 0 2px 4px rgb(70 40 0 / 0.08), 0 18px 34px -16px rgb(70 40 0 / 0.22);
+  }
+
+  html.dark {
+    color-scheme: dark;
+
+    --bg: #0c0d0c;
+    --rail: #111210;
+    --canvas: #141513;
+    --surface: #1b1d1a;
+    --surface-hover: #232622;
+    --surface-soft: #131413;
+    --border: rgb(255 255 255 / 0.08);
+    --border-strong: rgb(255 255 255 / 0.14);
+
+    --ink: #f4f4f0;
+    --ink-soft: #dbddd7;
+    --muted: #a8aca3; /* > 7.2:1 on --surface, > 7.8:1 on --canvas */
+
+    --accent: #dff55c;
+    --on-accent: #11130e;
+    --accent-soft: rgb(223 245 92 / 0.12);
+    --lime: #dff55c;
+    --on-lime: #11130e;
+
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --warn-soft: rgb(251 191 36 / 0.09);
+    --danger: #fb7185;
+
+    --code-bg: #0e1013;
+    --code-ink: #e4e4df;
+    --dot: rgb(255 255 255 / 0.1);
+    --focus-ring: #dff55c;
+    --focus-halo: rgb(223 245 92 / 0.22);
+
+    --elevation-card: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 12px 32px -16px rgb(0 0 0 / 0.72);
+    --elevation-float: 0 1px 0 rgb(255 255 255 / 0.07) inset, 0 22px 54px -16px rgb(0 0 0 / 0.82);
+    --elevation-pop: 0 1px 0 rgb(255 255 255 / 0.08) inset, 0 30px 70px -18px rgb(0 0 0 / 0.9);
+    --ambient: radial-gradient(620px 290px at 50% 12%, rgb(223 245 92 / 0.07), transparent 72%);
+
+    --room-wash: radial-gradient(760px 340px at 50% -4%, rgb(223 245 92 / 0.08), transparent 72%);
+    --room-numeral: #dff55c;
+    --room-mark: rgb(223 245 92 / 0.22);
+    --room-lift-shadow: 0 1px 0 rgb(255 255 255 / 0.08) inset, 0 22px 42px -16px rgb(0 0 0 / 0.86);
+  }
+
+  /* Per-section subtle chromatic atmospheres (AA contrast preserved on all ink) */
+  [data-room="projects"] {
+    --room-wash: radial-gradient(780px 320px at 14% -6%, rgb(216 64 44 / 0.09), transparent 72%);
+    --room-numeral: #b42c1a;
+  }
+  html.dark [data-room="projects"] {
+    --room-wash: radial-gradient(780px 320px at 14% -6%, rgb(232 95 74 / 0.11), transparent 72%);
+    --room-numeral: #ff9b8a;
+  }
+
+  [data-room="experience"] {
+    --room-wash: radial-gradient(780px 320px at 84% -6%, rgb(199 150 60 / 0.14), transparent 72%);
+    --room-numeral: #7c5514;
+  }
+  html.dark [data-room="experience"] {
+    --room-wash: radial-gradient(780px 320px at 84% -6%, rgb(223 245 92 / 0.08), transparent 72%);
+    --room-numeral: #f3c96b;
+  }
+
+  [data-room="studies"] {
+    --room-wash: radial-gradient(780px 320px at 16% -6%, rgb(0 78 223 / 0.08), transparent 72%);
+    --room-numeral: #0042bf;
+  }
+  html.dark [data-room="studies"] {
+    --room-wash: radial-gradient(780px 320px at 16% -6%, rgb(93 157 197 / 0.13), transparent 72%);
+    --room-numeral: #8ab8ff;
+  }
+
+  [data-room="articles"] {
+    --room-wash: radial-gradient(780px 320px at 82% -6%, rgb(190 75 110 / 0.08), transparent 72%);
+    --room-numeral: #8f254a;
+  }
+  html.dark [data-room="articles"] {
+    --room-wash: radial-gradient(780px 320px at 82% -6%, rgb(231 191 255 / 0.1), transparent 72%);
+    --room-numeral: #f5b8d0;
+  }
+
+  [data-room="ai"] {
+    --room-wash: radial-gradient(780px 320px at 50% -6%, rgb(20 21 19 / 0.06), transparent 72%);
+    --room-numeral: #4a4e47;
+  }
+  html.dark [data-room="ai"] {
+    --room-wash: radial-gradient(780px 320px at 50% -6%, rgb(223 245 92 / 0.07), transparent 72%);
+    --room-numeral: #dff55c;
+  }
+}
+
+@layer components {
+  /* =========================================================================
+   * Standardized Card System (3 styles, 1 unified calm hover — zero lift)
+   * 1. .card-editorial          -> Clickable content cards (Projects, Studies, Certs, Articles, Suggestions)
+   * 2. .card-panel / .surface-card -> Read-only structural panels (Experience, Education, Stack, Preview)
+   * 3. .card-inset              -> Nested read-only metric/stat blocks
+   *    .card-inset-interactive  -> Compact clickable items (Index rows, shortcuts)
+   * ========================================================================= */
+
+  /* Style 2: Read-only structural panel (matte, no shadow, no hover). */
+  .card-panel,
+  .surface-card {
+    background-color: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+  }
+
+  /* Style 1: Clickable content / catalog card — calm border + surface shift (no vertical jump). */
+  .card-editorial {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--elevation-card);
+    cursor: pointer;
+    transition-property: border-color, background-color;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .card-editorial:hover {
+      border-color: var(--border-strong);
+      background-color: var(--surface-hover);
+    }
+  }
+
+  /* Style 3: Nested read-only metric / compact block (no hover). */
+  .card-inset {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-inner);
+  }
+
+  /* Compact clickable item (matches .card-editorial calm border + surface shift). */
+  .card-inset-interactive {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-inner);
+    cursor: pointer;
+    transition-property: border-color, background-color;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .card-inset-interactive:hover {
+      border-color: var(--border-strong);
+      background-color: var(--surface-hover);
+    }
+  }
+
+  /* Main content sheet next to the sidebar. No header chrome inside. */
+  .surface-sheet {
+    background-color: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sheet);
+  }
+
+  /* Chat input shell. */
+  .surface-composer {
+    background-color: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-card);
+    box-shadow: var(--elevation-float);
+    transition-property: border-color, box-shadow;
+    transition-duration: 160ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  .surface-composer:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--focus-halo), var(--elevation-float);
+  }
+
+  /* Floating menus and popovers (reasoning, skills). */
+  .surface-popover {
+    background-color: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-inner);
+    box-shadow: var(--elevation-pop);
+  }
+
+  /* Compact pill control (reasoning trigger, filters, chips). */
+  .pill-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.125rem;
+    padding-inline: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-soft);
+    color: var(--ink);
+    font-size: var(--text-ui);
+    font-weight: 560;
+    line-height: 1;
+    cursor: pointer;
+    transition-property: background-color, border-color, color, transform;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  .pill-button:hover:not(:disabled) {
+    background-color: var(--surface-hover);
+    border-color: var(--border-strong);
+  }
+
+  .pill-button:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .pill-button[aria-expanded="true"] {
+    border-color: var(--border-strong);
+    background-color: var(--surface-hover);
+  }
+
+  .pill-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* Dotted canvas for empty states, diagrams and visual thumbnails. */
+  .dot-canvas {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 18px 18px;
+  }
+
+  .ambient-glow {
+    background-image: var(--ambient);
+  }
+
+  .room-atmosphere {
+    background-image: var(--room-wash);
+    background-repeat: no-repeat;
+  }
+
+  /* Subtle analog risograph/paper grain overlay inside the main sheet */
+  .paper-grain {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0.032;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-size: 220px 220px;
+  }
+
+  html.dark .paper-grain {
+    opacity: 0.045;
+  }
+
+  /* Visible keyboard focus. Overrides the legacy box-shadow focus style. */
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px var(--focus-halo);
+  }
+
+  /* Tactile stepped range. Set --fill (0% to 100%) inline for the filled track. */
+  input[type="range"].r-slider {
+    --fill: 50%;
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 1.75rem;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  input[type="range"].r-slider:focus-visible {
+    outline: none;
+  }
+
+  input[type="range"].r-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(to right, var(--accent) 0 var(--fill), var(--border-strong) var(--fill) 100%);
+  }
+
+  input[type="range"].r-slider::-moz-range-track {
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--border-strong);
+  }
+
+  input[type="range"].r-slider::-moz-range-progress {
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+  }
+
+  input[type="range"].r-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    margin-top: -7px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    border: 3px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--border-strong), 0 2px 6px rgb(0 0 0 / 0.3);
+    transition: transform 160ms var(--ease-spring);
+  }
+
+  input[type="range"].r-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    box-sizing: border-box;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    border: 3px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--border-strong), 0 2px 6px rgb(0 0 0 / 0.3);
+    transition: transform 160ms var(--ease-spring);
+  }
+
+  input[type="range"].r-slider:hover::-webkit-slider-thumb {
+    transform: scale(1.08);
+  }
+
+  input[type="range"].r-slider:hover::-moz-range-thumb {
+    transform: scale(1.08);
+  }
+
+  input[type="range"].r-slider:active::-webkit-slider-thumb {
+    transform: scale(1.16);
+  }
+
+  input[type="range"].r-slider:active::-moz-range-thumb {
+    transform: scale(1.16);
+  }
+
+  input[type="range"].r-slider:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 1px var(--border-strong), 0 0 0 6px var(--focus-halo);
+  }
+
+  input[type="range"].r-slider:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 1px var(--border-strong), 0 0 0 6px var(--focus-halo);
+  }
+
+  input[type="range"].r-slider:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-editorial,
+    .card-inset-interactive,
+    .surface-composer,
+    .pill-button,
+    input[type="range"].r-slider::-webkit-slider-thumb,
+    input[type="range"].r-slider::-moz-range-thumb {
+      transition: none;
+    }
+
+    .card-editorial:hover,
+    .card-editorial:active,
+    .pill-button:active:not(:disabled) {
+      transform: none;
+    }
+  }
+}

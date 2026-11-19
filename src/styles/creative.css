@@ -1,0 +1,137 @@
+/*
+ * pherls.dev creative overhaul motion and studio stage primitives.
+ * Compositor-friendly properties only (transform, opacity, clip-path).
+ * Every animation is disabled under prefers-reduced-motion: reduce.
+ */
+
+/* ---------- IntroCurtain stage ---------- */
+
+.intro-curtain {
+  clip-path: inset(0 0 0 0);
+  transition-property: clip-path;
+  transition-duration: 520ms;
+  transition-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  will-change: clip-path;
+}
+
+.intro-curtain[data-phase="exiting"] {
+  clip-path: inset(0 0 100% 0);
+  pointer-events: none;
+}
+
+.intro-curtain-grain {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+.intro-wordmark-rise {
+  animation: intro-wordmark-rise 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes intro-wordmark-rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Acid-lime orb dropping with squash-and-stretch onto the period of PEDRO.md */
+.intro-orb {
+  transform-origin: 50% 100%;
+  animation: intro-orb-drop 760ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both;
+  will-change: transform, opacity;
+}
+
+@keyframes intro-orb-drop {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -132px, 0) scale(0.84, 1.24);
+  }
+  12% {
+    opacity: 1;
+  }
+  44% {
+    opacity: 1;
+    transform: translate3d(-50%, 0, 0) scale(1.34, 0.66);
+  }
+  62% {
+    transform: translate3d(-50%, -34px, 0) scale(0.88, 1.16);
+  }
+  78% {
+    transform: translate3d(-50%, 0, 0) scale(1.16, 0.85);
+  }
+  89% {
+    transform: translate3d(-50%, -9px, 0) scale(0.96, 1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(-50%, 0, 0) scale(1, 1);
+  }
+}
+
+/* ---------- Main sheet 2px scroll-progress hairline ---------- */
+
+.scroll-progress-bar {
+  transform-origin: 0% 50%;
+  transform: scaleX(0);
+  transition-property: opacity;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-out);
+  will-change: transform;
+}
+
+/* ---------- Custom bespoke desktop cursor ---------- */
+
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-custom-cursor="on"],
+  html[data-custom-cursor="on"] * {
+    cursor: none !important;
+  }
+}
+
+/* ---------- EditorialLoader animations ---------- */
+
+@keyframes editorial-track-slide {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(260%, 0, 0);
+  }
+}
+
+.editorial-loader-bar {
+  transform: translate3d(75%, 0, 0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .editorial-loader-bar {
+    animation: editorial-track-slide 1.25s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    will-change: transform;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-curtain,
+  .scroll-progress-bar {
+    transition: none;
+    will-change: auto;
+  }
+
+  .intro-wordmark-rise,
+  .intro-orb,
+  .editorial-loader-bar {
+    animation: none !important;
+    will-change: auto;
+  }
+}

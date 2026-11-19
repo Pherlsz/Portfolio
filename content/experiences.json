@@ -1,0 +1,113 @@
+[
+  {
+    "id": "atlas",
+    "company": "Atlas Governance",
+    "location": "Brasil",
+    "summary": "Desenvolvimento do portal de governança corporativa com React, Next.js e TypeScript: componentes do Design System, otimização de telas com grandes volumes de dados, interfaces para recursos com LLMs e manutenção de serviços em C#/.NET Core.",
+    "roles": [
+      { "title": "Software Engineer", "start": "2021-11", "end": "2026-07" },
+      { "title": "Estágio em Engenharia de Software", "start": "2021-03", "end": "2021-11" }
+    ],
+    "highlights": [
+      {
+        "metric": "30+ componentes",
+        "text": "Primitivos e componentes do Design System no Atlas PLG (React, Next.js e TypeScript), seguindo critérios de acessibilidade WCAG 2.1 Level AA e atuando em discussões técnicas com o time de arquitetura."
+      },
+      {
+        "metric": "5.000+ registros",
+        "text": "Virtualização do DOM (TanStack Virtual) e code splitting no módulo Atlas Sign, resolvendo travamentos e layout thrashing em listagens grandes."
+      },
+      {
+        "metric": "10.000+ usuários",
+        "text": "Navegação em árvore e fluxos de assinatura eletrônica com Error Boundaries e testes automatizados (Vitest, Jest e React Testing Library)."
+      },
+      {
+        "metric": "Interfaces de IA",
+        "text": "Chat interativo e telas de relatórios integrados a modelos de linguagem (LLMs) em produção."
+      },
+      {
+        "metric": "1.000+ templates",
+        "text": "Refatoração do serviço de envio de e-mails em C#/.NET Core e APIs REST, unificando templates legados com Docker e pipelines no Azure DevOps."
+      },
+      {
+        "metric": "15+ fluxos",
+        "text": "Biblioteca de componentes com Styled Components e Context API compartilhada entre módulos da plataforma."
+      },
+      {
+        "text": "Organização de estado e cache de requisições com TanStack Query, Zustand e Context API, reduzindo chamadas repetidas à API."
+      },
+      {
+        "text": "Configuração e otimização de build frontend com Webpack e Vite para modularização de bundles, compatibilidade cross-browser e responsividade."
+      },
+      {
+        "text": "Investigação de bugs em produção entre frontend e APIs (RCA) e correção de falhas de segurança e sanitização de inputs (OWASP Top 10 / XSS)."
+      }
+    ],
+    "stack": [
+      "React",
+      "Next.js",
+      "TypeScript",
+      "JavaScript (ES6+)",
+      "HTML e CSS",
+      "Tailwind CSS",
+      "Styled Components",
+      "Vite",
+      "Webpack",
+      "TanStack Query",
+      "TanStack Virtual",
+      "Zustand",
+      "Context API",
+      "Vitest",
+      "Jest",
+      "React Testing Library",
+      "C# / .NET Core",
+      "APIs REST",
+      "SQL",
+      "Git",
+      "Docker",
+      "Azure DevOps"
+    ]
+  },
+  {
+    "id": "nelogica",
+    "company": "Nelogica",
+    "location": "Porto Alegre, RS",
+    "summary": "Monitoramento de plataformas de negociação financeira e resposta a incidentes em ambiente de produção.",
+    "roles": [
+      { "title": "Analista de Operações de TI (NOC)", "start": "2019-08", "end": "2020-09" }
+    ],
+    "highlights": [
+      {
+        "text": "Acompanhamento de plataformas de negociação e serviços transacionais com Grafana, Zabbix e Kibana para identificar quedas e picos de latência."
+      },
+      {
+        "text": "Investigação de incidentes via análise de causa raiz (RCA), contenção de falhas e acionamento dos times de Engenharia e Infraestrutura para reduzir o tempo médio de recuperação (MTTR)."
+      },
+      {
+        "text": "Criação de dashboards e ajuste de alertas para acompanhar a saúde dos serviços em tempo real."
+      }
+    ],
+    "stack": ["Grafana", "Zabbix", "Kibana"]
+  },
+  {
+    "id": "lebes",
+    "company": "Lojas Lebes",
+    "location": "Eldorado do Sul, RS",
+    "summary": "Suporte técnico e sustentação de sistemas internos (ERP e CRM) das lojas e da matriz.",
+    "roles": [
+      { "title": "Analista de Suporte a Sistemas", "start": "2018-02", "end": "2019-08" }
+    ],
+    "highlights": [
+      {
+        "text": "Sustentação de rotinas de ERP e CRM no dia a dia da operação."
+      },
+      {
+        "text": "Diagnóstico de falhas em servidores, integrações entre sistemas e rotinas de comunicação."
+      },
+      {
+        "text": "Validação de correções e conferência de dados junto às equipes de TI e desenvolvimento."
+      }
+    ],
+    "stack": ["ERP", "CRM"]
+  }
+]

@@ -10,7 +10,7 @@
     />
     <meta name="author" content="Pedro Henrique Lopes" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f4f4f1" />
+    <meta name="theme-color" content="#ecebe6" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href="https://pherls.dev/" />
@@ -36,20 +36,27 @@
     <meta name="twitter:image" content="https://pherls.dev/og.png?v=2026-11-06" />
     <meta name="twitter:image:alt" content="Pedro Henrique Lopes · Software Engineer · Frontend" />
     <style>
-      html{background-color:#f4f4f1;color:#111111}
-      html.dark{background-color:#111111;color:#f4f4f1}
+      html{background-color:#ecebe6;color:#141513}
+      html.dark{background-color:#0c0d0c;color:#f4f4f0}
       .seo-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+      .initial-shell{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 1rem 2.5rem;box-sizing:border-box;font-family:"Archivo Fallback",system-ui,-apple-system,sans-serif}
+      .initial-eyebrow{margin:0 0 1rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;line-height:1.4;color:#62645d;text-align:center}
+      html.dark .initial-eyebrow{color:#9fa399}
+      .initial-title{margin:0 0 2rem;max-width:18ch;text-align:center;font-size:clamp(2rem,6vw,3.35rem);font-weight:800;line-height:1.03;letter-spacing:-.035em}
+      .initial-composer{width:100%;max-width:44rem;height:7rem;border-radius:1.5rem;border:1px solid rgba(20,21,19,.12);background-color:#fbfbf9}
+      html.dark .initial-composer{border-color:rgba(244,244,240,.12);background-color:#141513}
     </style>
     <noscript><style>.seo-only{position:static!important;width:auto!important;height:auto!important;margin:0!important;overflow:visible!important;clip-path:none!important;white-space:normal!important}</style></noscript>
     <script>
       (() => {
         let dark = matchMedia('(prefers-color-scheme: dark)').matches;
         try {
-          const stored = localStorage.getItem('theme');
-          if (stored) dark = stored === 'dark';
+          const stored = localStorage.getItem('pherls.theme') || localStorage.getItem('theme');
+          if (stored === 'dark' || stored === 'light') dark = stored === 'dark';
         } catch {}
         document.documentElement.classList.toggle('dark', dark);
-        document.querySelector('meta[name="theme-color"]').content = dark ? '#111111' : '#f4f4f1';
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', dark ? '#0c0d0c' : '#ecebe6');
       })();
     </script>
     <link rel="stylesheet" href="/src/index.css" />
