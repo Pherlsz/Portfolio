@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -65,6 +65,10 @@ function StudyDetail({
   study: ContentDocument;
   onAskChat: (prompt: string) => void;
 }) {
+  useEffect(() => {
+    document.title = `${study.title} · Estudos · Pedro Henrique Lopes`;
+  }, [study.title]);
+
   return (
     <article className="mx-auto max-w-6xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
       <Link href="/estudos" className="focus-ring pill-button">
@@ -156,9 +160,18 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
 
   if (isDetail && detailParams?.slug && detailParams.slug !== 'certificados') {
     const study = findStudyBySlug(detailParams.slug);
-    if (study) {
-      return <StudyDetail study={study} onAskChat={onAskChat} />;
+    if (!study) {
+      return (
+        <section className="mx-auto max-w-4xl px-5 pt-16 pb-12 sm:px-8 lg:py-12">
+          <Link href="/estudos" className="focus-ring pill-button">
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            <span>{t('studies.backToList')}</span>
+          </Link>
+          <p className="mt-6 text-body text-ink-soft">Estudo não encontrado.</p>
+        </section>
+      );
     }
+    return <StudyDetail study={study} onAskChat={onAskChat} />;
   }
 
   const certificates = DEFAULT_PORTFOLIO_DATA.certificates;

@@ -3,6 +3,7 @@ import { afterEach, test } from 'node:test';
 import { createChatStore, MAX_CHATS } from '../src/chat/chatStore.ts';
 import { visibleSections } from '../src/content/sections.ts';
 import { DEFAULT_PORTFOLIO_DATA } from '../src/data/portfolioData.ts';
+import { shouldShowIntro } from '../src/shell/introPolicy.ts';
 import { buildSystemPrompt, buildUserPrompt, isSafeReply } from '../src/server/assistant.ts';
 import {
   MODEL_TURN_CHAR_LIMIT,
@@ -999,4 +1000,27 @@ test('chatStore: envia apenas até HISTORY_LIMIT turnos concluídos (status done
     lastHistory.some((turn) => turn.text.includes('falha simulada')),
     false
   );
+});
+
+test('introPolicy: exibe intro 1x apenas em rotas principais no desktop e pula em mobile, /cv, /v1 ou conexão lenta', () => {
+  const base = {
+    pathname: '/',
+    alreadySeen: false,
+    prefersReducedMotion: false,
+    finePointer: true,
+    saveData: false,
+    effectiveType: '4g'
+  };
+
+  assert.equal(shouldShowIntro(base), true);
+  assert.equal(shouldShowIntro({ ...base, pathname: '/projetos' }), true);
+  assert.equal(shouldShowIntro({ ...base, alreadySeen: true }), false);
+  assert.equal(shouldShowIntro({ ...base, pathname: '/cv' }), false);
+  assert.equal(shouldShowIntro({ ...base, pathname: '/cv/' }), false);
+  assert.equal(shouldShowIntro({ ...base, pathname: '/v1' }), false);
+  assert.equal(shouldShowIntro({ ...base, finePointer: false }), false);
+  assert.equal(shouldShowIntro({ ...base, prefersReducedMotion: true }), false);
+  assert.equal(shouldShowIntro({ ...base, saveData: true }), false);
+  assert.equal(shouldShowIntro({ ...base, effectiveType: '3g' }), false);
+  assert.equal(shouldShowIntro({ ...base, effectiveType: '2g' }), false);
 });

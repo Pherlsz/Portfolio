@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Clock, MessageSquare } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -28,6 +28,10 @@ function ArticleDetail({
   article: ContentDocument;
   onAskChat: (prompt: string) => void;
 }) {
+  useEffect(() => {
+    document.title = `${article.title} · Artigos · Pedro Henrique Lopes`;
+  }, [article.title]);
+
   return (
     <article className="mx-auto max-w-5xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
       <Link href="/artigos" className="focus-ring pill-button">
@@ -112,9 +116,18 @@ export function ArticlesPage({ onAskChat }: { onAskChat: (prompt: string) => voi
 
   if (isDetail && params?.slug) {
     const article = findArticleBySlug(params.slug);
-    if (article) {
-      return <ArticleDetail article={article} onAskChat={onAskChat} />;
+    if (!article) {
+      return (
+        <section className="mx-auto max-w-4xl px-5 pt-16 pb-12 sm:px-8 lg:py-12">
+          <Link href="/artigos" className="focus-ring pill-button">
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            <span>{t('articles.backToList')}</span>
+          </Link>
+          <p className="mt-6 text-body text-ink-soft">Artigo não encontrado.</p>
+        </section>
+      );
     }
+    return <ArticleDetail article={article} onAskChat={onAskChat} />;
   }
 
   return (

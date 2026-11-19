@@ -1,4 +1,4 @@
-import { useRef, useState, type MouseEvent, type PointerEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react';
 import {
   BookOpen,
   Briefcase,
@@ -77,10 +77,13 @@ export function Sidebar({
 
   const sections = visibleSections();
 
-  const go = (to: string) => {
-    navigateWithTransition(setLocation, to);
-    onNavigate?.();
-  };
+  const go = useCallback(
+    (to: string) => {
+      navigateWithTransition(setLocation, to);
+      onNavigate?.();
+    },
+    [onNavigate, setLocation]
+  );
 
   const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>, to: string) => {
     if (!isPlainLeftClick(event)) return;
@@ -111,10 +114,46 @@ export function Sidebar({
     el.style.setProperty('--rot', '0deg');
   };
 
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     chatStore.newChat();
     go('/');
-  };
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const composer = document.querySelector<HTMLTextAreaElement>('main#conteudo textarea');
+        composer?.focus();
+      });
+    });
+  }, [go]);
+
+  useEffect(() => {
+    if (isMobileDrawer || typeof window === 'undefined') return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+      if (document.querySelector('dialog[open]')) {
+        return;
+      }
+      const active = document.activeElement;
+      if (
+        active instanceof HTMLInputElement ||
+        active instanceof HTMLTextAreaElement ||
+        active instanceof HTMLSelectElement ||
+        (active instanceof HTMLElement && active.isContentEditable)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      handleNewChat();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleNewChat, isMobileDrawer]);
 
   const startRename = (id: string, currentTitle: string) => {
     setEditingId(id);

@@ -9,7 +9,7 @@
 .intro-curtain {
   clip-path: inset(0 0 0 0);
   transition-property: clip-path;
-  transition-duration: 520ms;
+  transition-duration: 380ms;
   transition-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
   will-change: clip-path;
 }
@@ -29,13 +29,13 @@
 }
 
 .intro-wordmark-rise {
-  animation: intro-wordmark-rise 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: intro-wordmark-rise 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes intro-wordmark-rise {
   from {
-    opacity: 0;
-    transform: translateY(22px);
+    opacity: 0.45;
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
