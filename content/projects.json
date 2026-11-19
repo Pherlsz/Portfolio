@@ -1,0 +1,81 @@
+[
+  {
+    "id": "gymkhana-database",
+    "name": "Gymkhana Database",
+    "kicker": "Aplicação web",
+    "kind": "app",
+    "featured": true,
+    "tagline": "Sistema web para organizar dados, contas e documentos, com planilha no estilo Excel (fórmulas e filtros) e assistente de IA para busca.",
+    "repoUrl": "https://github.com/Pherlsz/Gymkhana-Database",
+    "access": "public",
+    "stack": ["React", "TypeScript", "Vite", "Ant Design", "Go", "GitHub Actions"],
+    "image": "/projects/gymkhana-database-assistente.webp",
+    "chatPrompt": "Me explica a arquitetura e os desafios do Gymkhana Database."
+  },
+  {
+    "id": "gymkhana-core",
+    "name": "Gymkhana Core",
+    "kicker": "Biblioteca Go",
+    "kind": "library",
+    "featured": true,
+    "tagline": "Biblioteca em Go para padronização de dados, extração de texto de documentos e integração com modelos de IA.",
+    "repoUrl": "https://github.com/Pherlsz/Gymkhana-Core",
+    "access": "public",
+    "language": "Go",
+    "stack": ["Go", "JSON Schema", "OCR", "RAG", "LLM Tools"],
+    "modules": [
+      {
+        "name": "normalize",
+        "description": "Padronização de nomes, documentos, endereços e contatos."
+      },
+      {
+        "name": "civiltime",
+        "description": "Datas e períodos sem dependência de fuso horário."
+      },
+      {
+        "name": "fingerprint",
+        "description": "Hashes determinísticos para evitar registros duplicados."
+      },
+      {
+        "name": "portablejson",
+        "description": "Validação de JSON e schemas."
+      },
+      {
+        "name": "assistant",
+        "description": "Chamadas a modelos de IA com suporte a tools e RAG."
+      },
+      {
+        "name": "ocr",
+        "description": "Extração de dados a partir de documentos."
+      }
+    ],
+    "chatPrompt": "Como funcionam os módulos do Gymkhana Core em Go?"
+  },
+  {
+    "id": "portfolio-v2",
+    "name": "pherls.dev v2",
+    "kicker": "Estudo de caso",
+    "kind": "case-study",
+    "featured": true,
+    "tagline": "Portfólio conversacional com streaming SSE, cards ricos sem custo extra de tokens, curadoria semanal por IA e registro aberto de decisões de arquitetura.",
+    "href": "/estudos/portfolio-v2-arquitetura-ia",
+    "decisionsDoc": "docs/decisoes.md",
+    "access": "public",
+    "stack": ["React", "TypeScript", "Vite", "Tailwind CSS", "Cloudflare Workers", "Gemini API"],
+    "image": "/projects/portfolio-v2.webp",
+    "chatPrompt": "Como o pherls.dev v2 foi planejado e construído?"
+  },
+  {
+    "id": "portfolio-v1",
+    "name": "pherls.dev v1 (2025)",
+    "kicker": "Versão arquivada",
+    "kind": "portfolio-version",
+    "featured": false,
+    "tagline": "Primeira versão do portfólio em formato editorial de página única, preservada de forma simplificada com a tampa interativa de adesivos holográficos.",
+    "href": "/v1",
+    "access": "public",
+    "stack": ["React", "TypeScript", "Vite", "Tailwind CSS", "Canvas"],
+    "image": "/projects/portfolio-v1.webp",
+    "chatPrompt": "O que mudou entre o pherls.dev v1 e a v2?"
+  }
+]

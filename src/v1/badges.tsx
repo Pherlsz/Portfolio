@@ -51,24 +51,12 @@ function VitestMark() {
   );
 }
 
-export function SkillBadge({
-  name,
-  active = false,
-  onSelect
-}: {
-  name: string;
-  active?: boolean;
-  onSelect?: (name: string) => void;
-}) {
+export function SkillBadge({ name }: { name: string }) {
   const icon = SKILL_ICONS[name];
-  const fill = active
-    ? 'currentColor'
-    : !icon || icon.hex === '000000'
-      ? 'currentColor'
-      : `#${icon.hex}`;
+  const fill = !icon || icon.hex === '000000' ? 'currentColor' : `#${icon.hex}`;
 
-  const content = (
-    <>
+  return (
+    <li className="inline-flex items-center gap-2 border border-line bg-surface px-3 py-1.5 text-[0.875rem] font-medium">
       {name === 'Vitest' ? (
         <VitestMark />
       ) : name === 'Zustand' ? (
@@ -79,31 +67,6 @@ export function SkillBadge({
         </svg>
       ) : null}
       <span>{name}</span>
-    </>
-  );
-
-  if (!onSelect) {
-    return (
-      <li className="inline-flex items-center gap-2 border border-line bg-surface px-3 py-1.5 text-[0.875rem] font-medium">
-        {content}
-      </li>
-    );
-  }
-
-  return (
-    <li>
-      <button
-        type="button"
-        aria-pressed={active}
-        onClick={() => onSelect(name)}
-        className={`inline-flex min-h-9 cursor-pointer items-center gap-2 border px-3 py-1.5 text-[0.875rem] font-medium transition-colors duration-150 ${
-          active
-            ? 'border-ink bg-marker text-on-marker'
-            : 'border-line bg-surface text-ink hover:border-ink'
-        }`}
-      >
-        {content}
-      </button>
     </li>
   );
 }
@@ -160,7 +123,9 @@ export function CertBadge({ cert }: { cert: Certification }) {
         <p className="eyebrow">{series}</p>
         <p className="mt-0.5 font-bold leading-snug">{title}</p>
         <p className="eyebrow mt-1">
-          {badge.code === cert.issuer ? `${cert.issuer} · ${cert.year}` : `${cert.issuer} · ${badge.code} · ${cert.year}`}
+          {badge.code === cert.issuer
+            ? `${cert.issuer} · ${cert.year}`
+            : `${cert.issuer} · ${badge.code} · ${cert.year}`}
         </p>
       </div>
     </div>

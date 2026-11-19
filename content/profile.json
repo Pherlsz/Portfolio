@@ -1,0 +1,84 @@
+{
+  "siteOrigin": "https://pherls.dev",
+  "updatedAt": "2026-11-06",
+  "profile": {
+    "name": "Pedro Henrique Lopes",
+    "shortName": "Pedro Lopes",
+    "jobTitle": "Software Engineer · Frontend",
+    "headline": "Mais de 4 anos desenvolvendo aplicações web em produção com React, Next.js e TypeScript.",
+    "summary": "Experiência prática em Design Systems (==30+ componentes WCAG 2.1 AA==), virtualização de listagens com ==5.000+ registros== e interfaces para recursos com LLMs, além de manutenção de serviços em C#/.NET Core.",
+    "trustCopy": "Busco vagas Pleno em frontend (remoto ou em Porto Alegre), também aberto a contribuir em APIs e backend.",
+    "status": "Aberto a oportunidades",
+    "location": "Porto Alegre, RS",
+    "seniority": "Pleno",
+    "workMode": "Remoto, ou híbrido/presencial em Porto Alegre",
+    "salary": "A combinar",
+    "email": "phpherls@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/pherls/",
+    "github": "https://github.com/Pherlsz",
+    "cvUrl": "/cv/Pedro-Henrique-Lopes-CV.pdf",
+    "about": [
+      "Comecei trabalhando com suporte técnico e monitoramento de sistemas críticos (NOC). Acompanhar ambientes de produção de perto me deu uma boa base para investigar incidentes, ler logs e achar a causa raiz antes de mexer no código.",
+      "Na transição para engenharia de software, evoluí do estágio a Software Engineer ao longo de mais de quatro anos atuando principalmente com React, Next.js e TypeScript, criando componentes de Design System, melhorando a performance de telas pesadas, construindo interfaces para recursos de IA e dando manutenção em serviços em C#/.NET Core.",
+      "Me adapto rápido a projetos em andamento e gosto de pegar problemas em que preciso aprender algo novo. Meu foco é frontend, mas também escrevo backend e APIs em .NET e Go quando faz sentido para o time."
+    ]
+  },
+  "skills": [
+    {
+      "name": "Frontend",
+      "featured": ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+      "items": [
+        "JavaScript (ES6+)",
+        "HTML e CSS",
+        "Styled Components",
+        "Design Systems",
+        "Acessibilidade (WCAG 2.1 AA)",
+        "Web Performance",
+        "Vite",
+        "Webpack"
+      ]
+    },
+    {
+      "name": "Estado e dados",
+      "featured": ["TanStack Query", "Zustand"],
+      "items": ["TanStack Virtual", "Context API"]
+    },
+    {
+      "name": "Backend e IA",
+      "featured": [".NET", "Go"],
+      "items": ["C#", "APIs REST", "Interfaces para IA (LLMs)", "SQL"]
+    },
+    {
+      "name": "Qualidade e DevOps",
+      "featured": ["Vitest", "Docker", "GitHub Actions"],
+      "items": [
+        "React Testing Library",
+        "Jest",
+        "Git",
+        "Azure DevOps",
+        "Microsoft Azure",
+        "OWASP Top 10",
+        "Grafana",
+        "Zabbix"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "course": "Tecnólogo em Análise e Desenvolvimento de Sistemas",
+      "school": "Estácio",
+      "period": "ago 2022 - dez 2024"
+    }
+  ],
+  "otherCourses": [
+    "Zabbix Foundation",
+    "Container Fundamentals",
+    "DevOps Essentials",
+    "Technical Support Fundamentals"
+  ],
+  "languages": [
+    { "name": "Português", "code": "pt-BR", "level": "Nativo" },
+    { "name": "Inglês", "code": "en", "level": "Intermediário, com leitura e escrita técnica" },
+    { "name": "Espanhol", "code": "es", "level": "Intermediário" }
+  ]
+}

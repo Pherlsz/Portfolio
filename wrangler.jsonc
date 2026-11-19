@@ -13,13 +13,25 @@
     "traces": { "enabled": true }
   },
   "upload_source_maps": true,
-  "vars": {
-    "GEMINI_MODELS": "gemini-flash-latest,gemini-flash-lite-latest"
+  "triggers": {
+    "crons": ["0 12 * * 1"]
   },
+  // "vars": {
+  //   "GEMINI_MODELS": "gemini-3.8-flash,gemini-3.5-flash-lite",
+  //   "REASONING_PROFILES": "{\"fast\":{\"models\":[\"gemini-3.5-flash-lite\",\"gemini-3.8-flash\"],\"temperature\":0.25,\"maxOutputTokens\":450,\"thinkingBudget\":0,\"thinkingLevel\":\"minimal\"},\"default\":{\"models\":[\"gemini-3.8-flash\",\"gemini-3.5-flash-lite\"],\"temperature\":0.3,\"maxOutputTokens\":600,\"thinkingBudget\":512,\"thinkingLevel\":\"low\"},\"high\":{\"models\":[\"gemini-3.8-flash\",\"gemini-3.5-flash-lite\"],\"temperature\":0.3,\"maxOutputTokens\":900,\"thinkingBudget\":2048,\"thinkingLevel\":\"medium\"}}"
+  // },
   "kv_namespaces": [
     {
       "binding": "INBOX",
       "id": "9513e6cd5e7f46feb1545faf27d48f1c"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "QUESTIONS",
+      "database_name": "pherls-questions",
+      "database_id": "c0fca173-c1a0-4934-973c-28e32fd6a64f",
+      "migrations_dir": "migrations"
     }
   ],
   "ratelimits": [
@@ -27,6 +39,11 @@
       "name": "CHAT_LIMIT",
       "namespace_id": "6101",
       "simple": { "limit": 20, "period": 60 }
+    },
+    {
+      "name": "CHAT_HIGH_LIMIT",
+      "namespace_id": "6103",
+      "simple": { "limit": 6, "period": 60 }
     },
     {
       "name": "CONTACT_LIMIT",
@@ -42,7 +59,13 @@
       "/llms.txt",
       "/robots.txt",
       "/sitemap.xml",
-      "/.well-known/*"
+      "/cv.md",
+      "/cv.json",
+      "/.well-known/*",
+      "/studio",
+      "/studio/*",
+      "/admin",
+      "/admin/*"
     ]
   },
   "routes": [
@@ -50,7 +73,8 @@
   ],
   "previews": {
     "vars": {
-      "GEMINI_MODELS": "gemini-flash-latest,gemini-flash-lite-latest"
+      "GEMINI_MODELS": "gemini-3.8-flash,gemini-3.5-flash-lite",
+      "REASONING_PROFILES": "{\"fast\":{\"models\":[\"gemini-3.5-flash-lite\",\"gemini-3.8-flash\"],\"temperature\":0.25,\"maxOutputTokens\":450,\"thinkingBudget\":0,\"thinkingLevel\":\"minimal\"},\"default\":{\"models\":[\"gemini-3.8-flash\",\"gemini-3.5-flash-lite\"],\"temperature\":0.3,\"maxOutputTokens\":600,\"thinkingBudget\":512,\"thinkingLevel\":\"low\"},\"high\":{\"models\":[\"gemini-3.8-flash\",\"gemini-3.5-flash-lite\"],\"temperature\":0.3,\"maxOutputTokens\":900,\"thinkingBudget\":2048,\"thinkingLevel\":\"medium\"}}"
     },
     "kv_namespaces": [
       {
@@ -58,11 +82,24 @@
         "id": "2caac2a53908405e8b365bb10dd90ed3"
       }
     ],
+    "d1_databases": [
+      {
+        "binding": "QUESTIONS",
+        "database_name": "pherls-questions-preview",
+        "database_id": "08452bf4-552a-459a-a1b7-0cad99faa2d7",
+        "migrations_dir": "migrations"
+      }
+    ],
     "ratelimits": [
       {
         "name": "CHAT_LIMIT",
         "namespace_id": "6201",
         "simple": { "limit": 20, "period": 60 }
+      },
+      {
+        "name": "CHAT_HIGH_LIMIT",
+        "namespace_id": "6203",
+        "simple": { "limit": 6, "period": 60 }
       },
       {
         "name": "CONTACT_LIMIT",

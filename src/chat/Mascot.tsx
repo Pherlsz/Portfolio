@@ -1,0 +1,95 @@
+import { useEffect, useRef, useState } from 'react';
+
+export type Reasoning = 'fast' | 'default' | 'high';
+
+interface MascotProps {
+  reasoning: Reasoning;
+  statusText?: string;
+}
+
+interface MascotSpec {
+  name: string;
+  src: string;
+  width: number;
+  height: number;
+  status: string;
+}
+
+/* Rendered box is 48px on the long edge; width/height keep each sticker's intrinsic ratio (zero CLS). */
+const MASCOTS: Record<Reasoning, MascotSpec> = {
+  fast: { name: 'Tomada', src: '/stickers/tomada.webp', width: 48, height: 44, status: 'Respondendo rápido' },
+  default: { name: 'Morcega', src: '/stickers/morcega.webp', width: 44, height: 48, status: 'Pensando na resposta' },
+  high: { name: 'Banguela', src: '/stickers/banguela.webp', width: 48, height: 44, status: 'Pensando com calma antes de responder' },
+};
+
+/**
+ * Working indicator shown only while the assistant is thinking or streaming.
+ * The caller mounts it conditionally. The image is decorative; the polite status text carries the meaning.
+ */
+export default function Mascot({ reasoning, statusText }: MascotProps) {
+  const mascot = MASCOTS[reasoning] ?? MASCOTS.default;
+  const text = statusText?.trim() || mascot.status;
+  const hopRef = useRef<HTMLSpanElement>(null);
+
+  // Fill the live region after mount so screen readers announce it (regions populated at mount are often skipped).
+  const [announced, setAnnounced] = useState('');
+  useEffect(() => {
+    const id = window.setTimeout(() => setAnnounced(text), 60);
+    return () => window.clearTimeout(id);
+  }, [text]);
+
+  const hop = () => {
+    const el = hopRef.current;
+    if (!el) return;
+    el.classList.remove('mascot-hop');
+    void el.offsetWidth; // restart the animation on rapid clicks
+    el.classList.add('mascot-hop');
+  };
+
+  return (
+    <div className="status-in flex items-center gap-3 py-1" data-reasoning={reasoning}>
+      <button
+        type="button"
+        onClick={hop}
+        aria-label={`${mascot.name}: clique para fazer pular`}
+        className="mascot focus-ring relative -my-1 flex size-14 shrink-0 cursor-pointer flex-col items-center justify-end rounded-control pb-0.5"
+        data-mascot={reasoning}
+      >
+        <span
+          ref={hopRef}
+          className="mascot-hop-layer"
+          onAnimationEnd={(e) => {
+            if (e.animationName === 'mascot-hop') e.currentTarget.classList.remove('mascot-hop');
+          }}
+        >
+          <span className="mascot-idle">
+            <img
+              src={mascot.src}
+              width={mascot.width}
+              height={mascot.height}
+              alt=""
+              decoding="async"
+              draggable={false}
+              className="block select-none"
+              style={{ width: mascot.width, height: mascot.height }}
+            />
+          </span>
+        </span>
+        <span className="mascot-shadow" aria-hidden="true" />
+      </button>
+
+      <div className="min-w-0">
+        <p key={text} aria-hidden="true" className="status-in truncate text-ui font-medium text-ink-soft">
+          {text}
+        </p>
+        <p className="font-mono text-micro text-muted" aria-hidden="true">
+          {mascot.name}
+        </p>
+      </div>
+
+      <span role="status" aria-live="polite" className="sr-only">
+        {announced}
+      </span>
+    </div>
+  );
+}

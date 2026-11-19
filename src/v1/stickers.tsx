@@ -8,8 +8,8 @@ import {
   type RefObject
 } from 'react';
 import { HoloSparkleCanvas } from './HoloSparkleCanvas';
-import { useStickerHoloPointer } from '../utils/holoPointer';
-import { holoMaskUrl, isStickerHoloActive, prefersReducedMotion, useHoloRoulette } from '../utils/stickerHolo';
+import { useStickerHoloPointer } from './holoPointer';
+import { holoMaskUrl, isStickerHoloActive, prefersReducedMotion, useHoloRoulette } from './stickerHolo';
 import {
   localPadded,
   nudgeConflicts,
@@ -22,7 +22,7 @@ import {
   TEXT_PAD,
   type LidSlotId,
   type ScatterSlot
-} from '../utils/lidStickerSlots';
+} from './lidStickerSlots';
 
 export type StickerId = LidSlotId;
 

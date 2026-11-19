@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { prefersReducedMotion } from '../utils/stickerHolo';
+import { prefersReducedMotion } from './stickerHolo';
 
 const GLINT_COUNT = 56;
 

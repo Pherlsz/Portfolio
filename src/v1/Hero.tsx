@@ -1,12 +1,12 @@
 import { lazy, Suspense } from 'react';
-import { FileText, ArrowDownRight } from 'lucide-react';
+import { ArrowDownRight } from 'lucide-react';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { CTA } from './CTA';
 import { handleSmoothScrollClick, Marked, Reveal } from './ui';
 
 const StickerLid = lazy(() => import('./stickers').then((module) => ({ default: module.StickerLid })));
 
-export function Hero({ onOpenCv }: { onOpenCv: () => void }) {
+export function Hero() {
   const { profile } = DEFAULT_PORTFOLIO_DATA;
   const titleParts = profile.jobTitle.split(' · ');
   const role = titleParts[0];
@@ -68,16 +68,6 @@ export function Hero({ onOpenCv }: { onOpenCv: () => void }) {
 
           <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <CTA
-              variant="primary"
-              onClick={onOpenCv}
-              aria-haspopup="dialog"
-              aria-controls="cv-preview"
-              className="w-full sm:w-auto"
-              icon={<FileText className="size-4" aria-hidden="true" />}
-            >
-              Ver CV
-            </CTA>
-            <CTA
               variant="secondary"
               href="#experiencia"
               onClick={(event) => handleSmoothScrollClick(event, 'experiencia')}
@@ -87,11 +77,11 @@ export function Hero({ onOpenCv }: { onOpenCv: () => void }) {
             </CTA>
             <CTA
               variant="tertiary"
-              href="#contato"
-              onClick={(event) => handleSmoothScrollClick(event, 'contato')}
+              href="#projeto"
+              onClick={(event) => handleSmoothScrollClick(event, 'projeto')}
               icon={<ArrowDownRight className="size-4" aria-hidden="true" />}
             >
-              Canais de contato
+              Ver projetos
             </CTA>
           </div>
         </Reveal>
