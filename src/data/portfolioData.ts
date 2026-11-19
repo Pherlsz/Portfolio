@@ -64,6 +64,8 @@ export interface CertificateItem {
   issuedAt: string;
   expiresAt?: string;
   badge?: string;
+  image?: string;
+  mediaKind?: 'badge' | 'diploma' | 'monogram';
   pdf?: string;
   verifyUrl?: string;
   badgeMeta?: CertificateBadgeMeta;

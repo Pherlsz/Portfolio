@@ -1,9 +1,17 @@
-import { lazy, Suspense, useCallback, useEffect } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { Route, Switch, useLocation } from 'wouter';
 import { chatStore } from './chat/chatStore';
 import ChatView from './chat/ChatView';
+import { EditorialLoader } from './components/EditorialLoader';
 import { printConsoleBanner } from './easter/consoleBanner';
 import { AppShell } from './shell/AppShell';
+
+const IntroCurtain = lazy(() =>
+  import('./shell/IntroCurtain').then((mod) => ({ default: mod.IntroCurtain }))
+);
+const NarratorOrb = lazy(() =>
+  import('./components/NarratorOrb').then((mod) => ({ default: mod.NarratorOrb }))
+);
 
 const NotFoundPage = lazy(() =>
   import('./pages/NotFoundPage').then((mod) => ({ default: mod.NotFoundPage }))
@@ -29,19 +37,19 @@ const CvDocument = lazy(() =>
   import('./components/CvDocument').then((mod) => ({ default: mod.CvDocument }))
 );
 
-function RouteLoading() {
-  return (
-    <div className="flex min-h-[50vh] items-center justify-center font-mono text-micro text-muted">
-      Carregando...
-    </div>
-  );
-}
-
 export default function App() {
   const [, setLocation] = useLocation();
+  const [isFinePointer, setIsFinePointer] = useState(false);
 
   useEffect(() => {
     printConsoleBanner();
+    if (
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(pointer: fine)').matches
+    ) {
+      setIsFinePointer(true);
+    }
   }, []);
 
   const handleAskChat = useCallback(
@@ -61,59 +69,67 @@ export default function App() {
   }, [handleAskChat]);
 
   return (
-    <Switch>
-      <Route path="/v1">
-        {() => (
-          <div className="v1-scope">
-            <Suspense fallback={<RouteLoading />}>
-              <V1Page />
-            </Suspense>
-          </div>
-        )}
-      </Route>
+    <>
+      {isFinePointer ? (
+        <Suspense fallback={null}>
+          <IntroCurtain />
+          <NarratorOrb />
+        </Suspense>
+      ) : null}
+      <Switch>
+        <Route path="/v1">
+          {() => (
+            <div className="v1-scope">
+              <Suspense fallback={<EditorialLoader />}>
+                <V1Page />
+              </Suspense>
+            </div>
+          )}
+        </Route>
 
-      <Route path="/cv">
-        {() => (
-          <div className="v1-scope">
-            <Suspense fallback={<RouteLoading />}>
-              <CvDocument />
-            </Suspense>
-          </div>
-        )}
-      </Route>
+        <Route path="/cv">
+          {() => (
+            <div className="v1-scope">
+              <Suspense fallback={<EditorialLoader />}>
+                <CvDocument />
+              </Suspense>
+            </div>
+          )}
+        </Route>
 
-      <Route>
-        {() => (
-          <AppShell onStartContact={handleStartContact}>
-            <Suspense fallback={<RouteLoading />}>
-              <Switch>
-                <Route path="/">{() => <ChatView />}</Route>
-                <Route path="/c/:id">{(params) => <ChatView chatId={params.id} />}</Route>
-                <Route path="/projetos">{() => <ProjectsPage onAskChat={handleAskChat} />}</Route>
-                <Route path="/projetos/:slug">
-                  {() => <ProjectsPage onAskChat={handleAskChat} />}
-                </Route>
-                <Route path="/experiencia">
-                  {() => <ExperiencePage onAskChat={handleAskChat} />}
-                </Route>
-                <Route path="/estudos">{() => <StudiesPage onAskChat={handleAskChat} />}</Route>
-                <Route path="/estudos/certificados">
-                  {() => <StudiesPage onAskChat={handleAskChat} />}
-                </Route>
-                <Route path="/estudos/:slug">
-                  {() => <StudiesPage onAskChat={handleAskChat} />}
-                </Route>
-                <Route path="/artigos">{() => <ArticlesPage onAskChat={handleAskChat} />}</Route>
-                <Route path="/artigos/:slug">
-                  {() => <ArticlesPage onAskChat={handleAskChat} />}
-                </Route>
-                <Route path="/ai">{() => <AiFilesPage />}</Route>
-                <Route>{() => <NotFoundPage />}</Route>
-              </Switch>
-            </Suspense>
-          </AppShell>
-        )}
-      </Route>
-    </Switch>
+        <Route>
+          {() => (
+            <AppShell onStartContact={handleStartContact}>
+              <Suspense fallback={<EditorialLoader />}>
+                <Switch>
+                  <Route path="/">{() => <ChatView />}</Route>
+                  <Route path="/c/:id">{(params) => <ChatView chatId={params.id} />}</Route>
+                  <Route path="/projetos">{() => <ProjectsPage onAskChat={handleAskChat} />}</Route>
+                  <Route path="/projetos/:slug">
+                    {() => <ProjectsPage onAskChat={handleAskChat} />}
+                  </Route>
+                  <Route path="/experiencia">
+                    {() => <ExperiencePage onAskChat={handleAskChat} />}
+                  </Route>
+                  <Route path="/estudos">{() => <StudiesPage onAskChat={handleAskChat} />}</Route>
+                  <Route path="/estudos/certificados">
+                    {() => <StudiesPage onAskChat={handleAskChat} />}
+                  </Route>
+                  <Route path="/estudos/:slug">
+                    {() => <StudiesPage onAskChat={handleAskChat} />}
+                  </Route>
+                  <Route path="/artigos">{() => <ArticlesPage onAskChat={handleAskChat} />}</Route>
+                  <Route path="/artigos/:slug">
+                    {() => <ArticlesPage onAskChat={handleAskChat} />}
+                  </Route>
+                  <Route path="/ai">{() => <AiFilesPage />}</Route>
+                  <Route>{() => <NotFoundPage />}</Route>
+                </Switch>
+              </Suspense>
+            </AppShell>
+          )}
+        </Route>
+      </Switch>
+    </>
   );
 }

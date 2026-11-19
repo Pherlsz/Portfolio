@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Clock, MessageSquare } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link, useRoute } from 'wouter';
+import { PageHeader } from '../components/PageHeader';
 import { ARTICLES, findArticleBySlug, type ContentDocument } from '../content/collections';
 import { t } from '../i18n/pt-BR';
 
@@ -117,39 +118,36 @@ export function ArticlesPage({ onAskChat }: { onAskChat: (prompt: string) => voi
   }
 
   return (
-    <section className="mx-auto max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
-      <header>
-        <h1 className="font-display text-title font-bold tracking-[-0.02em] text-ink">
-          {t('articles.title')}
-        </h1>
-      </header>
+    <section className="mx-auto w-full max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
+      <PageHeader title={t('articles.title')} />
 
-      <div className="mt-7 space-y-4">
+      <div className="mt-8 space-y-5">
         {ARTICLES.map((article) => (
           <article key={article.slug}>
             <Link
               href={`/artigos/${article.slug}`}
-              className="focus-ring surface-card surface-card-interactive group block p-6"
+              data-cursor="ler"
+              className="focus-ring card-editorial group grid gap-5 p-6 sm:p-7 lg:grid-cols-[1fr_auto] lg:items-baseline"
             >
-              <div className="flex flex-wrap items-center gap-2 font-mono text-micro text-muted tabular-nums">
-                <span className="rounded-pill bg-surface-soft px-2.5 py-0.5 font-sans text-micro font-medium text-ink-soft">
-                  {article.category}
-                </span>
-                <span>{article.publishedAt}</span>
-                <span aria-hidden="true">·</span>
-                <span className="inline-flex items-center gap-1">
-                  <Clock className="size-3.5" aria-hidden="true" />
-                  {article.readingTime}
-                </span>
-              </div>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2.5 font-mono text-micro text-muted tabular-nums">
+                  <span className="rounded-pill bg-surface-soft px-2.5 py-0.5 font-sans text-micro font-medium text-ink-soft">
+                    {article.category}
+                  </span>
+                  <span>{article.publishedAt}</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="size-3.5" aria-hidden="true" />
+                    {article.readingTime}
+                  </span>
+                </div>
 
-              <h2 className="mt-3 font-display text-lead font-bold tracking-[-0.015em] text-ink">
-                {article.title}
-              </h2>
-              <p className="mt-2 max-w-[65ch] text-body text-ink-soft">{article.summary}</p>
+                <h2 className="mt-2.5 font-display text-title font-bold tracking-[-0.02em] text-ink group-hover:underline">
+                  {article.title}
+                </h2>
+                <p className="mt-2 max-w-[65ch] text-body text-ink-soft">{article.summary}</p>
 
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                <div className="flex flex-wrap gap-1.5">
+                <div className="mt-4 flex flex-wrap gap-1.5">
                   {article.tags.slice(0, 4).map((tag) => (
                     <span
                       key={tag}
@@ -159,14 +157,15 @@ export function ArticlesPage({ onAskChat }: { onAskChat: (prompt: string) => voi
                     </span>
                   ))}
                 </div>
-                <span className="inline-flex items-center gap-1.5 text-ui font-medium text-ink">
-                  <span>Ler artigo</span>
-                  <ArrowRight
-                    className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-                    aria-hidden="true"
-                  />
-                </span>
               </div>
+
+              <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap font-mono text-ui font-semibold text-ink lg:self-center">
+                <span>Ler</span>
+                <ArrowRight
+                  className="size-4 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+                  aria-hidden="true"
+                />
+              </span>
             </Link>
           </article>
         ))}

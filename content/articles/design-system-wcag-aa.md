@@ -1,6 +1,6 @@
 ---
 slug: design-system-wcag-aa
-title: Estruturando um Design System com 30+ componentes acessíveis (WCAG 2.1 AA)
+title: Estruturando um Design System acessível (WCAG 2.1 AA)
 summary: Lições práticas construindo primitivos reutilizáveis em React, Next.js e TypeScript com foco em teclado, contraste, semântica e manutenção entre times.
 publishedAt: 2026-08-14
 readingTime: 6 min
@@ -8,7 +8,7 @@ category: Design Systems
 tags: [Design Systems, WCAG 2.1 AA, React, Next.js, TypeScript, Acessibilidade]
 ---
 
-Construir um Design System usado em produção por múltiplos módulos exige equilibrar velocidade de entrega com garantias sólidas de acessibilidade. Na evolução do Atlas PLG, manter mais de 30 componentes consistentes em React, Next.js e TypeScript mostrou que acessibilidade não funciona como revisão de última hora: ela precisa morar nos primitivos.
+Construir uma biblioteca de componentes compartilhada entre múltiplos módulos exige equilibrar velocidade de entrega com garantias sólidas de acessibilidade. Na prática, acessibilidade não funciona como revisão de última hora: ela precisa morar nos primitivos.
 
 ## Comece pelos primitivos, não pelas telas
 

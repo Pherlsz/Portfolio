@@ -17,9 +17,9 @@ interface MascotSpec {
 
 /* Rendered box is 48px on the long edge; width/height keep each sticker's intrinsic ratio (zero CLS). */
 const MASCOTS: Record<Reasoning, MascotSpec> = {
-  fast: { name: 'Tomada', src: '/stickers/tomada.webp', width: 48, height: 44, status: 'Respondendo rápido' },
-  default: { name: 'Morcega', src: '/stickers/morcega.webp', width: 44, height: 48, status: 'Pensando na resposta' },
-  high: { name: 'Banguela', src: '/stickers/banguela.webp', width: 48, height: 44, status: 'Pensando com calma antes de responder' },
+  fast: { name: 'Tomada', src: '/stickers/tomada.webp', width: 48, height: 44, status: 'Respondendo...' },
+  default: { name: 'Morcega', src: '/stickers/morcega.webp', width: 44, height: 48, status: 'Pensando...' },
+  high: { name: 'Banguela', src: '/stickers/banguela.webp', width: 48, height: 44, status: 'Pensando com calma' },
 };
 
 /**

@@ -1,4 +1,5 @@
-import { Suspense, lazy, useCallback, useEffect, useRef } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { ArrowDown } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { t } from '../i18n/pt-BR';
@@ -18,6 +19,25 @@ export default function ChatView({ chatId }: ChatViewProps) {
   const [location, setLocation] = useLocation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const bottomAnchorRef = useRef<HTMLDivElement>(null);
+  const prevMessageCountRef = useRef(0);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+
+  const getScrollParent = useCallback((): HTMLElement | null => {
+    const inner = scrollContainerRef.current;
+    if (inner && inner.scrollHeight > inner.clientHeight + 4) {
+      return inner;
+    }
+    const main = document.getElementById('conteudo');
+    return main instanceof HTMLElement ? main : inner;
+  }, []);
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    const prefersReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const effectiveBehavior: ScrollBehavior = prefersReduced ? 'auto' : behavior;
+    bottomAnchorRef.current?.scrollIntoView({ behavior: effectiveBehavior, block: 'end' });
+  }, []);
 
   useEffect(() => {
     if (chatId) {
@@ -40,14 +60,57 @@ export default function ChatView({ chatId }: ChatViewProps) {
   const lastMessage = messages[messages.length - 1];
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container || messages.length === 0) return;
-    const distanceFromBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight;
-    if (distanceFromBottom < 240 || lastMessage?.role === 'user') {
-      bottomAnchorRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
+    if (messages.length === 0) {
+      prevMessageCountRef.current = 0;
+      setShowScrollButton(false);
+      return;
     }
-  }, [messages.length, lastMessage?.text, lastMessage?.status, lastMessage?.role]);
+
+    const addedNewMessages = messages.length > prevMessageCountRef.current;
+    prevMessageCountRef.current = messages.length;
+
+    if (addedNewMessages) {
+      requestAnimationFrame(() => {
+        scrollToBottom('smooth');
+      });
+      return;
+    }
+
+    const scroller = getScrollParent();
+    if (!scroller) return;
+    const distanceFromBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight;
+    if (distanceFromBottom < 260) {
+      scrollToBottom('auto');
+    }
+  }, [
+    messages.length,
+    lastMessage?.text,
+    lastMessage?.status,
+    getScrollParent,
+    scrollToBottom
+  ]);
+
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    const handleScroll = () => {
+      const scroller = getScrollParent();
+      if (!scroller) return;
+      const distanceFromBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight;
+      setShowScrollButton(distanceFromBottom > 220);
+    };
+
+    const inner = scrollContainerRef.current;
+    const main = document.getElementById('conteudo');
+    inner?.addEventListener('scroll', handleScroll, { passive: true });
+    main?.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      inner?.removeEventListener('scroll', handleScroll);
+      main?.removeEventListener('scroll', handleScroll);
+    };
+  }, [messages.length, getScrollParent]);
 
   const handleReasoningChange = useCallback(
     (next: Reasoning) => {
@@ -107,9 +170,9 @@ export default function ChatView({ chatId }: ChatViewProps) {
 
   if (!activeThread || messages.length === 0) {
     return (
-      <div className="ambient-glow flex min-h-full flex-col items-center justify-center px-4 pt-16 pb-10 sm:px-8 lg:py-12">
-        <div className="flex w-full max-w-[44rem] flex-col items-center">
-          <p className="mb-4 flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center text-ui text-muted">
+      <div className="flex min-h-full w-full flex-col items-center px-4 pt-16 pb-10 sm:px-8 lg:py-12">
+        <div className="my-auto flex w-full max-w-[46rem] flex-col items-center">
+          <p className="mb-4 flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-0.5 font-mono text-micro text-muted">
             <span className="font-medium text-ink-soft">{profile.name}</span>
             <span aria-hidden="true">·</span>
             <span>{profile.jobTitle}</span>
@@ -117,20 +180,37 @@ export default function ChatView({ chatId }: ChatViewProps) {
             <span>{profile.location}</span>
           </p>
 
-          <h1 className="mb-8 text-center font-display text-hero font-bold tracking-[-0.025em] text-ink">
-            {t('chat.greeting')}
+          <h1 className="mb-8 max-w-[18ch] text-center font-display text-[length:var(--text-poster)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink">
+            <span className="word-reveal">
+              <span
+                className="word-reveal-inner"
+                style={{ '--reveal-delay': '0ms' } as CSSProperties}
+              >
+                O que você quer saber
+              </span>
+            </span>{' '}
+            <span className="word-reveal">
+              <span
+                className="word-reveal-inner"
+                style={{ '--reveal-delay': '70ms' } as CSSProperties}
+              >
+                sobre o trabalho do Pedro?
+              </span>
+            </span>
           </h1>
 
-          <Composer
-            reasoning={reasoning}
-            onReasoningChange={handleReasoningChange}
-            isStreaming={state.isStreaming}
-            onSend={handleSend}
-            onStop={handleStop}
-            autoFocus
-          />
+          <div className="w-full max-w-[44rem]">
+            <Composer
+              reasoning={reasoning}
+              onReasoningChange={handleReasoningChange}
+              isStreaming={state.isStreaming}
+              onSend={handleSend}
+              onStop={handleStop}
+              autoFocus
+            />
 
-          <Suggestions onSelect={handleSuggestionSelect} disabled={state.isStreaming} />
+            <Suggestions onSelect={handleSuggestionSelect} disabled={state.isStreaming} />
+          </div>
         </div>
       </div>
     );
@@ -181,7 +261,20 @@ export default function ChatView({ chatId }: ChatViewProps) {
       </div>
 
       <div className="sticky bottom-0 z-20 bg-gradient-to-t from-canvas via-canvas/95 to-transparent px-4 pt-6 pb-4 sm:px-8">
-        <div className="mx-auto w-full max-w-[44rem]">
+        <div className="relative mx-auto w-full max-w-[44rem]">
+          {showScrollButton ? (
+            <div className="pointer-events-none absolute -top-11 right-0 left-0 flex justify-center">
+              <button
+                type="button"
+                onClick={() => scrollToBottom('smooth')}
+                aria-label="Ir para a mensagem mais recente"
+                className="focus-ring pointer-events-auto inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-pill border border-border-strong bg-surface px-3 py-1 font-mono text-micro text-ink shadow-float transition-colors duration-150 hover:bg-surface-hover"
+              >
+                <ArrowDown className="size-3.5" aria-hidden="true" />
+                <span>Nova mensagem</span>
+              </button>
+            </div>
+          ) : null}
           <Composer
             reasoning={reasoning}
             onReasoningChange={handleReasoningChange}

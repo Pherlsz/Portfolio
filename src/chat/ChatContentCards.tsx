@@ -235,7 +235,7 @@ export default function ChatContentCards({ cards }: ChatContentCardsProps) {
             key={key}
             type="button"
             onClick={() => setLocation('/v1')}
-            className="group surface-card surface-card-interactive focus-ring w-full overflow-hidden rounded-card text-left"
+            className="group card-editorial focus-ring w-full overflow-hidden text-left"
           >
             <div className="dot-canvas flex items-center justify-between gap-3 border-b border-border bg-surface-soft px-4 py-3">
               <div className="flex items-center gap-2">
@@ -421,7 +421,7 @@ export default function ChatContentCards({ cards }: ChatContentCardsProps) {
             key={key}
             type="button"
             onClick={() => setLocation(`/estudos/${study.slug}`)}
-            className="group surface-card surface-card-interactive focus-ring w-full rounded-card p-4 text-left"
+            className="group card-editorial focus-ring w-full p-4 text-left"
           >
             <div className="flex items-center justify-between gap-3">
               <span className="inline-flex items-center gap-1.5 rounded-pill border border-border bg-surface-soft px-2.5 py-0.5 font-mono text-micro text-ink-soft">
@@ -451,7 +451,7 @@ export default function ChatContentCards({ cards }: ChatContentCardsProps) {
             key={key}
             type="button"
             onClick={() => setLocation(`/artigos/${article.slug}`)}
-            className="group surface-card surface-card-interactive focus-ring w-full rounded-card p-4 text-left"
+            className="group card-editorial focus-ring w-full p-4 text-left"
           >
             <div className="flex items-center justify-between gap-3 font-mono text-micro text-muted">
               <span className="inline-flex items-center gap-1.5">

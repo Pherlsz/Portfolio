@@ -19,20 +19,20 @@ const LEVELS: readonly LevelSpec[] = [
   {
     id: 'fast',
     label: 'Rápido',
-    description: 'Responde direto, sem pensar antes. Bom para perguntas curtas.',
-    budget: 'Teto de 450 tokens · 20 por minuto',
+    description: 'Direto ao ponto.',
+    budget: '450 tokens · 20/min',
   },
   {
     id: 'default',
     label: 'Padrão',
-    description: 'Equilíbrio entre rapidez e cuidado. Serve para quase tudo.',
-    budget: 'Teto de 600 tokens · 20 por minuto',
+    description: 'Rápido e equilibrado.',
+    budget: '600 tokens · 20/min',
   },
   {
     id: 'high',
     label: 'Profundo',
-    description: 'Pensa antes de responder. Bom para colar uma vaga e checar a aderência.',
-    budget: 'Teto de 900 tokens · 5 por minuto',
+    description: 'Análise detalhada para vagas e código.',
+    budget: '900 tokens · 5/min',
   },
 ];
 
@@ -160,7 +160,7 @@ export default function ReasoningSelect({ value, onChange, disabled = false }: R
             <p id={titleId} className="text-ui font-semibold text-ink">
               Raciocínio
             </p>
-            <p className="font-mono text-micro text-muted">{index + 1} de 3</p>
+            <p className="font-mono text-micro tabular-nums text-muted">{index + 1}/3</p>
           </div>
 
           <div className="mt-3">

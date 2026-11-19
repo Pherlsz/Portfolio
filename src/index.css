@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./styles/tokens.css";
 @import "./styles/animations.css";
+@import "./styles/creative.css";
 
 @font-face {
   font-family: "Archivo Fallback";
@@ -426,13 +427,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  html {
+    scroll-behavior: auto;
+  }
+
+  .v1-scope [data-holo='true'][data-holo-state='idle'] {
+    animation: none;
+  }
+
+  .v1-scope .cta,
+  .v1-scope .experience-chevron {
+    transition: none;
   }
 }
 

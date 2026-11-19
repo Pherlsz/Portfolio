@@ -12,6 +12,7 @@ import {
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link, useRoute } from 'wouter';
+import { PageHeader } from '../components/PageHeader';
 import {
   STUDIES,
   findStudyBySlug,
@@ -29,9 +30,20 @@ const BLOCK_LABELS: Record<RichBlockKind, string> = {
   'spec-tabs': 'Spec'
 };
 
+const BLUEPRINT_TAGS: Record<RichBlockKind, string> = {
+  canvas: '[CANVAS]',
+  'code-preview': '[CÓDIGO]',
+  'spec-tabs': '[SPEC]'
+};
+
 function primaryKindLabel(study: ContentDocument): string {
   const firstBlock = study.richBlocks[0];
   return firstBlock ? BLOCK_LABELS[firstBlock] : study.category;
+}
+
+function blueprintCornerTag(study: ContentDocument): string {
+  const firstBlock = study.richBlocks[0];
+  return firstBlock ? BLUEPRINT_TAGS[firstBlock] : '[NOTA]';
 }
 
 function safeUrl(url: string): string {
@@ -152,115 +164,124 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
   const certificates = DEFAULT_PORTFOLIO_DATA.certificates;
 
   return (
-    <section className="mx-auto max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-title font-bold tracking-tight text-ink sm:text-[28px]">
-          {t('studies.title')}
-        </h1>
-
-        <nav
-          aria-label="Abas de estudos e certificados"
-          className="inline-flex items-center rounded-pill border border-border bg-surface p-1 shadow-card"
-        >
-          <Link
-            href="/estudos"
-            aria-current={!isCertTab ? 'page' : undefined}
-            className={`focus-ring inline-flex min-h-9 items-center gap-2 rounded-pill px-4 py-1.5 text-ui font-medium transition-colors duration-150 ${
-              !isCertTab ? 'bg-accent text-on-accent' : 'text-muted hover:text-ink'
-            }`}
+    <section className="mx-auto w-full max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
+      <PageHeader
+        title="Estudos e certificados"
+        actions={
+          <nav
+            aria-label="Abas de estudos e certificados"
+            className="inline-flex flex-wrap items-center gap-1 rounded-pill border border-border bg-surface p-1 shadow-card"
           >
-            <BookOpen className="size-3.5" aria-hidden="true" />
-            <span>{t('studies.tabStudies')}</span>
-            <span
-              className={`font-mono text-micro tabular-nums ${
-                !isCertTab ? 'text-on-accent/75' : 'text-muted'
+            <Link
+              href="/estudos"
+              aria-current={!isCertTab ? 'page' : undefined}
+              className={`focus-ring inline-flex min-h-9 items-center gap-2 rounded-pill px-3.5 py-1.5 text-ui font-medium transition-colors duration-150 ${
+                !isCertTab
+                  ? 'bg-accent text-on-accent'
+                  : 'text-muted hover:bg-surface-soft hover:text-ink'
               }`}
             >
-              {STUDIES.length}
-            </span>
-          </Link>
-          <Link
-            href="/estudos/certificados"
-            aria-current={isCertTab ? 'page' : undefined}
-            className={`focus-ring inline-flex min-h-9 items-center gap-2 rounded-pill px-4 py-1.5 text-ui font-medium transition-colors duration-150 ${
-              isCertTab ? 'bg-accent text-on-accent' : 'text-muted hover:text-ink'
-            }`}
-          >
-            <Award className="size-3.5" aria-hidden="true" />
-            <span>{t('studies.tabCertificates')}</span>
-            <span
-              className={`font-mono text-micro tabular-nums ${
-                isCertTab ? 'text-on-accent/75' : 'text-muted'
+              <BookOpen className="size-3.5" aria-hidden="true" />
+              <span>{t('studies.tabStudies')}</span>
+              <span
+                className={`font-mono text-micro tabular-nums ${
+                  !isCertTab ? 'text-on-accent/80' : 'text-muted'
+                }`}
+              >
+                {STUDIES.length}
+              </span>
+            </Link>
+            <Link
+              href="/estudos/certificados"
+              aria-current={isCertTab ? 'page' : undefined}
+              className={`focus-ring inline-flex min-h-9 items-center gap-2 rounded-pill px-3.5 py-1.5 text-ui font-medium transition-colors duration-150 ${
+                isCertTab
+                  ? 'bg-accent text-on-accent'
+                  : 'text-muted hover:bg-surface-soft hover:text-ink'
               }`}
             >
-              {certificates.length}
-            </span>
-          </Link>
-        </nav>
-      </header>
+              <Award className="size-3.5" aria-hidden="true" />
+              <span>{t('studies.tabCertificates')}</span>
+              <span
+                className={`font-mono text-micro tabular-nums ${
+                  isCertTab ? 'text-on-accent/80' : 'text-muted'
+                }`}
+              >
+                {certificates.length}
+              </span>
+            </Link>
+          </nav>
+        }
+      />
 
       {!isCertTab ? (
-        <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {STUDIES.map((study) => (
             <article
               key={study.slug}
-              className="surface-card surface-card-interactive flex flex-col justify-between rounded-card p-5 sm:p-6"
+              className="card-editorial flex flex-col justify-between p-5 sm:p-6"
             >
               <div>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {study.richBlocks.length > 0 ? (
-                      study.richBlocks.map((block, index) => (
-                        <span
-                          key={block}
-                          className={`rounded-pill px-2.5 py-0.5 font-mono text-micro font-medium ${
-                            index === 0
-                              ? 'bg-accent-soft text-ink'
-                              : 'border border-border bg-surface-soft text-muted'
-                          }`}
-                        >
-                          {BLOCK_LABELS[block]}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-mono text-micro font-medium text-ink">
-                        {study.category}
+                <div className="flex flex-wrap items-center gap-2">
+                  {study.richBlocks.length > 0 ? (
+                    study.richBlocks.map((block, index) => (
+                      <span
+                        key={block}
+                        className={`rounded-pill px-2.5 py-0.5 font-mono text-micro font-medium ${
+                          index === 0
+                            ? 'bg-accent-soft text-ink'
+                            : 'border border-border bg-surface-soft text-muted'
+                        }`}
+                      >
+                        {BLOCK_LABELS[block]}
                       </span>
-                    )}
-                  </div>
-
-                  <span className="font-mono text-micro text-muted tabular-nums">
-                    {study.publishedAt} · {study.readingTime}
-                  </span>
+                    ))
+                  ) : (
+                    <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-mono text-micro font-medium text-ink">
+                      {study.category}
+                    </span>
+                  )}
                 </div>
+
+                <p className="mt-2.5 font-mono text-micro text-muted tabular-nums">
+                  {study.publishedAt} · {study.readingTime}
+                </p>
 
                 <Link
                   href={`/estudos/${study.slug}`}
-                  className="focus-ring mt-3.5 block rounded-control font-display text-lead font-bold leading-snug tracking-tight text-ink hover:underline"
+                  data-cursor="ler"
+                  className="focus-ring mt-2.5 block rounded-control font-display text-lead font-bold leading-snug tracking-tight text-ink hover:underline"
                 >
                   {study.title}
                 </Link>
                 <p className="mt-2 text-ui leading-relaxed text-ink-soft">{study.summary}</p>
               </div>
 
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                <div className="flex flex-wrap items-center gap-1.5 font-mono text-micro text-muted">
+              <div className="mt-5">
+                <div className="mb-4 flex flex-wrap items-center gap-1.5">
                   {study.tags.slice(0, 3).map((tag) => (
-                    <span key={tag}>#{tag}</span>
+                    <span
+                      key={tag}
+                      className="rounded-pill border border-border bg-surface-soft px-2.5 py-0.5 font-mono text-micro text-muted"
+                    >
+                      #{tag}
+                    </span>
                   ))}
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between gap-2 border-t border-border pt-4">
                   <button
                     type="button"
+                    data-cursor="perguntar"
                     onClick={() => onAskChat(`Resuma o estudo "${study.title}".`)}
-                    className="focus-ring inline-flex min-h-8 items-center gap-1.5 rounded-pill px-2.5 py-1 text-micro font-medium text-muted transition-colors duration-150 hover:bg-surface-soft hover:text-ink"
+                    className="focus-ring inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-pill px-2.5 py-1 text-micro font-medium text-muted transition-colors duration-150 hover:bg-surface-soft hover:text-ink"
                   >
                     <MessageSquare className="size-3.5" aria-hidden="true" />
                     <span>Perguntar</span>
                   </button>
                   <Link
                     href={`/estudos/${study.slug}`}
+                    data-cursor="ler"
                     className="focus-ring inline-flex min-h-8 items-center gap-1 rounded-pill border border-border bg-surface px-3 py-1 text-micro font-semibold text-ink transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover"
                   >
                     <span>Abrir</span>
@@ -272,93 +293,112 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
           ))}
         </div>
       ) : (
-        <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {certificates.map((cert) => {
             const issuerLine =
               cert.platform && cert.platform !== cert.issuer
                 ? `${cert.issuer} · ${cert.platform}`
                 : cert.issuer;
+            const mediaKind =
+              cert.mediaKind ?? (cert.image ? 'diploma' : cert.badge ? 'badge' : 'monogram');
 
             return (
               <article
                 key={cert.slug}
-                className="surface-card flex flex-col justify-between overflow-hidden rounded-card"
+                className="card-editorial flex flex-col justify-between overflow-hidden"
               >
                 <div>
-                  <div
-                    className={`dot-canvas flex items-center justify-between gap-3 border-b border-border px-5 py-4 ${
-                      cert.verifyUrl ? 'bg-accent-soft' : 'bg-surface-soft'
-                    }`}
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      {cert.badge ? (
+                  {mediaKind === 'diploma' && cert.image ? (
+                    <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border bg-surface-soft">
+                      <img
+                        src={cert.image}
+                        alt={cert.title}
+                        width={960}
+                        height={600}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover object-top"
+                      />
+                      <span className="absolute top-3.5 right-3.5 rounded-pill border border-border bg-surface/90 px-2.5 py-1 font-mono text-micro font-semibold text-ink tabular-nums backdrop-blur-xs">
+                        {cert.code}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="dot-canvas relative flex h-40 w-full items-center justify-center border-b border-border bg-surface-soft px-5">
+                      <span className="absolute top-3.5 right-3.5 rounded-pill border border-border bg-surface px-2.5 py-1 font-mono text-micro font-semibold text-ink tabular-nums">
+                        {cert.code}
+                      </span>
+
+                      {mediaKind === 'badge' && cert.badge ? (
                         <img
                           src={cert.badge}
                           alt={cert.title}
-                          width={48}
-                          height={48}
+                          width={96}
+                          height={96}
                           loading="lazy"
                           decoding="async"
-                          className="size-12 shrink-0 rounded-control border border-border bg-surface object-contain p-1.5 shadow-card"
+                          className="size-24 object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.16)]"
                         />
                       ) : (
                         <div
                           aria-hidden="true"
-                          className="flex size-12 shrink-0 items-center justify-center rounded-control border border-border-strong bg-surface font-mono text-ui font-bold text-ink shadow-card"
+                          className="flex flex-col items-center justify-center rounded-inner border border-border-strong bg-surface px-5 py-3 shadow-card"
                         >
-                          {cert.code}
+                          <span className="font-display text-title font-extrabold tracking-tight text-ink">
+                            {cert.badgeMeta?.code ?? cert.code}
+                          </span>
+                          {cert.badgeMeta?.caption ? (
+                            <span className="mt-0.5 font-mono text-micro text-muted">
+                              {cert.badgeMeta.caption}
+                            </span>
+                          ) : null}
                         </div>
                       )}
-                      <div className="min-w-0">
-                        <p className="truncate font-mono text-micro font-medium text-ink-soft">
-                          {issuerLine}
-                        </p>
-                        <p className="mt-0.5 font-mono text-micro text-muted tabular-nums">
-                          {t('studies.issuedAt')} {cert.issuedAt}
-                        </p>
-                      </div>
                     </div>
+                  )}
 
-                    <span className="shrink-0 rounded-pill border border-border-strong bg-surface px-3 py-1 font-mono text-micro font-bold tracking-wide text-ink tabular-nums shadow-card">
-                      {cert.code}
-                    </span>
-                  </div>
-
-                  <div className="p-5">
-                    <h2 className="font-display text-lead font-bold leading-snug tracking-tight text-ink">
+                  <div className="p-5 sm:p-6">
+                    <p className="font-mono text-micro font-medium text-muted">{issuerLine}</p>
+                    <h2 className="mt-2 font-display text-lead font-bold leading-snug tracking-tight text-ink">
                       {cert.title}
                     </h2>
                     <p className="mt-2 text-ui leading-relaxed text-ink-soft">{cert.description}</p>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dashed border-border-strong bg-surface-soft px-5 py-3.5">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-micro text-muted tabular-nums">
-                    <span>
-                      {t('studies.issuedAt')}: <strong className="font-semibold text-ink">{cert.issuedAt}</strong>
-                    </span>
-                    <span aria-hidden="true">·</span>
-                    <span>
-                      {t('studies.expiresAt')}:{' '}
-                      <strong className="font-semibold text-ink">
-                        {cert.expiresAt ?? t('studies.noExpiry')}
-                      </strong>
-                    </span>
-                  </div>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-4 sm:px-6">
+                  <p className="font-mono text-micro text-muted tabular-nums">
+                    {cert.issuedAt} · {cert.expiresAt ?? t('studies.noExpiry')}
+                  </p>
 
                   {cert.verifyUrl ? (
                     <a
                       href={cert.verifyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      data-cursor="abrir"
                       className="focus-ring pill-button"
                     >
                       <ShieldCheck className="size-3.5 text-ok" aria-hidden="true" />
                       <span>{t('studies.verifyCredential')}</span>
                       <ExternalLink className="size-3.5" aria-hidden="true" />
                     </a>
+                  ) : cert.pdf ? (
+                    <a
+                      href={cert.pdf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-cursor="abrir"
+                      className="focus-ring pill-button"
+                    >
+                      <ExternalLink className="size-3.5" aria-hidden="true" />
+                      <span>Ver certificado</span>
+                    </a>
                   ) : (
-                    <span className="font-mono text-micro text-muted">Credencial emitida</span>
+                    <span className="inline-flex min-h-8 items-center gap-1.5 rounded-pill border border-border bg-surface-soft px-3 py-1 font-mono text-micro text-ink-soft">
+                      <Award className="size-3.5 text-muted" aria-hidden="true" />
+                      <span>Concluído</span>
+                    </span>
                   )}
                 </div>
               </article>

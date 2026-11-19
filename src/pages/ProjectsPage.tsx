@@ -6,6 +6,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { Link, useRoute } from 'wouter';
+import { PageHeader } from '../components/PageHeader';
 import { DEFAULT_PORTFOLIO_DATA, type ProjectItem } from '../data/portfolioData';
 import { t } from '../i18n/pt-BR';
 
@@ -59,11 +60,7 @@ function ProjectPreview({
           loading={isDetail || priority ? 'eager' : 'lazy'}
           fetchPriority={isDetail || priority ? 'high' : undefined}
           decoding="async"
-          className={`h-full w-full object-cover object-top ${
-            isDetail
-              ? ''
-              : 'transition-transform duration-200 ease-out group-hover:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100'
-          }`}
+          className="h-full w-full object-cover object-top"
         />
       </div>
     );
@@ -72,10 +69,10 @@ function ProjectPreview({
   if (project.id === 'gymkhana-core') {
     const modules = project.modules ?? [];
     return (
-      <div className="dot-canvas relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-5 sm:p-6">
+      <div className="dot-canvas relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-4 sm:p-5">
         <div className="flex items-center justify-between gap-2 font-mono text-micro text-muted tabular-nums">
-          <span>go.mod · gymkhana-core</span>
-          <span>{modules.length} pacotes</span>
+          <span className="truncate">go.mod · gymkhana-core</span>
+          <span className="shrink-0">{modules.length} pacotes</span>
         </div>
 
         {isDetail ? (
@@ -104,13 +101,13 @@ function ProjectPreview({
             })}
           </div>
         ) : (
-          <div className="my-auto flex flex-wrap items-center justify-center gap-2 px-2">
+          <div className="my-auto flex flex-wrap items-center justify-center gap-1.5 px-1">
             {modules.map((mod) => {
               const highlighted = mod.name === 'assistant';
               return (
                 <span
                   key={mod.name}
-                  className={`rounded-pill border px-3.5 py-1.5 font-mono text-micro font-medium shadow-card ${
+                  className={`rounded-pill border px-2.5 py-1 font-mono text-[11px] font-medium ${
                     highlighted
                       ? 'border-transparent bg-accent text-on-accent'
                       : 'border-border bg-surface text-ink'
@@ -354,91 +351,204 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
   }
 
   const filtered = filter === 'all' ? projects : projects.filter((item) => item.kind === filter);
+  const countByFilter = (kind: FilterKind) =>
+    kind === 'all' ? projects.length : projects.filter((item) => item.kind === kind).length;
+
+  const showSpotlight = filter === 'all' && filtered.length > 0;
+  const spotlightProject = showSpotlight ? filtered[0] : null;
+  const gridProjects = showSpotlight ? filtered.slice(1) : filtered;
 
   return (
-    <section className="mx-auto max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-title font-bold tracking-tight text-ink sm:text-[28px]">
-          {t('projects.title')}
-        </h1>
+    <section className="mx-auto w-full max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
+      <PageHeader
+        title={t('projects.title')}
+        actions={
+          <div
+            role="group"
+            aria-label="Filtrar projetos"
+            className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-card border border-border bg-surface p-1 shadow-card sm:rounded-pill"
+          >
+            {FILTERS.map((item) => {
+              const active = filter === item.id;
+              const count = countByFilter(item.id);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setFilter(item.id)}
+                  className={`focus-ring inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-pill px-3.5 py-1.5 text-ui font-medium transition-colors duration-150 ${
+                    active
+                      ? 'bg-accent text-on-accent'
+                      : 'text-muted hover:bg-surface-soft hover:text-ink'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  <span
+                    className={`font-mono text-micro tabular-nums ${
+                      active ? 'text-on-accent/80' : 'text-muted'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        }
+      />
 
-        <div role="group" aria-label="Filtrar projetos" className="flex flex-wrap gap-1.5">
-          {FILTERS.map((item) => {
-            const active = filter === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setFilter(item.id)}
-                className={`focus-ring min-h-9 rounded-pill border px-3.5 py-1.5 text-ui font-medium transition-colors duration-150 ${
-                  active
-                    ? 'border-transparent bg-accent text-on-accent'
-                    : 'border-border bg-surface text-muted hover:border-border-strong hover:text-ink'
-                }`}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-      </header>
-
-      <div className="mt-7 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {filtered.map((project, index) => (
-          <article key={project.id} className="group space-y-3">
+      <div className="mt-8 grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-3">
+        {spotlightProject ? (
+          <article
+            key={spotlightProject.id}
+            className="card-editorial group grid min-w-0 items-center gap-6 p-5 sm:p-6 md:col-span-2 lg:grid-cols-[1.25fr_1fr] xl:col-span-3"
+          >
             <Link
-              href={`/projetos/${project.id}`}
-              aria-label={`Abrir detalhes de ${project.name}`}
-              className="focus-ring surface-card surface-card-interactive block rounded-card p-3"
+              href={`/projetos/${spotlightProject.id}`}
+              aria-label={`Abrir detalhes de ${spotlightProject.name}`}
+              data-cursor="abrir"
+              className="focus-ring relative block rounded-inner"
             >
-              <ProjectPreview project={project} variant="tile" priority={index === 0} />
+              <ProjectPreview project={spotlightProject} variant="tile" priority />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute right-3 bottom-3 z-10 inline-flex items-center gap-1 rounded-pill border border-border-strong bg-surface/95 px-3 py-1 font-mono text-micro font-medium text-ink opacity-0 shadow-card backdrop-blur-xs transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
+              >
+                <span>Ver ficha</span>
+                <ArrowUpRight className="size-3.5" aria-hidden="true" />
+              </span>
             </Link>
 
-            <div className="flex items-center justify-between gap-3 px-1">
-              <div className="flex min-w-0 items-center gap-3">
-                <span
-                  aria-hidden="true"
-                  className="flex size-9 shrink-0 items-center justify-center rounded-control border border-border bg-surface font-mono text-micro font-bold text-ink shadow-card"
-                >
-                  {getProjectMonogram(project)}
-                </span>
-                <div className="min-w-0">
+            <div className="flex flex-col justify-between space-y-4 px-1">
+              <div>
+                <p className="font-mono text-micro uppercase tracking-[0.06em] text-muted">
+                  {spotlightProject.kicker}
+                </p>
+
+                <h2 className="mt-2 font-display text-title font-bold tracking-[-0.02em] text-ink sm:text-[1.75rem]">
                   <Link
-                    href={`/projetos/${project.id}`}
-                    className="focus-ring block truncate rounded-control font-display text-body font-bold tracking-tight text-ink hover:underline"
+                    href={`/projetos/${spotlightProject.id}`}
+                    data-cursor="abrir"
+                    className="focus-ring rounded-control hover:underline"
                   >
-                    {project.name}
+                    {spotlightProject.name}
                   </Link>
-                  <p className="truncate text-ui text-muted">{project.tagline}</p>
+                </h2>
+
+                <p className="mt-2.5 text-body leading-relaxed text-ink-soft">
+                  {spotlightProject.tagline}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {spotlightProject.stack.slice(0, 4).map((tech) => (
+                    <span
+                      key={tech}
+                      className="rounded-pill border border-border bg-surface-soft px-3 py-1 font-mono text-micro text-ink-soft"
+                    >
+                      {tech}
+                    </span>
+                  ))}
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-1.5">
-                {project.kind === 'portfolio-version' && project.href ? (
-                  <Link
-                    href={project.href}
-                    className="focus-ring inline-flex min-h-8 items-center gap-1 rounded-pill border border-border bg-surface px-3 py-1 text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-border-strong hover:text-ink"
-                  >
-                    <span>/v1</span>
-                    <ArrowUpRight className="size-3.5" aria-hidden="true" />
-                  </Link>
-                ) : null}
+              <div className="flex flex-wrap items-center gap-2.5 border-t border-border pt-4">
+                <Link
+                  href={`/projetos/${spotlightProject.id}`}
+                  data-cursor="abrir"
+                  className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
+                >
+                  <span>Abrir detalhes</span>
+                  <ArrowUpRight className="size-4" aria-hidden="true" />
+                </Link>
                 <button
                   type="button"
+                  data-cursor="perguntar"
                   onClick={() =>
                     onAskChat(
-                      project.chatPrompt ?? `Me explica os detalhes técnicos de ${project.name}.`
+                      spotlightProject.chatPrompt ??
+                        `Me explica os detalhes técnicos de ${spotlightProject.name}.`
                     )
                   }
-                  className="focus-ring inline-flex min-h-8 items-center gap-1.5 rounded-pill border border-border bg-surface px-3 py-1 text-micro font-medium text-ink transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover"
+                  className="focus-ring pill-button min-h-10 px-4"
                 >
-                  <MessageSquare className="size-3.5 text-muted" aria-hidden="true" />
+                  <MessageSquare className="size-4 text-muted" aria-hidden="true" />
                   <span>Perguntar</span>
                 </button>
               </div>
             </div>
           </article>
+        ) : null}
+
+        {gridProjects.map((project, index) => (
+            <article key={project.id} className="group min-w-0 space-y-3.5">
+              <Link
+                href={`/projetos/${project.id}`}
+                aria-label={`Abrir detalhes de ${project.name}`}
+                data-cursor="abrir"
+                className="focus-ring card-editorial relative block p-3"
+              >
+                <ProjectPreview
+                  project={project}
+                  variant="tile"
+                  priority={!showSpotlight && index === 0}
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-5 bottom-5 z-10 inline-flex items-center gap-1 rounded-pill border border-border-strong bg-surface/95 px-2.5 py-1 font-mono text-micro font-medium text-ink opacity-0 shadow-card backdrop-blur-xs transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
+                >
+                  <span>Ver ficha</span>
+                  <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                </span>
+              </Link>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-control border border-border bg-surface font-mono text-micro font-bold text-ink"
+                  >
+                    {getProjectMonogram(project)}
+                  </span>
+                  <div className="min-w-0">
+                    <Link
+                      href={`/projetos/${project.id}`}
+                      data-cursor="abrir"
+                      className="focus-ring block truncate rounded-control font-display text-body font-bold tracking-tight text-ink hover:underline"
+                    >
+                      {project.name}
+                    </Link>
+                    <p className="truncate text-ui text-muted">{project.tagline}</p>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1.5">
+                  {project.kind === 'portfolio-version' && project.href ? (
+                    <Link
+                      href={project.href}
+                      data-cursor="abrir"
+                      className="focus-ring inline-flex min-h-8 items-center gap-1 rounded-pill border border-border bg-surface px-3 py-1 text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-border-strong hover:text-ink"
+                    >
+                      <span>/v1</span>
+                      <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                    </Link>
+                  ) : null}
+                  <button
+                    type="button"
+                    data-cursor="perguntar"
+                    onClick={() =>
+                      onAskChat(
+                        project.chatPrompt ?? `Me explica os detalhes técnicos de ${project.name}.`
+                      )
+                    }
+                    className="focus-ring inline-flex min-h-8 items-center gap-1.5 rounded-pill border border-border bg-surface px-3 py-1 text-micro font-medium text-ink transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover"
+                  >
+                    <MessageSquare className="size-3.5 text-muted" aria-hidden="true" />
+                    <span>Perguntar</span>
+                  </button>
+                </div>
+              </div>
+            </article>
         ))}
       </div>
     </section>

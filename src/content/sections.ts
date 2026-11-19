@@ -1,5 +1,20 @@
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData.ts';
-import { ARTICLES, STUDIES } from './collections.ts';
+
+function countStudyFiles(): number {
+  try {
+    return Object.keys(import.meta.glob('../../content/studies/*.md')).length;
+  } catch {
+    return 0;
+  }
+}
+
+function countArticleFiles(): number {
+  try {
+    return Object.keys(import.meta.glob('../../content/articles/*.md')).length;
+  } catch {
+    return 0;
+  }
+}
 
 export type SectionId = 'projects' | 'experience' | 'studies' | 'articles' | 'ai';
 
@@ -23,9 +38,9 @@ export function getSectionCounts(): SectionCounts {
   return {
     projects: DEFAULT_PORTFOLIO_DATA.projects.length,
     experiences: DEFAULT_PORTFOLIO_DATA.experiences.length,
-    studies: STUDIES.length,
+    studies: countStudyFiles(),
     certificates: DEFAULT_PORTFOLIO_DATA.certificates.length,
-    articles: ARTICLES.length
+    articles: countArticleFiles()
   };
 }
 

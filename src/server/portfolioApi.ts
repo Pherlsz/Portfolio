@@ -192,7 +192,7 @@ const BODY_ERRORS = { 400: 'JSON inválido.', 413: 'Pedido grande demais.' } as 
 
 const KNOWN_STUDY_SLUGS = new Set<string>([
   ...STUDIES.map((s) => s.slug),
-  'virtualizacao-atlas-sign',
+  'virtualizacao-listagens-react',
   'gymkhana-core-pipeline',
   'portfolio-v2-arquitetura-ia'
 ]);
@@ -226,12 +226,18 @@ function isValidCardRef(card: ChatCardRef): boolean {
   }
 }
 
+const CASUAL_QUERY_RE =
+  /^(?:oi+|ola+|opa|eae|fala|salve|hey|hi|hello|bom dia|boa tarde|boa noite|tudo bem|td bem|beleza|blz|valeu|vlw|obrigad[oa]|thanks|thank you|ok|certo|entendi|show|legal|massa)[!?.,\s]*$/i;
+
 export function inferContextualCards(
   userQuery: string,
   replyText: string,
   skill?: ChatSkill
 ): ChatCardRef[] {
   const queryFolded = foldText(userQuery);
+  if (!skill && CASUAL_QUERY_RE.test(queryFolded)) {
+    return [];
+  }
   const combinedFolded = foldText(`${userQuery} ${replyText}`);
   const candidates: ChatCardRef[] = [];
 
@@ -291,7 +297,7 @@ export function inferContextualCards(
 
   // Specific Studies & Articles
   if (mentions('tanstack virtual', 'virtualizacao', '5.000+ registros', '5000 registros', 'layout thrashing')) {
-    candidates.push({ kind: 'study', id: 'virtualizacao-atlas-sign' });
+    candidates.push({ kind: 'study', id: 'virtualizacao-listagens-react' });
   }
   if (mentions('pipeline', 'modulos do gymkhana', 'deduplicacao')) {
     candidates.push({ kind: 'study', id: 'gymkhana-core-pipeline' });
@@ -649,7 +655,7 @@ async function handleChat(
     });
   }
 
-  const { message, history, reasoning, skill } = parsed.data;
+  const { message, history, reasoning, skill, regenerate } = parsed.data;
 
   if (reasoning === 'high' && !(await allowed(env.CHAT_HIGH_LIMIT, ip))) {
     return json(429, {
@@ -669,8 +675,10 @@ async function handleChat(
       };
 
       try {
-        // 1. Check first-turn KV suggestion cache (0 tokens)
-        const cachedReply = await getCachedSuggestionReply(env, message, trimmedHistory, skill);
+        // 1. Check first-turn KV suggestion cache (0 tokens), bypassed on explicit regenerate
+        const cachedReply = regenerate
+          ? null
+          : await getCachedSuggestionReply(env, message, trimmedHistory, skill, reasoning);
         if (cachedReply) {
           emit({ type: 'delta', text: cachedReply });
           const cards = inferContextualCards(message, cachedReply, skill);
@@ -848,7 +856,14 @@ async function handleChat(
         scheduleBackground(
           ctx,
           Promise.all([
-            cacheSuggestionReplyIfEligible(env, message, trimmedHistory, skill, accumulated),
+            cacheSuggestionReplyIfEligible(
+              env,
+              message,
+              trimmedHistory,
+              skill,
+              accumulated,
+              effectiveReasoning
+            ),
             logQuestion(env, {
               text: message,
               reasoning: effectiveReasoning,

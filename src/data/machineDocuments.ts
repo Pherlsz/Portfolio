@@ -453,10 +453,6 @@ export function generateCvJsonResume(data: PortfolioData = DEFAULT_PORTFOLIO_DAT
 
 export function generateIndexableHomeHtml(data: PortfolioData = DEFAULT_PORTFOLIO_DATA): string {
   const { profile, project, featuredProjects } = data;
-  const name = profile.name
-    .split(' ')
-    .map((word) => `<span class="block">${escHtml(word)}</span>`)
-    .join('');
   const experience = data.experiences
     .map((exp) => {
       const span = experienceSpan(exp);
@@ -475,38 +471,42 @@ export function generateIndexableHomeHtml(data: PortfolioData = DEFAULT_PORTFOLI
     `<li><a class="link" href="${escHtml(project.repoUrl)}">${escHtml(project.name)}</a> - ${escHtml(project.tagline)}</li>`
   ].join('');
 
-  return `<main id="conteudo" class="seo-only">
-      <section id="inicio" class="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
-        <p class="eyebrow inline-flex flex-wrap items-center gap-x-2 gap-y-1">${escHtml(profile.status)}<span class="hidden sm:inline" aria-hidden="true">·</span><span class="whitespace-nowrap basis-full sm:basis-auto">${escHtml(profile.location)}</span></p>
-        <h1 id="inicio-titulo" class="display-wide mt-6 text-[clamp(2.6rem,7.4vw,4.6rem)] uppercase leading-[0.9]">${name}</h1>
-        <p class="mt-5 font-mono text-[0.9375rem] text-ink-soft"><span class="block">${escHtml(profile.jobTitle)}</span><span class="mt-1 block text-muted">React · Next.js · TypeScript</span></p>
-        <p class="mt-7 max-w-xl text-[clamp(1.25rem,2.1vw,1.55rem)] font-semibold leading-snug">${escHtml(profile.headline)}</p>
-        <p class="mt-4 max-w-xl text-ink-soft">${escHtml(plainText(profile.summary))}</p>
-        <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1">
-          <a class="link" href="${escHtml(profile.cvUrl)}">Baixar CV (PDF)</a>
-          <a class="link" href="mailto:${escHtml(profile.email)}">${escHtml(profile.email)}</a>
-          <a class="link" href="${escHtml(profile.linkedin)}">LinkedIn</a>
-          <a class="link" href="${escHtml(profile.github)}">GitHub</a>
+  return `<main id="conteudo" class="initial-shell">
+      <p class="initial-eyebrow">${escHtml(profile.name)} · ${escHtml(profile.jobTitle)} · ${escHtml(profile.location)}</p>
+      <h1 id="inicio-titulo" class="initial-title">O que você quer saber sobre o trabalho do Pedro?</h1>
+      <div class="initial-composer" aria-hidden="true"></div>
+      <div class="seo-only">
+      <section id="inicio">
+        <p>${escHtml(profile.status)} · ${escHtml(profile.location)}</p>
+        <p>${escHtml(profile.jobTitle)} · React · Next.js · TypeScript</p>
+        <p>${escHtml(profile.headline)}</p>
+        <p>${escHtml(plainText(profile.summary))}</p>
+        <p>
+          <a href="${escHtml(profile.cvUrl)}">Baixar CV (PDF)</a>
+          <a href="mailto:${escHtml(profile.email)}">${escHtml(profile.email)}</a>
+          <a href="${escHtml(profile.linkedin)}">LinkedIn</a>
+          <a href="${escHtml(profile.github)}">GitHub</a>
         </p>
       </section>
-      <section id="experiencia" class="mx-auto max-w-6xl border-t border-line px-5 py-16 sm:px-8">
-        <h2 class="display text-2xl sm:text-3xl">Experiência</h2>
-        <ul class="mt-4 max-w-3xl list-disc space-y-3 pl-4 text-ink-soft">${experience}</ul>
+      <section id="experiencia">
+        <h2>Experiência</h2>
+        <ul>${experience}</ul>
       </section>
-      <section id="projeto" class="mx-auto max-w-6xl border-t border-line px-5 py-16 sm:px-8">
-        <h2 class="display text-2xl sm:text-3xl">Projetos</h2>
-        <ul class="mt-4 max-w-3xl list-disc space-y-3 pl-4 text-ink-soft">${projects}</ul>
+      <section id="projeto">
+        <h2>Projetos</h2>
+        <ul>${projects}</ul>
       </section>
-      <section id="contato" class="mx-auto max-w-6xl border-t border-line px-5 py-16 sm:px-8">
-        <h2 class="display text-2xl sm:text-3xl">Contato</h2>
-        <p class="mt-4 max-w-3xl text-ink-soft">${escHtml(profile.trustCopy)}</p>
-        <p class="mt-4 max-w-3xl text-ink-soft">${escHtml(availabilityLine(profile))}</p>
-        <ul class="mt-4 list-disc space-y-3 pl-4">
-          <li><a class="link" href="/llms.txt">/llms.txt</a></li>
-          <li><a class="link" href="/cv.md">/cv.md</a></li>
-          <li><a class="link" href="/cv.json">/cv.json</a></li>
-          <li><a class="link" href="/cv">/cv</a></li>
+      <section id="contato">
+        <h2>Contato</h2>
+        <p>${escHtml(profile.trustCopy)}</p>
+        <p>${escHtml(availabilityLine(profile))}</p>
+        <ul>
+          <li><a href="/llms.txt">/llms.txt</a></li>
+          <li><a href="/cv.md">/cv.md</a></li>
+          <li><a href="/cv.json">/cv.json</a></li>
+          <li><a href="/cv">/cv</a></li>
         </ul>
       </section>
+      </div>
     </main>`;
 }

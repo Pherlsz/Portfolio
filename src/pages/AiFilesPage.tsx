@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check, Copy, ExternalLink, FileCode2, Send } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
 import { CONTACT_API, SITE_ORIGIN } from '../data/portfolioData';
 import { t } from '../i18n/pt-BR';
 
@@ -74,10 +75,12 @@ const CONTACT_EXAMPLE = JSON.stringify(
   2
 );
 
+const previewCache = new Map<string, string>();
+
 export function AiFilesPage() {
   const [activeId, setActiveId] = useState<string>('llms');
-  const [preview, setPreview] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [preview, setPreview] = useState<string>(() => previewCache.get('/llms.txt') ?? '');
+  const [loading, setLoading] = useState<boolean>(() => !previewCache.has('/llms.txt'));
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const active = ENDPOINTS.find((item) => item.id === activeId) ?? ENDPOINTS[0];
@@ -85,6 +88,13 @@ export function AiFilesPage() {
   useEffect(() => {
     if (!active.previewable) {
       setPreview(CONTACT_EXAMPLE);
+      setLoading(false);
+      return;
+    }
+
+    const cached = previewCache.get(active.path);
+    if (cached !== undefined) {
+      setPreview(cached);
       setLoading(false);
       return;
     }
@@ -98,6 +108,7 @@ export function AiFilesPage() {
         return res.text();
       })
       .then((content) => {
+        previewCache.set(active.path, content);
         if (!cancelled) setPreview(content);
       })
       .catch(() => {
@@ -130,14 +141,10 @@ export function AiFilesPage() {
   const lineCount = preview ? preview.split('\n').length : 0;
 
   return (
-    <section className="mx-auto max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
-      <header className="mb-7">
-        <h1 className="font-display text-title font-bold tracking-[-0.02em] text-ink">
-          {t('ai.title')}
-        </h1>
-      </header>
+    <section className="mx-auto w-full max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
+      <PageHeader title={t('ai.title')} />
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         <div
           className="surface-card space-y-1 p-2"
           role="list"
@@ -270,29 +277,31 @@ export function AiFilesPage() {
             </div>
           </div>
 
-          <p className="px-1.5 text-ui text-ink-soft">{active.description}</p>
+          <p className="min-h-[2.75rem] px-1.5 text-ui text-ink-soft">{active.description}</p>
 
           <div className="overflow-hidden rounded-inner border border-border-strong bg-code-bg text-code-ink">
-            <div className="flex items-center justify-between gap-2 border-b border-code-ink/15 px-4 py-2.5 font-mono text-micro text-code-ink/70 tabular-nums">
+            <div className="flex min-h-10 items-center justify-between gap-2 border-b border-code-ink/15 px-4 py-2.5 font-mono text-micro text-code-ink/70 tabular-nums">
               <span className="truncate">
                 {SITE_ORIGIN}
                 {active.path}
               </span>
-              {!loading && lineCount > 0 ? (
-                <span className="shrink-0">
-                  {lineCount} {lineCount === 1 ? 'linha' : 'linhas'}
-                </span>
-              ) : null}
+              <span className="shrink-0">
+                {loading
+                  ? 'Atualizando...'
+                  : lineCount > 0
+                    ? `${lineCount} ${lineCount === 1 ? 'linha' : 'linhas'}`
+                    : ''}
+              </span>
             </div>
 
             <div className="p-4 sm:p-5">
-              {loading ? (
-                <p className="font-mono text-micro text-code-ink/70">Carregando conteúdo...</p>
-              ) : (
-                <pre className="max-h-[34rem] overflow-auto font-mono text-micro leading-relaxed whitespace-pre-wrap break-words text-code-ink">
-                  <code>{preview}</code>
-                </pre>
-              )}
+              <pre
+                className={`h-[22rem] overflow-auto font-mono text-micro leading-relaxed whitespace-pre-wrap break-words text-code-ink transition-opacity duration-150 sm:h-[34rem] ${
+                  loading ? 'opacity-50' : 'opacity-100'
+                }`}
+              >
+                <code>{preview || 'Carregando conteúdo...'}</code>
+              </pre>
             </div>
           </div>
         </div>

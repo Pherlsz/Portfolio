@@ -11,6 +11,7 @@ import {
 import { useLocation } from 'wouter';
 import type { ChatAction } from '../utils/chat';
 import ChatContentCards from './ChatContentCards';
+import { ChatLoader } from './ChatLoader';
 import type { ChatMessage } from './chatStore';
 import Mascot from './Mascot';
 
@@ -190,14 +191,13 @@ function MessageBubbleInner({
 
   const isStreaming = message.status === 'streaming';
   const hasText = message.text.trim().length > 0;
+  const reasoning = message.reasoning ?? 'default';
 
   return (
     <article className="message-in flex flex-col gap-1.5" aria-busy={isStreaming}>
-      {isStreaming && (
-        <Mascot
-          reasoning={message.reasoning ?? 'default'}
-          statusText={hasText ? 'Escrevendo resposta' : undefined}
-        />
+      {isStreaming && !hasText && <ChatLoader reasoning={reasoning} />}
+      {isStreaming && hasText && (
+        <Mascot reasoning={reasoning} statusText="Escrevendo resposta" />
       )}
 
       {message.notice && (

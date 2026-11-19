@@ -167,14 +167,11 @@ function htmlHead(): Plugin {
     },
     transformIndexHtml: {
       order: 'post',
-      handler(html, ctx) {
+      handler(html) {
         const marker = '<!--indexable-shell-->';
         if (!html.includes(marker)) {
           throw new Error('index.html está sem o marcador <!--indexable-shell-->.');
         }
-        const font = Object.keys(ctx.bundle ?? {}).find((file) =>
-          file.includes('archivo-latin-wdth-normal')
-        );
         const tags: HtmlTagDescriptor[] = [
           {
             tag: 'script',
@@ -183,19 +180,6 @@ function htmlHead(): Plugin {
             injectTo: 'head'
           }
         ];
-        if (font) {
-          tags.unshift({
-            tag: 'link',
-            attrs: {
-              rel: 'preload',
-              href: `/${font}`,
-              as: 'font',
-              type: 'font/woff2',
-              crossorigin: 'anonymous'
-            },
-            injectTo: 'head'
-          });
-        }
         return {
           html: html.replace(marker, generateIndexableHomeHtml(DEFAULT_PORTFOLIO_DATA)),
           tags

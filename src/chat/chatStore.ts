@@ -52,6 +52,7 @@ export interface SendOptions {
   attachmentText?: string;
   attachmentName?: string;
   chatId?: string | null;
+  regenerate?: boolean;
 }
 
 export interface CreateChatStoreOptions {
@@ -591,7 +592,8 @@ export function createChatStore(options: CreateChatStoreOptions = {}) {
     payloadMessage: string,
     history: Array<{ role: 'user' | 'model'; text: string }>,
     reasoning: Reasoning,
-    skill?: ChatSkill
+    skill?: ChatSkill,
+    regenerate?: boolean
   ): Promise<void> {
     if (!fetchFn) {
       updateMessage(chatId, assistantId, (msg) => ({
@@ -706,6 +708,9 @@ export function createChatStore(options: CreateChatStoreOptions = {}) {
       };
       if (skill) {
         requestBody.skill = skill;
+      }
+      if (regenerate) {
+        requestBody.regenerate = true;
       }
 
       const response = await fetchFn('/api/chat', {
@@ -963,7 +968,8 @@ export function createChatStore(options: CreateChatStoreOptions = {}) {
       remoteText,
       history,
       latestThread.reasoning,
-      parsed.skill
+      parsed.skill,
+      opts.regenerate
     );
 
     return thread.id;
@@ -998,7 +1004,8 @@ export function createChatStore(options: CreateChatStoreOptions = {}) {
     return send(lastUser.text, {
       chatId,
       skill: lastUser.skill,
-      attachmentName: lastUser.attachmentName
+      attachmentName: lastUser.attachmentName,
+      regenerate: true
     });
   }
 

@@ -9,6 +9,7 @@ import {
   Printer,
   X
 } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
 import {
   DEFAULT_PORTFOLIO_DATA,
   availabilityLine,
@@ -22,13 +23,6 @@ import { t } from '../i18n/pt-BR';
 
 function formatRange(period: string): string {
   return period.replace(/\s+-\s+/g, ' a ');
-}
-
-function parseStatMetric(metric?: string): { value: string; label: string } | null {
-  if (!metric) return null;
-  const match = metric.trim().match(/^([\d.,]+[+%]?)\s+(.+)$/);
-  if (!match) return null;
-  return { value: match[1], label: match[2] };
 }
 
 function PdfViewerDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -100,32 +94,32 @@ export function ExperiencePage({ onAskChat }: { onAskChat: (prompt: string) => v
   const { profile, experiences, skills, education, languages, otherCourses } = DEFAULT_PORTFOLIO_DATA;
 
   return (
-    <section className="mx-auto max-w-6xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
-      <header className="border-b border-border pb-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="font-display text-hero font-bold tracking-[-0.025em] text-ink">
-              {profile.name}
-            </h1>
-            <p className="mt-2 text-lead font-medium text-ink-soft">{profile.jobTitle}</p>
-            <p className="mt-1.5 text-ui text-muted">
+    <section className="mx-auto w-full max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
+      <PageHeader
+        title={profile.name}
+        subtitle={
+          <>
+            <p className="text-lead font-medium text-ink-soft">{profile.jobTitle}</p>
+            <p className="mt-1 font-mono text-micro text-muted">
               {profile.location} · {profile.status}
             </p>
-          </div>
-
+          </>
+        }
+        actions={
           <button
             type="button"
+            data-cursor="perguntar"
             onClick={() =>
               onAskChat('Faça um resumo objetivo da experiência profissional do Pedro.')
             }
-            className="focus-ring inline-flex min-h-10 shrink-0 items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
+            className="focus-ring inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
           >
             <MessageSquare className="size-4" aria-hidden="true" />
             <span>{t('experience.askCta')}</span>
           </button>
-        </div>
-
-        <p className="mt-5 max-w-[66ch] text-body text-ink-soft">{plainText(profile.summary)}</p>
+        }
+      >
+        <p className="max-w-[66ch] text-body text-ink-soft">{plainText(profile.summary)}</p>
         <p className="mt-3 text-ui text-ink-soft">{availabilityLine(profile)}</p>
 
         <div
@@ -181,90 +175,98 @@ export function ExperiencePage({ onAskChat }: { onAskChat: (prompt: string) => v
             <span>Imprimir A4</span>
           </a>
         </div>
-      </header>
+      </PageHeader>
 
-      <div className="mt-8 space-y-5">
-        {experiences.map((exp) => {
-          const span = experienceSpan(exp);
-          const stats = exp.highlights
-            .map((item) => parseStatMetric(item.metric))
-            .filter((item): item is { value: string; label: string } => item !== null);
-
-          return (
-            <article key={exp.id} className="surface-card p-6 sm:p-7">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="font-display text-title font-bold tracking-[-0.02em] text-ink">
-                    {exp.company}
-                  </h2>
-                  <p className="mt-0.5 text-ui text-muted">{exp.location}</p>
-                </div>
-                <p className="rounded-pill bg-surface-soft px-3 py-1 font-mono text-micro text-muted tabular-nums">
-                  {formatRange(formatPeriod(span.start, span.end))} ·{' '}
-                  {formatDuration(span.start, span.end)}
-                </p>
-              </div>
-
-              <ol className="mt-4 space-y-1.5 border-l border-border-strong pl-4">
-                {exp.roles.map((role) => (
-                  <li
-                    key={`${exp.id}-${role.title}`}
-                    className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5"
-                  >
-                    <span className="text-ui font-semibold text-ink">{role.title}</span>
-                    <span className="font-mono text-micro text-muted tabular-nums">
-                      {formatRange(formatPeriod(role.start, role.end))}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-
-              <p className="mt-4 max-w-[66ch] text-body text-ink-soft">{exp.summary}</p>
-
-              {stats.length > 0 ? (
-                <dl
-                  className={`mt-5 grid grid-cols-2 gap-2.5 ${
-                    stats.length >= 4 ? 'sm:grid-cols-3 lg:grid-cols-5' : 'sm:grid-cols-3'
-                  }`}
+      <div className="mt-8 grid gap-6 lg:grid-cols-[200px_1fr] lg:items-start lg:gap-8">
+        <aside
+          aria-label="Empresas"
+          className="lg:sticky lg:top-8 lg:self-start"
+        >
+          <nav className="flex flex-wrap gap-2 lg:flex-col lg:gap-2">
+            {experiences.map((exp) => {
+              const span = experienceSpan(exp);
+              return (
+                <a
+                  key={exp.id}
+                  href={`#exp-${exp.id}`}
+                  className="focus-ring card-inset-interactive group block px-3.5 py-2.5 lg:w-full"
                 >
-                  {stats.map((stat) => (
-                    <div
-                      key={`${exp.id}-${stat.value}-${stat.label}`}
-                      className="rounded-inner bg-surface-soft px-3.5 py-3"
-                    >
-                      <dt className="font-display text-title font-bold tracking-[-0.02em] text-ink tabular-nums">
-                        {stat.value}
-                      </dt>
-                      <dd className="mt-0.5 text-micro text-muted">{stat.label}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
-
-              <ul className="mt-5 space-y-3 text-ui leading-relaxed text-ink-soft">
-                {exp.highlights.map((item, idx) => (
-                  <li key={idx} className="border-l-2 border-border pl-3.5">
-                    {item.metric ? (
-                      <strong className="font-semibold text-ink">{item.metric}: </strong>
-                    ) : null}
-                    <span>{item.text}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-6 flex flex-wrap gap-1.5 border-t border-border pt-4">
-                {exp.stack.map((tech) => (
-                  <span
-                    key={tech}
-                    className="rounded-pill border border-border bg-canvas px-2.5 py-0.5 font-mono text-micro text-muted"
-                  >
-                    {tech}
+                  <span className="block truncate font-display text-ui font-bold text-ink group-hover:underline">
+                    {exp.company}
                   </span>
-                ))}
-              </div>
-            </article>
-          );
-        })}
+                  <span className="mt-0.5 block font-mono text-micro text-muted tabular-nums">
+                    {formatRange(formatPeriod(span.start, span.end))}
+                  </span>
+                </a>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <div className="space-y-6">
+          {experiences.map((exp) => {
+            const span = experienceSpan(exp);
+
+            return (
+              <article
+                key={exp.id}
+                id={`exp-${exp.id}`}
+                className="surface-card scroll-mt-8 border-t-2 border-t-border-strong p-6 sm:p-7"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-dashed border-border pb-4">
+                  <div>
+                    <h2 className="font-display text-title font-bold tracking-[-0.02em] text-ink">
+                      {exp.company}
+                    </h2>
+                    <p className="mt-0.5 text-ui text-muted">{exp.location}</p>
+                  </div>
+                  <p className="rounded-control border border-border bg-surface px-3 py-1 font-mono text-micro text-muted tabular-nums sm:rounded-pill">
+                    {formatRange(formatPeriod(span.start, span.end))} ·{' '}
+                    {formatDuration(span.start, span.end)}
+                  </p>
+                </div>
+
+                <ol className="mt-4 space-y-1.5 border-l border-border-strong pl-4">
+                  {exp.roles.map((role) => (
+                    <li
+                      key={`${exp.id}-${role.title}`}
+                      className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5"
+                    >
+                      <span className="text-ui font-semibold text-ink">{role.title}</span>
+                      <span className="font-mono text-micro text-muted tabular-nums">
+                        {formatRange(formatPeriod(role.start, role.end))}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+
+                <p className="mt-4 max-w-[66ch] text-body text-ink-soft">{exp.summary}</p>
+
+                <ul className="mt-5 space-y-3 text-ui leading-relaxed text-ink-soft">
+                  {exp.highlights.map((item, idx) => (
+                    <li key={idx} className="border-l-2 border-border pl-3.5">
+                      {item.metric ? (
+                        <strong className="font-semibold text-ink">{item.metric}: </strong>
+                      ) : null}
+                      <span>{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-6 flex flex-wrap gap-1.5 border-t border-border pt-4">
+                  {exp.stack.map((tech) => (
+                    <span
+                      key={tech}
+                      className="rounded-pill border border-border bg-canvas px-2.5 py-0.5 font-mono text-micro text-muted"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </div>
 
       <div className="mt-8 grid gap-5 md:grid-cols-2">

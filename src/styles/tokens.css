@@ -29,6 +29,8 @@
   --text-title--line-height: 1.25;
   --text-hero: clamp(1.75rem, 1.2rem + 2.2vw, 2.625rem); /* empty-state greeting */
   --text-hero--line-height: 1.08;
+  --text-poster: clamp(2.15rem, 1.35rem + 3vw, 3.55rem); /* editorial poster headers */
+  --text-poster--line-height: 0.98;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -81,7 +83,7 @@
     --canvas: #f7f7f3;
     --surface: #ffffff;
     --surface-hover: #f2f2ed;
-    --surface-soft: rgb(20 20 18 / 0.04);
+    --surface-soft: #f1f0eb;
     --border: rgb(20 20 18 / 0.09);
     --border-strong: rgb(20 20 18 / 0.16);
 
@@ -111,6 +113,12 @@
     --elevation-float: 0 2px 6px rgb(20 20 18 / 0.05), 0 18px 44px -16px rgb(20 20 18 / 0.16);
     --elevation-pop: 0 4px 12px rgb(20 20 18 / 0.06), 0 28px 60px -20px rgb(20 20 18 / 0.24);
     --ambient: radial-gradient(620px 290px at 50% 12%, rgb(217 238 70 / 0.24), transparent 72%);
+
+    /* Editorial Art Direction room tokens */
+    --room-wash: radial-gradient(760px 340px at 50% -4%, rgb(217 238 70 / 0.22), transparent 72%);
+    --room-numeral: #4a4e47;
+    --room-mark: rgb(231 242 90 / 0.78);
+    --room-lift-shadow: 0 2px 4px rgb(70 40 0 / 0.08), 0 18px 34px -16px rgb(70 40 0 / 0.22);
   }
 
   html.dark {
@@ -121,7 +129,7 @@
     --canvas: #141513;
     --surface: #1b1d1a;
     --surface-hover: #232622;
-    --surface-soft: rgb(255 255 255 / 0.04);
+    --surface-soft: #131413;
     --border: rgb(255 255 255 / 0.08);
     --border-strong: rgb(255 255 255 / 0.14);
 
@@ -150,35 +158,119 @@
     --elevation-float: 0 1px 0 rgb(255 255 255 / 0.07) inset, 0 22px 54px -16px rgb(0 0 0 / 0.82);
     --elevation-pop: 0 1px 0 rgb(255 255 255 / 0.08) inset, 0 30px 70px -18px rgb(0 0 0 / 0.9);
     --ambient: radial-gradient(620px 290px at 50% 12%, rgb(223 245 92 / 0.07), transparent 72%);
+
+    --room-wash: radial-gradient(760px 340px at 50% -4%, rgb(223 245 92 / 0.08), transparent 72%);
+    --room-numeral: #dff55c;
+    --room-mark: rgb(223 245 92 / 0.22);
+    --room-lift-shadow: 0 1px 0 rgb(255 255 255 / 0.08) inset, 0 22px 42px -16px rgb(0 0 0 / 0.86);
+  }
+
+  /* Per-section subtle chromatic atmospheres (AA contrast preserved on all ink) */
+  [data-room="projects"] {
+    --room-wash: radial-gradient(780px 320px at 14% -6%, rgb(216 64 44 / 0.09), transparent 72%);
+    --room-numeral: #b42c1a;
+  }
+  html.dark [data-room="projects"] {
+    --room-wash: radial-gradient(780px 320px at 14% -6%, rgb(232 95 74 / 0.11), transparent 72%);
+    --room-numeral: #ff9b8a;
+  }
+
+  [data-room="experience"] {
+    --room-wash: radial-gradient(780px 320px at 84% -6%, rgb(199 150 60 / 0.14), transparent 72%);
+    --room-numeral: #7c5514;
+  }
+  html.dark [data-room="experience"] {
+    --room-wash: radial-gradient(780px 320px at 84% -6%, rgb(223 245 92 / 0.08), transparent 72%);
+    --room-numeral: #f3c96b;
+  }
+
+  [data-room="studies"] {
+    --room-wash: radial-gradient(780px 320px at 16% -6%, rgb(0 78 223 / 0.08), transparent 72%);
+    --room-numeral: #0042bf;
+  }
+  html.dark [data-room="studies"] {
+    --room-wash: radial-gradient(780px 320px at 16% -6%, rgb(93 157 197 / 0.13), transparent 72%);
+    --room-numeral: #8ab8ff;
+  }
+
+  [data-room="articles"] {
+    --room-wash: radial-gradient(780px 320px at 82% -6%, rgb(190 75 110 / 0.08), transparent 72%);
+    --room-numeral: #8f254a;
+  }
+  html.dark [data-room="articles"] {
+    --room-wash: radial-gradient(780px 320px at 82% -6%, rgb(231 191 255 / 0.1), transparent 72%);
+    --room-numeral: #f5b8d0;
+  }
+
+  [data-room="ai"] {
+    --room-wash: radial-gradient(780px 320px at 50% -6%, rgb(20 21 19 / 0.06), transparent 72%);
+    --room-numeral: #4a4e47;
+  }
+  html.dark [data-room="ai"] {
+    --room-wash: radial-gradient(780px 320px at 50% -6%, rgb(223 245 92 / 0.07), transparent 72%);
+    --room-numeral: #dff55c;
   }
 }
 
 @layer components {
-  /* Cards: project, experience, study, inline chat cards. */
+  /* =========================================================================
+   * Standardized Card System (3 styles, 1 unified calm hover — zero lift)
+   * 1. .card-editorial          -> Clickable content cards (Projects, Studies, Certs, Articles, Suggestions)
+   * 2. .card-panel / .surface-card -> Read-only structural panels (Experience, Education, Stack, Preview)
+   * 3. .card-inset              -> Nested read-only metric/stat blocks
+   *    .card-inset-interactive  -> Compact clickable items (Index rows, shortcuts)
+   * ========================================================================= */
+
+  /* Style 2: Read-only structural panel (matte, no shadow, no hover). */
+  .card-panel,
   .surface-card {
+    background-color: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+  }
+
+  /* Style 1: Clickable content / catalog card — calm border + surface shift (no vertical jump). */
+  .card-editorial {
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
     box-shadow: var(--elevation-card);
-    transition-property: transform, border-color, background-color;
-    transition-duration: 180ms;
+    cursor: pointer;
+    transition-property: border-color, background-color;
+    transition-duration: 150ms;
     transition-timing-function: var(--ease-out);
   }
 
-  /* Add to clickable cards only. */
-  .surface-card-interactive {
-    cursor: pointer;
-  }
-
   @media (hover: hover) {
-    .surface-card-interactive:hover {
+    .card-editorial:hover {
       border-color: var(--border-strong);
-      transform: translateY(-2px);
+      background-color: var(--surface-hover);
     }
   }
 
-  .surface-card-interactive:active {
-    transform: translateY(0) scale(0.995);
+  /* Style 3: Nested read-only metric / compact block (no hover). */
+  .card-inset {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-inner);
+  }
+
+  /* Compact clickable item (matches .card-editorial calm border + surface shift). */
+  .card-inset-interactive {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-inner);
+    cursor: pointer;
+    transition-property: border-color, background-color;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .card-inset-interactive:hover {
+      border-color: var(--border-strong);
+      background-color: var(--surface-hover);
+    }
   }
 
   /* Main content sheet next to the sidebar. No header chrome inside. */
@@ -259,6 +351,26 @@
 
   .ambient-glow {
     background-image: var(--ambient);
+  }
+
+  .room-atmosphere {
+    background-image: var(--room-wash);
+    background-repeat: no-repeat;
+  }
+
+  /* Subtle analog risograph/paper grain overlay inside the main sheet */
+  .paper-grain {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0.032;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-size: 220px 220px;
+  }
+
+  html.dark .paper-grain {
+    opacity: 0.045;
   }
 
   /* Visible keyboard focus. Overrides the legacy box-shadow focus style. */
@@ -357,7 +469,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .surface-card,
+    .card-editorial,
+    .card-inset-interactive,
     .surface-composer,
     .pill-button,
     input[type="range"].r-slider::-webkit-slider-thumb,
@@ -365,8 +478,8 @@
       transition: none;
     }
 
-    .surface-card-interactive:hover,
-    .surface-card-interactive:active,
+    .card-editorial:hover,
+    .card-editorial:active,
     .pill-button:active:not(:disabled) {
       transform: none;
     }

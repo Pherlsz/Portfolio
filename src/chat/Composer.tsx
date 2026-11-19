@@ -205,7 +205,7 @@ export default function Composer({
 
   return (
     <div className="w-full">
-      <div className="surface-composer p-3 sm:p-3.5">
+      <div className="surface-composer relative p-3 hover:border-ink/25 focus-within:ring-1 focus-within:ring-accent/25 sm:p-3.5">
         {(activeSkill || attachment) && (
           <div className="mb-2 flex flex-wrap items-center gap-2 px-1">
             {activeSkill && (
@@ -248,7 +248,7 @@ export default function Composer({
           onKeyDown={handleKeyDown}
           placeholder={
             activeSkill === 'vaga'
-              ? 'Cole a descrição da vaga ou anexe um arquivo .txt/.md...'
+              ? 'Cole a vaga ou anexe .txt/.md...'
               : t('chat.placeholder')
           }
           aria-label={t('chat.placeholder')}
@@ -329,7 +329,7 @@ export default function Composer({
                       <span className="min-w-0">
                         <span className="block font-mono text-ui font-medium text-ink">/contato</span>
                         <span className="block text-micro text-muted">
-                          Abre o formulário de recado direto
+                          Enviar recado direto
                         </span>
                       </span>
                     </button>
@@ -344,7 +344,7 @@ export default function Composer({
                       <span className="min-w-0">
                         <span className="block font-mono text-ui font-medium text-ink">/v1</span>
                         <span className="block text-micro text-muted">
-                          Mostra a versão arquivada de 2025
+                          Versão arquivada de 2025
                         </span>
                       </span>
                     </button>
@@ -362,7 +362,7 @@ export default function Composer({
                     <span className="min-w-0">
                       <span className="block text-ui font-medium text-ink">Anexar .txt ou .md</span>
                       <span className="block text-micro text-muted">
-                        Leitura local, até 200 KB
+                        Local · até 200 KB
                       </span>
                     </span>
                   </button>
@@ -412,10 +412,14 @@ export default function Composer({
                 type="button"
                 onClick={submit}
                 disabled={!canSubmit}
+                data-cursor="enviar"
                 aria-label={t('chat.send')}
-                className="focus-ring inline-flex size-9 cursor-pointer items-center justify-center rounded-pill bg-accent text-on-accent transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="group focus-ring inline-flex size-9 cursor-pointer items-center justify-center rounded-pill bg-accent text-on-accent transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none motion-reduce:transform-none"
               >
-                <ArrowUp className="size-4" aria-hidden="true" />
+                <ArrowUp
+                  className="size-4 transition-transform duration-150 group-hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:transform-none"
+                  aria-hidden="true"
+                />
               </button>
             )}
           </div>

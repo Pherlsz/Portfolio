@@ -75,19 +75,20 @@ export default function Suggestions({ onSelect, disabled = false }: SuggestionsP
             <p className="font-mono text-micro tabular-nums text-muted">{data.week}</p>
           )}
         </div>
-        <div className="grid gap-2.5 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           {data.featured.map((prompt) => (
             <button
               key={prompt}
               type="button"
               disabled={disabled}
+              data-cursor="perguntar"
               onClick={() => onSelect(prompt)}
-              className="group surface-card surface-card-interactive focus-ring flex min-h-[4.75rem] flex-col justify-between gap-3 rounded-inner p-3.5 text-left disabled:cursor-not-allowed disabled:opacity-50"
+              className="group card-editorial focus-ring relative flex min-h-[6.25rem] flex-col justify-between gap-3 p-4 text-left disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="text-ui font-medium leading-snug text-ink">{prompt}</span>
               <span className="flex justify-end">
                 <ArrowUpRight
-                  className="size-3.5 text-muted transition-[color,transform] duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink motion-reduce:transition-none motion-reduce:transform-none"
+                  className="size-3.5 text-muted opacity-65 transition-[color,opacity] duration-150 group-hover:text-ink group-hover:opacity-100 motion-reduce:transition-none"
                   aria-hidden="true"
                 />
               </span>
@@ -100,7 +101,9 @@ export default function Suggestions({ onSelect, disabled = false }: SuggestionsP
         <section aria-label={t('chat.breakersHeading')}>
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <ShieldAlert className="size-3.5 text-muted" aria-hidden="true" />
-            <p className="text-micro font-medium text-muted">{t('chat.breakersHeading')}</p>
+            <p className="font-mono text-micro uppercase tracking-[0.06em] text-muted">
+              {t('chat.breakersHeading')}
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {data.breakers.map((prompt) => (
@@ -108,9 +111,13 @@ export default function Suggestions({ onSelect, disabled = false }: SuggestionsP
                 key={prompt}
                 type="button"
                 disabled={disabled}
+                data-cursor="perguntar"
                 onClick={() => onSelect(prompt)}
-                className="focus-ring inline-flex min-h-8 cursor-pointer items-center rounded-pill border border-dashed border-border-strong bg-surface-soft px-3 py-1.5 text-left text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-ink hover:bg-surface hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                className="focus-ring inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-pill border border-dashed border-border-strong bg-surface-soft px-3 py-1.5 text-left text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-ink hover:bg-surface hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
               >
+                <span aria-hidden="true" className="font-mono text-muted">
+                  //
+                </span>
                 <span>{prompt}</span>
               </button>
             ))}

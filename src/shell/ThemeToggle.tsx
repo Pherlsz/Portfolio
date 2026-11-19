@@ -9,7 +9,7 @@ function readInitialTheme(): 'light' | 'dark' {
   return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({ iconOnly = false }: { iconOnly?: boolean }) {
   const [theme, setTheme] = useState<'light' | 'dark'>(readInitialTheme);
 
   useEffect(() => {
@@ -30,7 +30,12 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      className="pill-button focus-ring"
+      title={isDark ? t('theme.light') : t('theme.dark')}
+      className={
+        iconOnly
+          ? 'focus-ring inline-flex size-8 cursor-pointer items-center justify-center rounded-control text-muted transition-colors duration-150 hover:bg-surface-hover hover:text-ink'
+          : 'pill-button focus-ring'
+      }
       aria-label={t('theme.toggle')}
       aria-pressed={isDark}
     >
@@ -39,7 +44,7 @@ export function ThemeToggle() {
       ) : (
         <Moon className="size-3.5 text-ink-soft" aria-hidden="true" />
       )}
-      <span>{isDark ? 'Claro' : 'Escuro'}</span>
+      {iconOnly ? null : <span>{isDark ? 'Claro' : 'Escuro'}</span>}
     </button>
   );
 }

@@ -102,8 +102,8 @@ export function hashSuggestionPrompt(text: string): string {
   return `${hex1}${hex2}`;
 }
 
-export function suggestionCacheKey(text: string): string {
-  return `cache:sug:${hashSuggestionPrompt(text)}`;
+export function suggestionCacheKey(text: string, reasoning: Reasoning = 'default'): string {
+  return `cache:sug:${reasoning}:${hashSuggestionPrompt(text)}`;
 }
 
 async function loadKnownSuggestionsSet(env?: BudgetEnv): Promise<Set<string>> {
@@ -154,7 +154,8 @@ export async function getCachedSuggestionReply(
   env: BudgetEnv | undefined,
   message: string,
   history: HistoryTurn[],
-  skill?: ChatSkill
+  skill?: ChatSkill,
+  reasoning: Reasoning = 'default'
 ): Promise<string | null> {
   if (history.length > 0 || skill || !env?.INBOX?.get) {
     return null;
@@ -165,7 +166,7 @@ export async function getCachedSuggestionReply(
   }
 
   try {
-    const raw = await env.INBOX.get(suggestionCacheKey(message));
+    const raw = await env.INBOX.get(suggestionCacheKey(message, reasoning));
     if (!raw) return null;
     try {
       const parsed = JSON.parse(raw) as { reply?: unknown };
@@ -187,7 +188,8 @@ export async function cacheSuggestionReplyIfEligible(
   message: string,
   history: HistoryTurn[],
   skill: ChatSkill | undefined,
-  reply: string
+  reply: string,
+  reasoning: Reasoning = 'default'
 ): Promise<void> {
   if (history.length > 0 || skill || !env?.INBOX?.put || !isSafeReply(reply)) {
     return;
@@ -199,7 +201,7 @@ export async function cacheSuggestionReplyIfEligible(
 
   try {
     await env.INBOX.put(
-      suggestionCacheKey(message),
+      suggestionCacheKey(message, reasoning),
       JSON.stringify({ reply, cachedAt: new Date().toISOString() }),
       { expirationTtl: SUGGESTION_CACHE_TTL_SECONDS }
     );

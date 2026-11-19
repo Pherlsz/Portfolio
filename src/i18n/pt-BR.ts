@@ -4,7 +4,7 @@ export const ptBR = {
   'nav.newChat': 'Novo chat',
   'nav.sections': 'Seções',
   'nav.history': 'Histórico',
-  'nav.historyEmpty': 'Suas conversas ficam salvas só neste navegador.',
+  'nav.historyEmpty': 'Salvo só neste navegador.',
   'nav.projects': 'Projetos',
   'nav.experience': 'Experiência',
   'nav.studies': 'Estudos',
@@ -19,27 +19,27 @@ export const ptBR = {
   'theme.toggle': 'Alternar tema',
 
   'chat.greeting': 'Por onde começamos?',
-  'chat.placeholder': 'Pergunte sobre projetos, experiência ou cole uma vaga...',
+  'chat.placeholder': 'Pergunte algo ou cole uma vaga...',
   'chat.send': 'Enviar',
   'chat.stop': 'Parar',
   'chat.deleteThread': 'Apagar conversa',
   'chat.featuredHeading': 'Perguntas em destaque',
   'chat.breakersHeading': 'Tenta quebrar',
-  'chat.privacyNotice': 'As perguntas podem ser registradas sem dados pessoais para curadoria semanal.',
-  'chat.unavailable': 'Assistente indisponível no momento. Você pode navegar pelas seções ou baixar o CV.',
+  'chat.privacyNotice': 'Perguntas anônimas podem ir para a curadoria semanal.',
+  'chat.unavailable': 'Assistente indisponível. Explore as seções ou baixe o CV.',
 
   'reasoning.label': 'Raciocínio',
   'reasoning.fast': 'Rápido',
-  'reasoning.fastDesc': 'Respostas diretas e menor latência.',
+  'reasoning.fastDesc': 'Direto ao ponto.',
   'reasoning.default': 'Padrão',
-  'reasoning.defaultDesc': 'Equilíbrio entre profundidade e velocidade.',
+  'reasoning.defaultDesc': 'Rápido e equilibrado.',
   'reasoning.high': 'Profundo',
-  'reasoning.highDesc': 'Mais contexto para análises técnicas e vagas.',
+  'reasoning.highDesc': 'Análise detalhada para vagas e código.',
 
   'skills.vaga': '/vaga',
-  'skills.vagaDesc': 'Avalia aderência de uma descrição de vaga',
+  'skills.vagaDesc': 'Analisa aderência a uma vaga',
   'skills.resumo': '/resumo',
-  'skills.resumoDesc': 'Gera um resumo rápido para recrutadores',
+  'skills.resumoDesc': 'Resumo rápido para recrutadores',
 
   'projects.title': 'Projetos',
   'projects.askCta': 'Perguntar no chat',
@@ -88,7 +88,7 @@ export const ptBR = {
   'contact.error': 'Não foi possível enviar o recado agora.',
 
   'notFound.title': 'Página não encontrada',
-  'notFound.description': 'Essa rota não existe por aqui, mas você pode voltar para o chat ou explorar as seções.',
+  'notFound.description': 'Rota não encontrada. Volte ao chat ou explore as seções.',
   'notFound.backHome': 'Voltar para o chat'
 } as const;
 
