@@ -16,35 +16,12 @@ import { PageHeader } from '../components/PageHeader';
 import {
   STUDIES,
   findStudyBySlug,
-  type ContentDocument,
-  type RichBlockKind
+  type ContentDocument
 } from '../content/collections';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { t } from '../i18n/pt-BR';
 
 const StudyRichSegment = lazy(() => import('./StudyModules'));
-
-const BLOCK_LABELS: Record<RichBlockKind, string> = {
-  canvas: 'Canvas',
-  'code-preview': 'Código + Preview',
-  'spec-tabs': 'Spec'
-};
-
-const BLUEPRINT_TAGS: Record<RichBlockKind, string> = {
-  canvas: '[CANVAS]',
-  'code-preview': '[CÓDIGO]',
-  'spec-tabs': '[SPEC]'
-};
-
-function primaryKindLabel(study: ContentDocument): string {
-  const firstBlock = study.richBlocks[0];
-  return firstBlock ? BLOCK_LABELS[firstBlock] : study.category;
-}
-
-function blueprintCornerTag(study: ContentDocument): string {
-  const firstBlock = study.richBlocks[0];
-  return firstBlock ? BLUEPRINT_TAGS[firstBlock] : '[NOTA]';
-}
 
 function safeUrl(url: string): string {
   try {
@@ -78,11 +55,9 @@ function StudyDetail({
 
       <header className="mt-6">
         <div className="flex flex-wrap items-center gap-2 font-mono text-micro text-muted tabular-nums">
-          <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-medium text-ink">
-            {primaryKindLabel(study)}
+          <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-sans font-medium text-ink">
+            {study.category}
           </span>
-          <span>{study.category}</span>
-          <span aria-hidden="true">·</span>
           <span>{study.publishedAt}</span>
           <span aria-hidden="true">·</span>
           <span className="inline-flex items-center gap-1">
@@ -235,30 +210,17 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
               className="card-editorial flex flex-col justify-between p-5 sm:p-6"
             >
               <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {study.richBlocks.length > 0 ? (
-                    study.richBlocks.map((block, index) => (
-                      <span
-                        key={block}
-                        className={`rounded-pill px-2.5 py-0.5 font-mono text-micro font-medium ${
-                          index === 0
-                            ? 'bg-accent-soft text-ink'
-                            : 'border border-border bg-surface-soft text-muted'
-                        }`}
-                      >
-                        {BLOCK_LABELS[block]}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-mono text-micro font-medium text-ink">
-                      {study.category}
-                    </span>
-                  )}
+                <div className="flex flex-wrap items-center gap-2 font-mono text-micro text-muted tabular-nums">
+                  <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-sans text-micro font-medium text-ink">
+                    {study.category}
+                  </span>
+                  <span>{study.publishedAt}</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="size-3.5" aria-hidden="true" />
+                    <span>{study.readingTime}</span>
+                  </span>
                 </div>
-
-                <p className="mt-2.5 font-mono text-micro text-muted tabular-nums">
-                  {study.publishedAt} · {study.readingTime}
-                </p>
 
                 <Link
                   href={`/estudos/${study.slug}`}
@@ -277,7 +239,7 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
                       key={tag}
                       className="rounded-pill border border-border bg-surface-soft px-2.5 py-0.5 font-mono text-micro text-muted"
                     >
-                      #{tag}
+                      {tag}
                     </span>
                   ))}
                 </div>

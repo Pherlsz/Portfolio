@@ -94,7 +94,7 @@ const SKILL_TEMPLATES: Record<ChatSkill, string> = {
     'Apresente um resumo direto para recrutador em ate 110 palavras cobrindo:',
     '- **Perfil e senioridade**: Software Engineer Frontend Pleno (4+ anos com React, Next.js e TypeScript em producao).',
     '- **Destaques na Atlas Governance**: Design System (30+ componentes WCAG 2.1 AA), virtualizacao (5.000+ registros), fluxos para 10.000+ usuarios, interfaces para LLMs e servicos em C#/.NET Core.',
-    '- **Diferencial tecnico**: base anterior em NOC/operacoes (Nelogica) e backend complementar em .NET e Go.',
+    '- **Diferencial tecnico**: base anterior em NOC/operacoes (Nelogica) e backend complementar em .NET e Python.',
     '- **Disponibilidade**: aberto a oportunidades (remoto ou em Porto Alegre, RS).'
   ].join('\n')
 };
@@ -172,7 +172,7 @@ export function buildSystemPrompt(data: PortfolioData): string {
     '[ESCOPO] Você conduz uma conversa natural sobre carreira, stack, projetos, estudos, artigos, certificados, formação, aderência a vagas e contato do Pedro. Em cumprimentos ("oi", "olá", "tudo bem"), agradecimentos ("valeu", "obrigado") ou mensagens curtas sem pergunta técnica, responda de forma leve e breve em 1 ou 2 frases sem despejar currículo, empresas ou stack. Recuse em uma frase qualquer pedido fora desse escopo (sem repetir a biografia dele). Nunca invente fatos nem considere requisitos atendidos sem evidência abaixo.',
     `[EVIDÊNCIA] Quando a pergunta for sobre experiência, stack ou projetos: experiência em produção (${data.experiences.map((e) => e.company).join(', ')}) sempre ganha de projeto pessoal. Se uma empresa já responde, não cite item de [PROJETOS] naquele turno, nem como complemento. Cite projeto pessoal só quando a pergunta for sobre ele, ou quando a skill não existir em produção. A resposta principal nomeia empresa, produto e período. Se o visitante colar uma descrição de vaga, compare de forma direta os requisitos pedidos com a experiência real em produção e aponte eventuais lacunas com honestidade.`,
     '[ESTILO] Conversacional, direto e técnico quando a pergunta pedir detalhes, no idioma do usuário, até 140 palavras. Use **negrito** e listas curtas só quando fizer sentido. Nunca use travessão ou meia-risca. Sem "Claro!" nem parafrasear a pergunta. Não despeje informações sobre o Pedro que não foram perguntadas.',
-    `[PERFIL] ${profile.headline} ${plainText(profile.summary)} Base anterior em NOC/suporte e foco atual em frontend com contribuição em backend (.NET e Go). Status: ${profile.status}. ${availabilityLine(profile)} ${atlasRoleEndedPromptClause(data)}`,
+    `[PERFIL] ${profile.headline} ${plainText(profile.summary)} Base anterior em NOC/suporte e foco atual em frontend com contribuição em backend (.NET e Python). Status: ${profile.status}. ${availabilityLine(profile)} ${atlasRoleEndedPromptClause(data)}`,
     `[EXPERIÊNCIA]\n${experiences}`,
     `[PROJETOS] Projetos autorais e estudos de caso (não substituem experiência em produção): ${projectsLine}`,
     `[ESTUDOS] Estudos técnicos publicados no site: ${studyTitles}. Artigos: ${articleTitles}.`,

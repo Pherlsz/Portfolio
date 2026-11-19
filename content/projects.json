@@ -15,7 +15,7 @@
   {
     "id": "gymkhana-core",
     "name": "Gymkhana Core",
-    "kicker": "Biblioteca Go",
+    "kicker": "Biblioteca",
     "kind": "library",
     "featured": true,
     "tagline": "Biblioteca em Go para padronização de dados, extração de texto de documentos e integração com modelos de IA.",
@@ -54,8 +54,8 @@
   {
     "id": "portfolio-v2",
     "name": "pherls.dev v2",
-    "kicker": "Estudo de caso",
-    "kind": "case-study",
+    "kicker": "Portfólio · v2",
+    "kind": "portfolio",
     "featured": true,
     "tagline": "Portfólio conversacional com streaming SSE, cards ricos sem custo extra de tokens, curadoria semanal por IA e registro aberto de decisões de arquitetura.",
     "href": "/estudos/portfolio-v2-arquitetura-ia",
@@ -68,8 +68,8 @@
   {
     "id": "portfolio-v1",
     "name": "pherls.dev v1 (2025)",
-    "kicker": "Versão arquivada",
-    "kind": "portfolio-version",
+    "kicker": "Portfólio · v1 (2025)",
+    "kind": "portfolio",
     "featured": false,
     "tagline": "Primeira versão do portfólio em formato editorial de página única, preservada de forma simplificada com a tampa interativa de adesivos holográficos.",
     "href": "/v1",

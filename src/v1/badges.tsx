@@ -2,8 +2,8 @@ import {
   siDocker,
   siDotnet,
   siGithubactions,
-  siGo,
   siNextdotjs,
+  siPython,
   siReact,
   siReactquery,
   siTailwindcss,
@@ -17,7 +17,7 @@ const SKILL_ICONS: Record<string, { path: string; hex: string }> = {
   'Next.js': siNextdotjs,
   'Tailwind CSS': siTailwindcss,
   'TanStack Query': siReactquery,
-  Go: siGo,
+  Python: siPython,
   '.NET': siDotnet,
   Docker: siDocker,
   'GitHub Actions': siGithubactions

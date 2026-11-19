@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { INTRO_SESSION_KEY, shouldShowIntro } from './introPolicy';
 
 type CurtainPhase = 'idle' | 'entering' | 'exiting';
@@ -44,6 +44,10 @@ export function IntroCurtain() {
   const rafRef = useRef<number | null>(null);
   const exitTimerRef = useRef<number | null>(null);
   const phaseRef = useRef<CurtainPhase>(phase);
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.remove('intro-pending');
+  }, []);
 
   const markSeen = useCallback(() => {
     try {

@@ -4,7 +4,7 @@ title: Arquitetura modular do Gymkhana Core em Go
 summary: Separação de responsabilidades em seis pacotes Go focados em normalização determinística, datas sem fuso, deduplicação por hash, OCR e chamadas a LLMs com RAG.
 publishedAt: 2026-06-20
 readingTime: 6 min
-category: Arquitetura e Backend
+category: Arquitetura de Software
 tags: [Go, RAG, OCR, JSON Schema, Deduplicação]
 ---
 

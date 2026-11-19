@@ -55,7 +55,7 @@ function contentSchemaGuard(): Plugin {
     id: z.string().min(1),
     name: z.string().min(1),
     kicker: z.string().min(1),
-    kind: z.enum(['app', 'library', 'case-study', 'portfolio-version']),
+    kind: z.enum(['app', 'library', 'portfolio']),
     tagline: z.string().min(1),
     stack: z.array(z.string().min(1))
   });
@@ -216,7 +216,7 @@ function htmlHead(): Plugin {
           routes.push({
             route: '/projetos',
             title: `Projetos · ${profile.name}`,
-            description: 'Galeria de projetos em React, TypeScript, Go e engenharia de IA por Pedro Henrique Lopes.',
+            description: 'Galeria de projetos em React, TypeScript, Python e engenharia de IA por Pedro Henrique Lopes.',
             bodyHtml: `<main class="seo-only"><h1>Projetos de ${escapeHtml(profile.name)}</h1><ul>${projects
               .map(
                 (p) =>
@@ -253,7 +253,7 @@ function htmlHead(): Plugin {
           routes.push({
             route: '/estudos',
             title: `Estudos e Certificados · ${profile.name}`,
-            description: 'Estudos técnicos de performance frontend, Go, arquitetura de IA e carteira de certificações.',
+            description: 'Estudos técnicos de performance frontend, arquitetura de software, IA e carteira de certificações.',
             bodyHtml: `<main class="seo-only"><h1>Estudos de ${escapeHtml(profile.name)}</h1><ul>${studies
               .map(
                 (s) =>

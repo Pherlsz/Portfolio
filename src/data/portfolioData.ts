@@ -33,7 +33,7 @@ export interface ProjectItem {
   id: string;
   name: string;
   kicker: string;
-  kind: 'app' | 'library' | 'case-study' | 'portfolio-version';
+  kind: 'app' | 'library' | 'portfolio';
   featured: boolean;
   tagline: string;
   href?: string;

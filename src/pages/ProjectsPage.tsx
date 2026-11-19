@@ -16,8 +16,7 @@ const FILTERS: { id: FilterKind; label: string }[] = [
   { id: 'all', label: 'Todos' },
   { id: 'app', label: 'Aplicações' },
   { id: 'library', label: 'Bibliotecas' },
-  { id: 'case-study', label: 'Estudo de caso' },
-  { id: 'portfolio-version', label: 'Versões' }
+  { id: 'portfolio', label: 'Portfólio' }
 ];
 
 const PROJECT_MONOGRAMS: Record<string, string> = {
@@ -313,7 +312,7 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
           {project.href ? (
             <Link href={project.href} className="focus-ring pill-button">
               <span>
-                {project.kind === 'portfolio-version'
+                {project.href === '/v1'
                   ? t('projects.archivedVersion')
                   : t('projects.openLive')}
               </span>
@@ -523,7 +522,7 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
                 </div>
 
                 <div className="flex shrink-0 items-center gap-1.5">
-                  {project.kind === 'portfolio-version' && project.href ? (
+                  {project.href === '/v1' && project.href ? (
                     <Link
                       href={project.href}
                       data-cursor="abrir"
