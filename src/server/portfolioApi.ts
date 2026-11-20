@@ -193,14 +193,10 @@ const BODY_ERRORS = { 400: 'JSON inválido.', 413: 'Pedido grande demais.' } as 
 const KNOWN_STUDY_SLUGS = new Set<string>([
   ...STUDIES.map((s) => s.slug),
   'virtualizacao-listagens-react',
-  'gymkhana-core-pipeline',
   'portfolio-v2-arquitetura-ia'
 ]);
 
-const KNOWN_ARTICLE_SLUGS = new Set<string>([
-  ...ARTICLES.map((a) => a.slug),
-  'design-system-wcag-aa'
-]);
+const KNOWN_ARTICLE_SLUGS = new Set<string>(ARTICLES.map((a) => a.slug));
 
 const VALID_PROJECT_IDS = new Set<string>(DEFAULT_PORTFOLIO_DATA.projects.map((p) => p.id));
 const VALID_EXPERIENCE_IDS = new Set<string>(DEFAULT_PORTFOLIO_DATA.experiences.map((e) => e.id));
@@ -277,10 +273,29 @@ export function inferContextualCards(
   ) {
     candidates.push({ kind: 'project', id: 'gymkhana-core' });
   }
-  if (mentions('pherls.dev v2', 'portfolio v2', 'portfolio-v2', 'segunda versao')) {
+  if (
+    mentions(
+      'pherls.dev v2',
+      'portfolio v2',
+      'portfolio-v2',
+      'portfolio conversacional',
+      'edicao atual',
+      'segunda versao'
+    )
+  ) {
     candidates.push({ kind: 'project', id: 'portfolio-v2' });
   }
-  if (queryMentions('pherls.dev v1', 'portfolio v1', '/v1', 'primeira versao', 'adesivos')) {
+  if (
+    queryMentions(
+      'pherls.dev v1',
+      'portfolio v1',
+      'portfolio editorial',
+      '/v1',
+      'primeira versao',
+      'primeira edicao',
+      'adesivos'
+    )
+  ) {
     candidates.push({ kind: 'v1' });
   }
 
@@ -299,14 +314,8 @@ export function inferContextualCards(
   if (mentions('tanstack virtual', 'virtualizacao', '5.000+ registros', '5000 registros', 'layout thrashing')) {
     candidates.push({ kind: 'study', id: 'virtualizacao-listagens-react' });
   }
-  if (mentions('pipeline', 'modulos do gymkhana', 'deduplicacao')) {
-    candidates.push({ kind: 'study', id: 'gymkhana-core-pipeline' });
-  }
   if (mentions('streaming sse', 'evento retract', 'curadoria semanal', 'arquitetura do assistente')) {
     candidates.push({ kind: 'study', id: 'portfolio-v2-arquitetura-ia' });
-  }
-  if (mentions('wcag', 'acessibilidade', '30+ componentes', 'design system')) {
-    candidates.push({ kind: 'article', id: 'design-system-wcag-aa' });
   }
 
   // Certificates

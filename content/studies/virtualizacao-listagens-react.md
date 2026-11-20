@@ -20,24 +20,11 @@ Em um cenário típico de listagem hierárquica com ~5.000 itens, o custo princi
 
 ## Arquitetura da solução
 
-A abordagem separa o estado plano da árvore expandida da camada de renderização em janela, mantendo apenas os itens visíveis e um overscan controlado montados no DOM.
+A abordagem separa o estado plano da árvore expandida da camada de renderização em janela, mantendo apenas os itens visíveis e um overscan controlado montados no DOM:
 
-:::canvas
-{
-  "title": "Pipeline de virtualização em React",
-  "nodes": [
-    { "id": "tree", "label": "Árvore normalizada", "detail": "Nós hierárquicos convertidos em lista plana", "x": 40, "y": 90 },
-    { "id": "query", "label": "TanStack Query", "detail": "Cache de páginas e deduplicação de requests", "x": 260, "y": 40 },
-    { "id": "virtual", "label": "TanStack Virtual", "detail": "Janela ativa + overscan controlado no DOM", "x": 260, "y": 150 },
-    { "id": "split", "label": "Code Splitting", "detail": "Carregamento sob demanda de painéis secundários", "x": 500, "y": 90 }
-  ],
-  "edges": [
-    { "from": "tree", "to": "virtual" },
-    { "from": "query", "to": "virtual" },
-    { "from": "virtual", "to": "split" }
-  ]
-}
-:::
+1. **Árvore normalizada:** nós hierárquicos são achatados em uma lista indexada conforme os ramos abertos.
+2. **Cache e deduplicação:** o **TanStack Query** evita refetches redundantes e pagina os blocos sob demanda.
+3. **Janela ativa e code splitting:** o **TanStack Virtual** renderiza apenas os itens visíveis enquanto painéis secundários são carregados via lazy import.
 
 ## Padrão de implementação
 

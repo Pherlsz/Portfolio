@@ -858,11 +858,11 @@ export function createChatStore(options: CreateChatStoreOptions = {}) {
       const assistantMessage: ChatMessage = {
         id: createId(),
         role: 'assistant',
-        text: 'A primeira versão do portfólio continua arquivada por aqui. Você pode abrir o card abaixo para visitar o `/v1`.',
+        text: 'O Portfólio Editorial (2025) continua arquivado por aqui. Você pode abrir o card abaixo para visitar o `/v1`.',
         status: 'done',
         createdAt: now + 1,
         cards: [{ kind: 'v1' }],
-        actions: [{ label: 'Abrir v1', type: 'route', value: '/v1' }]
+        actions: [{ label: 'Abrir Portfólio Editorial', type: 'route', value: '/v1' }]
       };
       updateChat(thread.id, (chat) => ({
         ...chat,
@@ -899,7 +899,7 @@ export function createChatStore(options: CreateChatStoreOptions = {}) {
           '- `/vaga [descrição]`: compara os requisitos de uma vaga com a experiência real do Pedro',
           '- `/resumo`: gera um resumo direto do perfil para recrutadores',
           '- `/contato [mensagem]`: abre o formulário para enviar um recado',
-          '- `/v1`: mostra o card da primeira versão arquivada do portfólio'
+          '- `/v1`: mostra o card do Portfólio Editorial (2025, arquivado)'
         ].join('\n'),
         status: 'done',
         createdAt: now + 1

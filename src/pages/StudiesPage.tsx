@@ -203,7 +203,9 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
       />
 
       {!isCertTab ? (
-        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div
+          className={`mt-8 grid gap-6 md:grid-cols-2 ${STUDIES.length > 2 ? 'xl:grid-cols-3' : ''}`}
+        >
           {STUDIES.map((study) => (
             <article
               key={study.slug}
@@ -299,7 +301,7 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
                       </span>
                     </div>
                   ) : (
-                    <div className="dot-canvas relative flex h-40 w-full items-center justify-center border-b border-border bg-surface-soft px-5">
+                    <div className="relative flex h-40 w-full items-center justify-center border-b border-border bg-surface-soft px-5">
                       <span className="absolute top-3.5 right-3.5 rounded-pill border border-border bg-surface px-2.5 py-1 font-mono text-micro font-semibold text-ink tabular-nums">
                         {cert.code}
                       </span>

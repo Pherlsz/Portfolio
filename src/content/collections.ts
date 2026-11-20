@@ -1,6 +1,8 @@
 export interface CanvasNode {
   id: string;
+  tag?: string;
   label: string;
+  summary?: string;
   detail?: string;
   x: number;
   y: number;
@@ -9,6 +11,7 @@ export interface CanvasNode {
 export interface CanvasEdge {
   from: string;
   to: string;
+  label?: string;
 }
 
 export interface CanvasBlockData {

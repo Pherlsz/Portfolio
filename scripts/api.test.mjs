@@ -11,7 +11,11 @@ import {
   suggestionCacheKey,
   trimHistoryToBudget
 } from '../src/server/budget.ts';
-import { handlePortfolioRequest, SECURITY_HEADERS } from '../src/server/portfolioApi.ts';
+import {
+  handlePortfolioRequest,
+  inferContextualCards,
+  SECURITY_HEADERS
+} from '../src/server/portfolioApi.ts';
 import {
   buildGenerationConfig,
   DEFAULT_PROFILES,
@@ -529,6 +533,41 @@ test('assistant: system prompt permanece compacto (<= 2000 tokens estimados)', (
   assert.ok(
     estimatedTokens <= 2000,
     `system prompt too large: ${estimatedTokens} estimated tokens (${prompt.length} chars)`
+  );
+  assert.match(prompt, /Portfólio Conversacional/);
+  assert.match(prompt, /Portfólio Editorial/);
+  assert.equal(prompt.includes('design-system-wcag-aa'), false);
+  assert.equal(prompt.includes('gymkhana-core-pipeline'), false);
+  assert.equal(prompt.includes('pherls.dev v1'), false);
+  assert.equal(prompt.includes('pherls.dev v2'), false);
+});
+
+test('cards e seções: inferContextualCards resolve novos nomes dos portfólios, ignora estudos/artigos removidos e oculta /artigos sem conteúdo', () => {
+  const v2Cards = inferContextualCards('Como o Portfólio Conversacional foi construído?', '');
+  assert.ok(v2Cards.some((c) => c.kind === 'project' && c.id === 'portfolio-v2'));
+
+  const v1Cards = inferContextualCards('Me mostra o Portfólio Editorial', '');
+  assert.ok(v1Cards.some((c) => c.kind === 'v1'));
+
+  const removedCards = inferContextualCards(
+    'Me fala sobre design system wcag acessibilidade e pipeline de deduplicação do gymkhana',
+    ''
+  );
+  assert.equal(
+    removedCards.some((c) => c.id === 'design-system-wcag-aa' || c.id === 'gymkhana-core-pipeline'),
+    false
+  );
+
+  const sectionsZeroArticles = visibleSections({
+    projects: 4,
+    experiences: 3,
+    studies: 2,
+    certificates: 3,
+    articles: 0
+  });
+  assert.equal(
+    sectionsZeroArticles.some((s) => s.path === '/artigos'),
+    false
   );
 });
 

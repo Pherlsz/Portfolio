@@ -8,7 +8,7 @@ import { Hero } from './Hero';
 import { ProjectSection } from './ProjectSection';
 import { smoothScrollToSection } from './ui';
 
-const V1_TITLE = 'pherls.dev · v1 (2025)';
+const V1_TITLE = 'Portfólio Editorial (2025) · pherls.dev';
 
 export function V1Page() {
   useEffect(() => {
@@ -55,14 +55,14 @@ export function V1Page() {
       <header className="no-print sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur-xs">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-8">
           <p className="font-mono text-xs text-ink-soft sm:text-sm">
-            Você está vendo o pherls.dev v1 (2025, arquivado).
+            Você está vendo o Portfólio Editorial (2025, arquivado).
           </p>
           <Link
             href="/"
             className="inline-flex min-h-9 items-center gap-1.5 border border-line bg-surface px-3 py-1.5 font-mono text-xs font-semibold text-ink transition-colors hover:border-ink"
           >
             <ArrowLeft className="size-3.5" aria-hidden="true" />
-            <span>Voltar para a v2</span>
+            <span>Voltar para o portfólio atual</span>
           </Link>
         </div>
       </header>
@@ -83,9 +83,9 @@ export function V1Page() {
 
       <footer className="no-print border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-6 text-sm text-muted sm:px-8">
-          <p>pherls.dev v1 (2025, arquivado)</p>
+          <p>Portfólio Editorial · pherls.dev (2025)</p>
           <Link href="/" className="link font-mono text-xs">
-            Voltar para a v2
+            Voltar para o portfólio atual
           </Link>
         </div>
       </footer>

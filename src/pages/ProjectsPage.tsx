@@ -22,8 +22,8 @@ const FILTERS: { id: FilterKind; label: string }[] = [
 const PROJECT_MONOGRAMS: Record<string, string> = {
   'gymkhana-database': 'GD',
   'gymkhana-core': 'GC',
-  'portfolio-v2': 'V2',
-  'portfolio-v1': 'V1'
+  'portfolio-v2': 'PC',
+  'portfolio-v1': 'PE'
 };
 
 function getProjectMonogram(project: ProjectItem): string {
@@ -68,7 +68,7 @@ function ProjectPreview({
   if (project.id === 'gymkhana-core') {
     const modules = project.modules ?? [];
     return (
-      <div className="dot-canvas relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-4 sm:p-5">
+      <div className="relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-4 sm:p-5">
         <div className="flex items-center justify-between gap-2 font-mono text-micro text-muted tabular-nums">
           <span className="truncate">go.mod · gymkhana-core</span>
           <span className="shrink-0">{modules.length} pacotes</span>
@@ -106,7 +106,7 @@ function ProjectPreview({
               return (
                 <span
                   key={mod.name}
-                  className={`rounded-pill border px-2.5 py-1 font-mono text-[11px] font-medium ${
+                  className={`rounded-pill border px-2.5 py-1 font-mono text-micro font-medium ${
                     highlighted
                       ? 'border-transparent bg-accent text-on-accent'
                       : 'border-border bg-surface text-ink'
@@ -131,7 +131,7 @@ function ProjectPreview({
     return (
       <div className="ambient-glow relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-5 sm:p-6">
         <div className="flex items-center justify-between gap-2 font-mono text-micro text-muted">
-          <span>pherls.dev v2</span>
+          <span>Portfólio Conversacional</span>
           <span>SSE · Cards tipados</span>
         </div>
 
@@ -171,7 +171,7 @@ function ProjectPreview({
 
   if (project.id === 'portfolio-v1') {
     return (
-      <div className="dot-canvas relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-5 sm:p-6">
+      <div className="relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-5 sm:p-6">
         <div className="flex items-center justify-between gap-2 font-mono text-micro text-muted">
           <span>Arquivo · 2025</span>
           <span>/v1</span>
@@ -215,7 +215,7 @@ function ProjectPreview({
 
         <div className="flex items-center justify-between gap-2">
           <span className="rounded-pill bg-accent px-3 py-0.5 font-mono text-micro font-semibold text-on-accent">
-            v1 · 2025
+            Arquivo · 2025
           </span>
           <span className="font-mono text-micro text-muted">
             Tampa com adesivos holográficos
@@ -226,7 +226,7 @@ function ProjectPreview({
   }
 
   return (
-    <div className="dot-canvas relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-5 sm:p-6">
+    <div className="relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-5 sm:p-6">
       <div className="font-mono text-micro text-muted">{project.kicker}</div>
       <div className="my-auto flex flex-wrap gap-2">
         {project.stack.map((tech) => (
@@ -525,10 +525,11 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
                   {project.href === '/v1' && project.href ? (
                     <Link
                       href={project.href}
+                      aria-label="Abrir Portfólio Editorial"
                       data-cursor="abrir"
                       className="focus-ring inline-flex min-h-8 items-center gap-1 rounded-pill border border-border bg-surface px-3 py-1 text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-border-strong hover:text-ink"
                     >
-                      <span>/v1</span>
+                      <span>Visitar</span>
                       <ArrowUpRight className="size-3.5" aria-hidden="true" />
                     </Link>
                   ) : null}
