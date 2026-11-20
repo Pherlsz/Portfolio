@@ -141,12 +141,43 @@ export function AiFilesPage() {
   const lineCount = preview ? preview.split('\n').length : 0;
 
   return (
-    <section className="mx-auto w-full max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
+    <section className="mx-auto flex h-full min-h-0 w-full max-w-[90rem] flex-col px-5 pt-16 pb-4 sm:px-8 sm:pb-6 lg:px-10 lg:py-8">
       <PageHeader title={t('ai.title')} />
 
-      <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      <div className="mt-5 flex min-h-0 flex-1 flex-col gap-4 sm:mt-6 lg:grid lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-stretch lg:gap-5">
         <div
-          className="surface-card space-y-1 p-2"
+          className="grid shrink-0 grid-cols-2 gap-2 sm:grid-cols-3 lg:hidden"
+          role="tablist"
+          aria-label="Arquivos e endpoints"
+        >
+          {ENDPOINTS.map((endpoint) => {
+            const isActive = endpoint.id === active.id;
+            return (
+              <button
+                key={endpoint.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setActiveId(endpoint.id)}
+                className={`focus-ring inline-flex min-h-9 min-w-0 cursor-pointer items-center justify-center gap-1.5 rounded-control border px-3 py-1.5 font-mono text-micro font-semibold transition-colors duration-150 ${
+                  isActive
+                    ? 'border-transparent bg-accent text-on-accent'
+                    : 'border-border bg-surface text-ink-soft hover:border-border-strong hover:text-ink'
+                }`}
+              >
+                {endpoint.method === 'POST' ? (
+                  <Send className="size-3.5 shrink-0" aria-hidden="true" />
+                ) : (
+                  <FileCode2 className="size-3.5 shrink-0" aria-hidden="true" />
+                )}
+                <span className="truncate">{endpoint.path}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          className="surface-card hidden space-y-1 overflow-y-auto p-2 lg:block"
           role="list"
           aria-label="Arquivos e endpoints"
         >
@@ -226,9 +257,9 @@ export function AiFilesPage() {
           })}
         </div>
 
-        <div className="surface-card flex min-w-0 flex-col gap-3 p-3.5 sm:p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 px-1.5 pt-0.5">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <div className="surface-card flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-3.5 sm:p-4">
+          <div className="flex shrink-0 items-center justify-between gap-2 px-1 pt-0.5">
+            <div className="flex min-w-0 items-center gap-2">
               {active.method === 'POST' ? (
                 <Send className="size-4 shrink-0 text-muted" aria-hidden="true" />
               ) : (
@@ -237,19 +268,16 @@ export function AiFilesPage() {
               <span className="truncate font-mono text-ui font-semibold text-ink">
                 {active.path}
               </span>
-              <span className="rounded-pill bg-surface-soft px-2.5 py-0.5 font-mono text-micro text-muted">
-                {active.format}
-              </span>
-              <span className="rounded-pill border border-border bg-canvas px-2 py-0.5 font-mono text-micro text-ink-soft">
+              <span className="shrink-0 rounded-pill border border-border bg-canvas px-2 py-0.5 font-mono text-micro text-ink-soft">
                 {active.method}
               </span>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => copyUrl(active)}
-                className="focus-ring pill-button"
+                className="focus-ring pill-button min-h-8 px-3 py-1 text-micro"
               >
                 {copiedId === active.id ? (
                   <>
@@ -268,7 +296,7 @@ export function AiFilesPage() {
                   href={active.path}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="focus-ring pill-button"
+                  className="focus-ring pill-button min-h-8 px-3 py-1 text-micro"
                 >
                   <ExternalLink className="size-3.5" aria-hidden="true" />
                   <span>{t('ai.open')}</span>
@@ -277,14 +305,11 @@ export function AiFilesPage() {
             </div>
           </div>
 
-          <p className="min-h-[2.75rem] px-1.5 text-ui text-ink-soft">{active.description}</p>
+          <p className="shrink-0 px-1 text-ui leading-snug text-ink-soft">{active.description}</p>
 
-          <div className="overflow-hidden rounded-inner border border-border-strong bg-code-bg text-code-ink">
-            <div className="flex min-h-10 items-center justify-between gap-2 border-b border-code-ink/15 px-4 py-2.5 font-mono text-micro text-code-ink/70 tabular-nums">
-              <span className="truncate">
-                {SITE_ORIGIN}
-                {active.path}
-              </span>
+          <div className="flex min-h-[14rem] flex-1 flex-col overflow-hidden rounded-inner border border-border-strong bg-code-bg text-code-ink">
+            <div className="flex min-h-9 shrink-0 items-center justify-between gap-2 border-b border-code-ink/15 px-3.5 py-2 font-mono text-micro text-code-ink/70 tabular-nums sm:px-4">
+              <span className="truncate">{active.format}</span>
               <span className="shrink-0">
                 {loading
                   ? 'Atualizando...'
@@ -294,9 +319,9 @@ export function AiFilesPage() {
               </span>
             </div>
 
-            <div className="p-4 sm:p-5">
+            <div className="min-h-0 flex-1 p-3.5 sm:p-4">
               <pre
-                className={`h-[22rem] overflow-auto font-mono text-micro leading-relaxed whitespace-pre-wrap break-words text-code-ink transition-opacity duration-150 sm:h-[34rem] ${
+                className={`h-full overflow-auto font-mono text-micro leading-relaxed whitespace-pre-wrap break-words text-code-ink transition-opacity duration-150 ${
                   loading ? 'opacity-50' : 'opacity-100'
                 }`}
               >

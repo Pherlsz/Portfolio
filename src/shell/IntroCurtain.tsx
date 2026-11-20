@@ -3,8 +3,8 @@ import { INTRO_SESSION_KEY, shouldShowIntro } from './introPolicy';
 
 type CurtainPhase = 'idle' | 'entering' | 'exiting';
 
-const COUNT_DURATION_MS = 560;
-const EXIT_DURATION_MS = 400;
+const COUNT_DURATION_MS = 1350;
+const EXIT_DURATION_MS = 480;
 
 interface NetworkInformationLike {
   saveData?: boolean;
@@ -129,8 +129,6 @@ export function IntroCurtain() {
     return null;
   }
 
-  const formattedProgress = String(progress).padStart(2, '0');
-
   return (
     <div
       role="presentation"
@@ -169,13 +167,7 @@ export function IntroCurtain() {
         </div>
       </div>
 
-      <div aria-hidden="true" className="relative z-10 flex flex-col gap-3">
-        <div className="flex justify-end">
-          <p className="font-display text-[clamp(2.25rem,5.5vw,3.75rem)] leading-[0.88] font-extrabold tracking-[-0.04em] text-[#f4f4f0] tabular-nums">
-            {formattedProgress}
-          </p>
-        </div>
-
+      <div aria-hidden="true" className="relative z-10">
         <div className="h-[2px] w-full overflow-hidden rounded-full bg-white/12">
           <div
             className="h-full w-full origin-left bg-[#e7f25a]"

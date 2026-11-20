@@ -9,21 +9,14 @@ import {
   Paragraph,
   TextRun
 } from 'docx';
-import {
-  DEFAULT_PORTFOLIO_DATA,
-  availabilityLine,
-  experienceSpan,
-  formatPeriod,
-  plainText,
-  skillNames
-} from '../src/data/portfolioData.ts';
+import { CV_DATA } from '../src/data/cvData.ts';
 
-const data = DEFAULT_PORTFOLIO_DATA;
+const shortUrl = (url) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 
 function sectionHeading(title) {
   return new Paragraph({
     heading: HeadingLevel.HEADING_2,
-    spacing: { before: 260, after: 100 },
+    spacing: { before: 240, after: 100 },
     border: {
       bottom: {
         color: 'D4D4CF',
@@ -49,7 +42,7 @@ const children = [
     spacing: { after: 60 },
     children: [
       new TextRun({
-        text: data.profile.name,
+        text: CV_DATA.name,
         bold: true,
         size: 36,
         color: '141513'
@@ -57,13 +50,12 @@ const children = [
     ]
   }),
   new Paragraph({
-    spacing: { after: 80 },
+    spacing: { after: 60 },
     children: [
       new TextRun({
-        text: `${data.profile.jobTitle} · ${data.profile.location}`,
-        bold: true,
-        size: 22,
-        color: '3F423C'
+        text: CV_DATA.title,
+        size: 21,
+        color: '1D5FA7'
       })
     ]
   }),
@@ -71,169 +63,122 @@ const children = [
     spacing: { after: 140 },
     children: [
       new TextRun({
-        text: `${data.profile.email} · ${data.profile.linkedin} · ${data.profile.github}`,
-        size: 19,
-        color: '686C64'
+        text: `${CV_DATA.email} | ${CV_DATA.phone} | ${shortUrl(CV_DATA.linkedin)} | ${shortUrl(CV_DATA.github)} | ${shortUrl(CV_DATA.website)} | ${CV_DATA.location}`,
+        size: 18,
+        color: '3F423C'
       })
     ]
   }),
+
+  sectionHeading('Resumo Profissional'),
   new Paragraph({
-    spacing: { after: 80 },
-    children: [new TextRun({ text: data.profile.headline, bold: true, size: 21 })]
+    spacing: { after: 100 },
+    children: [new TextRun({ text: CV_DATA.summary, size: 20, color: '141513' })]
   }),
-  new Paragraph({
-    spacing: { after: 80 },
-    children: [new TextRun({ text: plainText(data.profile.summary), size: 20 })]
-  }),
-  new Paragraph({
-    spacing: { after: 120 },
-    children: [new TextRun({ text: availabilityLine(data.profile), size: 19, color: '3F423C' })]
-  })
+
+  sectionHeading('Experiência Profissional')
 ];
 
-children.push(sectionHeading('Experiência'));
-
-for (const exp of data.experiences) {
-  const span = experienceSpan(exp);
+for (const exp of CV_DATA.experience) {
   children.push(
     new Paragraph({
-      spacing: { before: 140, after: 40 },
+      spacing: { before: 120, after: 40 },
       children: [
-        new TextRun({ text: exp.company, bold: true, size: 22 }),
-        new TextRun({
-          text: ` · ${exp.location} · ${formatPeriod(span.start, span.end)}`,
-          size: 19,
-          color: '686C64'
-        })
+        new TextRun({ text: `${exp.company} — ${exp.role}`, bold: true, size: 21, color: '141513' })
       ]
     })
   );
-
-  for (const role of exp.roles) {
-    children.push(
-      new Paragraph({
-        spacing: { after: 40 },
-        children: [
-          new TextRun({ text: role.title, bold: true, size: 20, color: '3F423C' }),
-          new TextRun({
-            text: ` (${formatPeriod(role.start, role.end)})`,
-            size: 19,
-            color: '686C64'
-          })
-        ]
-      })
-    );
-  }
-
   children.push(
     new Paragraph({
-      spacing: { after: 60 },
-      children: [new TextRun({ text: exp.summary, size: 20 })]
+      spacing: { after: 80 },
+      children: [new TextRun({ text: exp.period, italics: true, size: 19, color: '555852' })]
     })
   );
 
   for (const highlight of exp.highlights) {
-    const runs = [];
-    if (highlight.metric) {
-      runs.push(new TextRun({ text: `${highlight.metric}: `, bold: true, size: 19 }));
-    }
-    runs.push(new TextRun({ text: highlight.text, size: 19 }));
     children.push(
       new Paragraph({
         bullet: { level: 0 },
-        spacing: { after: 40 },
-        children: runs
+        spacing: { after: 50 },
+        children: [new TextRun({ text: highlight, size: 19, color: '141513' })]
       })
     );
   }
 }
 
-children.push(sectionHeading('Projetos principais'));
-for (const project of data.projects.filter((p) => p.featured)) {
-  children.push(
-    new Paragraph({
-      spacing: { before: 100, after: 40 },
-      children: [
-        new TextRun({ text: project.name, bold: true, size: 21 }),
-        new TextRun({
-          text: project.repoUrl ? ` · ${project.repoUrl}` : '',
-          size: 18,
-          color: '686C64'
-        })
-      ]
-    })
-  );
-  children.push(
-    new Paragraph({
-      spacing: { after: 40 },
-      children: [new TextRun({ text: project.tagline, size: 19 })]
-    })
-  );
+children.push(sectionHeading('Formação Acadêmica'));
+for (const edu of CV_DATA.education) {
   children.push(
     new Paragraph({
       spacing: { after: 60 },
       children: [
-        new TextRun({ text: `Stack: ${project.stack.join(', ')}`, size: 18, color: '686C64' })
+        new TextRun({
+          text: `${edu.course} | ${edu.institution} (${edu.period})`,
+          size: 19,
+          color: '141513'
+        })
       ]
     })
   );
 }
 
-children.push(sectionHeading('Stack técnica'));
-for (const group of data.skills) {
-  children.push(
-    new Paragraph({
-      spacing: { after: 50 },
-      children: [
-        new TextRun({ text: `${group.name}: `, bold: true, size: 20 }),
-        new TextRun({ text: skillNames(group).join(', '), size: 19 })
-      ]
-    })
-  );
-}
+children.push(sectionHeading('Habilidades'));
+children.push(
+  new Paragraph({
+    bullet: { level: 0 },
+    spacing: { after: 60 },
+    children: [
+      new TextRun({ text: 'Técnicas: ', bold: true, size: 19, color: '141513' }),
+      new TextRun({ text: `${CV_DATA.skills.technical.join(', ')}.`, size: 19, color: '141513' })
+    ]
+  })
+);
+children.push(
+  new Paragraph({
+    bullet: { level: 0 },
+    spacing: { after: 60 },
+    children: [
+      new TextRun({ text: 'Comportamentais: ', bold: true, size: 19, color: '141513' }),
+      new TextRun({ text: `${CV_DATA.skills.behavioral.join(', ')}.`, size: 19, color: '141513' })
+    ]
+  })
+);
+children.push(
+  new Paragraph({
+    bullet: { level: 0 },
+    spacing: { after: 60 },
+    children: [
+      new TextRun({ text: 'Idiomas: ', bold: true, size: 19, color: '141513' }),
+      new TextRun({
+        text: `${CV_DATA.languages.map((l) => `${l.name} (${l.level})`).join(', ')}.`,
+        size: 19,
+        color: '141513'
+      })
+    ]
+  })
+);
 
-children.push(sectionHeading('Formação e certificações'));
-for (const edu of data.education) {
-  children.push(
-    new Paragraph({
-      spacing: { after: 50 },
-      children: [
-        new TextRun({ text: edu.course, bold: true, size: 20 }),
-        new TextRun({ text: ` · ${edu.school} (${edu.period})`, size: 19, color: '686C64' })
-      ]
-    })
-  );
-}
-for (const cert of data.certificates) {
+children.push(sectionHeading('Certificações'));
+for (const cert of CV_DATA.certifications) {
   children.push(
     new Paragraph({
       bullet: { level: 0 },
-      spacing: { after: 40 },
+      spacing: { after: 50 },
       children: [
-        new TextRun({ text: cert.title, bold: true, size: 19 }),
-        new TextRun({ text: ` · ${cert.issuer} (${cert.issuedAt})`, size: 19, color: '686C64' })
-      ]
-    })
-  );
-}
-
-children.push(sectionHeading('Idiomas'));
-for (const lang of data.languages) {
-  children.push(
-    new Paragraph({
-      spacing: { after: 40 },
-      children: [
-        new TextRun({ text: `${lang.name}: `, bold: true, size: 19 }),
-        new TextRun({ text: lang.level, size: 19 })
+        new TextRun({
+          text: `${cert.name} — ${cert.issuer} (${cert.year})`,
+          size: 19,
+          color: '141513'
+        })
       ]
     })
   );
 }
 
 const doc = new Document({
-  creator: data.profile.name,
-  title: `Currículo - ${data.profile.name}`,
-  description: data.profile.headline,
+  creator: CV_DATA.name,
+  title: `Currículo - ${CV_DATA.name}`,
+  description: CV_DATA.title,
   sections: [{ children }]
 });
 

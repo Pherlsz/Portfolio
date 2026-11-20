@@ -296,11 +296,6 @@ export function foldText(text: string): string {
     .toLowerCase();
 }
 
-export function hasWholeWord(haystack: string, needle: string): boolean {
-  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`(?:^|[^a-z0-9#+.])${escaped}(?:$|[^a-z0-9#+.])`, 'i').test(haystack);
-}
-
 interface FeaturedProjectResolvedLink {
   kind: 'repo' | 'live';
   href: string;

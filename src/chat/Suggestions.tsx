@@ -67,15 +67,15 @@ export default function Suggestions({ onSelect, disabled = false }: SuggestionsP
   }, []);
 
   return (
-    <div className="mt-7 w-full space-y-6">
+    <div className="mt-5 w-full space-y-5 sm:mt-7 sm:space-y-6">
       <section aria-label={t('chat.featuredHeading')}>
-        <div className="mb-2.5 flex items-baseline justify-between gap-2 px-1">
+        <div className="mb-2 flex items-baseline justify-between gap-2 px-1 sm:mb-2.5">
           <p className="text-micro font-medium text-muted">{t('chat.featuredHeading')}</p>
           {data.week && (
             <p className="font-mono text-micro tabular-nums text-muted">{data.week}</p>
           )}
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
           {data.featured.map((prompt) => (
             <button
               key={prompt}
@@ -83,10 +83,10 @@ export default function Suggestions({ onSelect, disabled = false }: SuggestionsP
               disabled={disabled}
               data-cursor="perguntar"
               onClick={() => onSelect(prompt)}
-              className="group card-editorial focus-ring relative flex min-h-[6.25rem] flex-col justify-between gap-3 p-4 text-left disabled:cursor-not-allowed disabled:opacity-50"
+              className="group card-editorial focus-ring relative flex min-h-12 flex-row items-center justify-between gap-3 px-4 py-3 text-left disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-[6.25rem] sm:flex-col sm:items-stretch sm:p-4"
             >
               <span className="text-ui font-medium leading-snug text-ink">{prompt}</span>
-              <span className="flex justify-end">
+              <span className="flex shrink-0 justify-end">
                 <ArrowUpRight
                   className="size-3.5 text-muted opacity-65 transition-[color,opacity] duration-150 group-hover:text-ink group-hover:opacity-100 motion-reduce:transition-none"
                   aria-hidden="true"
@@ -113,7 +113,7 @@ export default function Suggestions({ onSelect, disabled = false }: SuggestionsP
                 disabled={disabled}
                 data-cursor="perguntar"
                 onClick={() => onSelect(prompt)}
-                className="focus-ring inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-pill border border-dashed border-border-strong bg-surface-soft px-3 py-1.5 text-left text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-ink hover:bg-surface hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                className="focus-ring inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-pill border border-dashed border-border-strong bg-surface-soft px-3.5 py-1.5 text-left text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-ink hover:bg-surface hover:text-ink disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-8 sm:px-3"
               >
                 <span aria-hidden="true" className="font-mono text-muted">
                   //

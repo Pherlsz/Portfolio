@@ -31,8 +31,8 @@ Em vez de pedir ao modelo que gere JSON complexo para renderizar cards visuais (
       "id": "guard",
       "tag": "Borda",
       "label": "Validação + Rate Limit",
-      "summary": "Zod, origem, cache KV e cota D1",
-      "detail": "Valida o payload com Zod, verifica a origem permitida, aplica rate limit por IP e consulta cache KV e orçamento diário no D1.",
+      "summary": "Zod, origem e cache KV",
+      "detail": "Valida o payload com Zod, verifica a origem permitida, aplica rate limit por IP e consulta o cache KV das sugestões.",
       "x": 318,
       "y": 110
     },
@@ -82,16 +82,12 @@ Durante o streaming, cada bloco passa por verificação. Se algum padrão intern
       "label": "Skills no servidor",
       "language": "json",
       "content": "{\n  \"message\": \"Vaga de Frontend Pleno React/TS\",\n  \"reasoning\": \"default\",\n  \"skill\": \"vaga\"\n}"
-    },
-    {
-      "id": "machine",
-      "label": "Endpoints para IAs",
-      "language": "text",
-      "content": "GET /llms.txt    -> resumo estruturado do perfil e rotas\nGET /cv.json     -> currículo em JSON Resume\nGET /cv.md       -> currículo em Markdown\nPOST /api/contact -> envio direto de recados por humanos ou agentes"
     }
   ]
 }
 :::
+
+Arquivos para outras IAs ficam em rotas próprias: `/llms.txt` resume o perfil, `/cv.md` e `/cv.json` entregam o currículo, e `POST /api/contact` recebe recado de pessoa ou de agente.
 
 ## Diário aberto de decisões
 

@@ -1,5 +1,6 @@
 import { ARTICLES, STUDIES } from '../content/collections.ts';
 import { visibleSections } from '../content/sections.ts';
+import { CV_DATA } from './cvData.ts';
 import {
   availabilityLine,
   CONTACT_API,
@@ -309,137 +310,99 @@ export function generateLlmsTxt(data: PortfolioData = DEFAULT_PORTFOLIO_DATA, or
   ].join('\n');
 }
 
-export function generateCvMarkdown(data: PortfolioData = DEFAULT_PORTFOLIO_DATA, origin = SITE_ORIGIN): string {
-  const { profile } = data;
+export function generateCvMarkdown(_data: PortfolioData = DEFAULT_PORTFOLIO_DATA, origin = SITE_ORIGIN): string {
+  const shortSite = origin.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+  const shortLinkedin = CV_DATA.linkedin.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+  const shortGithub = CV_DATA.github.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+
   return [
-    `# ${profile.name}`,
-    `**${profile.jobTitle}** · ${profile.location}`,
+    `# ${CV_DATA.name}`,
+    CV_DATA.title,
+    `${CV_DATA.email} | ${CV_DATA.phone} | ${shortLinkedin} | ${shortGithub} | ${shortSite} | ${CV_DATA.location}`,
     '',
-    `- E-mail: ${profile.email}`,
-    `- LinkedIn: ${profile.linkedin}`,
-    `- GitHub: ${profile.github}`,
-    `- Site: ${origin}`,
-    `- Status: ${profile.status} (${availabilityLine(profile)})`,
-    '',
-    '## Resumo',
-    `${profile.headline} ${plainText(profile.summary)}`,
-    '',
-    ...profile.about,
+    '## Resumo Profissional',
+    CV_DATA.summary,
     '',
     '## Experiência Profissional',
-    ...buildExperienceMarkdown(data),
-    '## Projetos Relevantes',
-    ...data.projects.flatMap((proj) => {
-      const link = proj.repoUrl ?? (proj.href ? (proj.href.startsWith('http') ? proj.href : `${origin}${proj.href}`) : '');
-      return [
-        `### ${proj.name} · ${proj.kicker}`,
-        proj.tagline,
-        ...(link ? [`- Link: ${link}`] : []),
-        ...(proj.modules?.length
-          ? [`- Módulos: ${proj.modules.map((m) => `${m.name} (${m.description})`).join('; ')}`]
-          : []),
-        `- Stack: ${proj.stack.join(', ')}`,
-        ''
-      ];
-    }),
-    '## Stack Técnica',
-    ...data.skills.map((group) => `- **${group.name}**: ${skillNames(group).join(', ')}`),
-    '',
+    ...CV_DATA.experience.flatMap((exp) => [
+      `### ${exp.company} — ${exp.role}`,
+      `*${exp.period}*`,
+      '',
+      ...exp.highlights.map((item) => `- ${item}`),
+      ''
+    ]),
     '## Formação Acadêmica',
-    ...data.education.map((edu) => `- **${edu.course}** · ${edu.school} (${edu.period})`),
+    ...CV_DATA.education.map((edu) => `${edu.course} | ${edu.institution} (${edu.period})`),
     '',
-    '## Certificados e Cursos',
-    ...data.certificates.map((cert) =>
-      `- **${cert.title}** · ${cert.issuer} (${cert.issuedAt})${cert.verifyUrl ? ` - ${cert.verifyUrl}` : ''}`
-    ),
-    `- **Outros cursos**: ${data.otherCourses.join(', ')}`,
+    '## Habilidades',
+    `- **Técnicas:** ${CV_DATA.skills.technical.join(', ')}.`,
+    `- **Comportamentais:** ${CV_DATA.skills.behavioral.join(', ')}.`,
+    `- **Idiomas:** ${CV_DATA.languages.map((l) => `${l.name} (${l.level})`).join(', ')}.`,
     '',
-    '## Idiomas',
-    ...data.languages.map((lang) => `- **${lang.name}**: ${lang.level}`),
+    '## Certificações',
+    ...CV_DATA.certifications.map((cert) => `- ${cert.name} — ${cert.issuer} (${cert.year})`),
     ''
   ].join('\n');
 }
 
-export function generateCvJsonResume(data: PortfolioData = DEFAULT_PORTFOLIO_DATA, origin = SITE_ORIGIN): object {
-  const { profile } = data;
-  const [city = 'Porto Alegre', region = 'RS'] = profile.location.split(',').map((s) => s.trim());
-
+export function generateCvJsonResume(_data: PortfolioData = DEFAULT_PORTFOLIO_DATA, origin = SITE_ORIGIN): object {
   return {
     $schema: 'https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json',
     basics: {
-      name: profile.name,
-      label: profile.jobTitle,
-      email: profile.email,
+      name: CV_DATA.name,
+      label: CV_DATA.title,
+      email: CV_DATA.email,
+      phone: CV_DATA.phone,
       url: origin,
-      summary: `${profile.headline} ${plainText(profile.summary)}`,
+      summary: CV_DATA.summary,
       location: {
-        city,
-        region,
+        city: CV_DATA.city,
+        region: CV_DATA.region,
         countryCode: 'BR'
       },
       profiles: [
         {
           network: 'LinkedIn',
           username: 'pherls',
-          url: profile.linkedin
+          url: CV_DATA.linkedin
         },
         {
           network: 'GitHub',
           username: 'Pherlsz',
-          url: profile.github
+          url: CV_DATA.github
         }
       ]
     },
-    work: data.experiences.map((exp) => {
-      const span = experienceSpan(exp);
-      return {
-        name: exp.company,
-        location: exp.location,
-        position: exp.roles[0]?.title ?? 'Software Engineer',
-        startDate: span.start,
-        endDate: span.end,
-        summary: exp.summary,
-        highlights: exp.highlights.map((h) => (h.metric ? `${h.metric}: ${h.text}` : h.text)),
-        keywords: exp.stack
-      };
-    }),
-    projects: data.projects.map((proj) => {
-      const rawUrl = proj.repoUrl ?? proj.href;
-      const url = rawUrl
-        ? rawUrl.startsWith('http')
-          ? rawUrl
-          : `${origin}${rawUrl}`
-        : origin;
-      return {
-        name: proj.name,
-        description: proj.tagline,
-        type: proj.kind,
-        url,
-        keywords: proj.stack,
-        ...(proj.modules?.length
-          ? { highlights: proj.modules.map((m) => `${m.name}: ${m.description}`) }
-          : {})
-      };
-    }),
-    education: data.education.map((edu) => ({
-      institution: edu.school,
+    work: CV_DATA.experience.map((exp) => ({
+      name: exp.company,
+      position: exp.role,
+      startDate: exp.startDate,
+      endDate: exp.endDate,
+      highlights: exp.highlights
+    })),
+    education: CV_DATA.education.map((edu) => ({
+      institution: edu.institution,
       area: edu.course,
-      studyType: 'Tecnólogo',
-      startDate: '2022-08',
-      endDate: '2024-12',
-      score: edu.period
+      studyType: edu.studyType,
+      startDate: edu.startDate,
+      endDate: edu.endDate
     })),
-    certificates: data.certificates.map((cert) => ({
-      name: cert.title,
+    certificates: CV_DATA.certifications.map((cert) => ({
+      name: cert.name,
       issuer: cert.issuer,
-      date: cert.issuedAt,
-      ...(cert.verifyUrl ? { url: cert.verifyUrl } : {})
+      date: cert.year
     })),
-    skills: data.skills.map((group) => ({
-      name: group.name,
-      keywords: skillNames(group)
-    })),
-    languages: data.languages.map((lang) => ({
+    skills: [
+      {
+        name: 'Técnicas',
+        keywords: CV_DATA.skills.technical
+      },
+      {
+        name: 'Comportamentais',
+        keywords: CV_DATA.skills.behavioral
+      }
+    ],
+    languages: CV_DATA.languages.map((lang) => ({
       language: lang.name,
       fluency: lang.level
     })),

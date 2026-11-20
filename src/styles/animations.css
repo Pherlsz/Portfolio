@@ -187,6 +187,61 @@ html.dark .mascot-shadow {
   }
 }
 
+.thinking-shimmer {
+  color: var(--ink-soft);
+  background: linear-gradient(
+    90deg,
+    var(--ink-soft) 0%,
+    var(--ink-soft) 35%,
+    var(--ink) 50%,
+    var(--ink-soft) 65%,
+    var(--ink-soft) 100%
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: thinking-shimmer 2.1s linear infinite;
+}
+
+@keyframes thinking-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+.thinking-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background-color: var(--muted);
+  animation: thinking-dot-pulse 1.35s var(--ease-in-out) infinite;
+}
+
+.thinking-dot:nth-child(2) {
+  animation-delay: 180ms;
+}
+
+.thinking-dot:nth-child(3) {
+  animation-delay: 360ms;
+}
+
+@keyframes thinking-dot-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
 .popover-in {
   transform-origin: 0% 100%;
   animation: popover-in 180ms var(--ease-out) both;
@@ -299,9 +354,16 @@ html.dark .mascot-shadow {
   .mascot-hop,
   .message-in,
   .status-in,
-  .popover-in {
+  .popover-in,
+  .thinking-shimmer,
+  .thinking-dot {
     animation: none !important;
     will-change: auto;
+  }
+
+  .thinking-shimmer {
+    background: none;
+    -webkit-text-fill-color: currentColor;
   }
 
   .living-emblem {

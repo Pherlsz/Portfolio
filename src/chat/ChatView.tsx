@@ -193,17 +193,19 @@ export default function ChatView({ chatId }: ChatViewProps) {
 
   if (!activeThread || messages.length === 0) {
     return (
-      <div className="flex min-h-full w-full flex-col items-center px-4 pt-16 pb-10 sm:px-8 lg:py-12">
-        <div className="my-auto flex w-full max-w-[46rem] flex-col items-center">
-          <p className="mb-4 flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-0.5 font-mono text-micro text-muted">
+      <div className="flex min-h-full w-full flex-col items-center px-4 pt-20 pb-8 sm:px-8 sm:py-12">
+        <div className="flex w-full max-w-[46rem] flex-col items-center sm:my-auto">
+          <p className="mb-3.5 flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center font-mono text-micro text-muted sm:mb-4">
             <span className="font-medium text-ink-soft">{profile.name}</span>
             <span aria-hidden="true">·</span>
             <span>{profile.jobTitle}</span>
-            <span aria-hidden="true">·</span>
-            <span>{profile.location}</span>
+            <span aria-hidden="true" className="hidden sm:inline">
+              ·
+            </span>
+            <span className="basis-full sm:basis-auto">{profile.location}</span>
           </p>
 
-          <h1 className="mb-8 max-w-[18ch] text-center font-display text-[length:var(--text-poster)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink">
+          <h1 className="mb-6 max-w-[18ch] text-center font-display text-[length:var(--text-poster)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink sm:mb-8">
             <span className="word-reveal">
               <span
                 className="word-reveal-inner"

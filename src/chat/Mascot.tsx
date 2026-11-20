@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-
-export type Reasoning = 'fast' | 'default' | 'high';
+import type { Reasoning } from '../utils/chat';
 
 interface MascotProps {
   reasoning: Reasoning;
@@ -73,13 +72,15 @@ export default function Mascot({ reasoning, statusText }: MascotProps) {
         <span className="mascot-shadow" aria-hidden="true" />
       </button>
 
-      <div className="min-w-0">
-        <p key={text} aria-hidden="true" className="status-in truncate text-ui font-medium text-ink-soft">
+      <div className="flex min-w-0 items-center gap-2">
+        <p key={text} aria-hidden="true" className="status-in thinking-shimmer truncate text-ui font-medium">
           {text}
         </p>
-        <p className="font-mono text-micro text-muted" aria-hidden="true">
-          {mascot.name}
-        </p>
+        <span className="thinking-dots inline-flex items-center gap-1" aria-hidden="true">
+          <span className="thinking-dot" />
+          <span className="thinking-dot" />
+          <span className="thinking-dot" />
+        </span>
       </div>
 
       <span role="status" aria-live="polite" className="sr-only">

@@ -8,9 +8,6 @@ import {
 import { isSafeReply } from './assistant.ts';
 
 export const MODEL_TURN_CHAR_LIMIT = 1200;
-export const DEFAULT_DAILY_SOFT_BUDGET = 250_000;
-export const DEFAULT_DAILY_HARD_BUDGET = 500_000;
-export const BUDGET_CACHE_TTL_MS = 60_000;
 export const SUGGESTION_CACHE_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 export interface HistoryTurn {
@@ -36,9 +33,6 @@ export interface D1DatabaseLike {
 
 export interface BudgetEnv {
   INBOX?: KvNamespaceLike;
-  QUESTIONS?: D1DatabaseLike;
-  DAILY_SOFT_BUDGET?: string | number;
-  DAILY_HARD_BUDGET?: string | number;
 }
 
 export function trimHistoryToBudget(
@@ -208,140 +202,6 @@ export async function cacheSuggestionReplyIfEligible(
   } catch {
     // Best-effort KV caching
   }
-}
-
-let isolateUsageCache: {
-  dayKey: string;
-  totalTokens: number;
-  expiresAt: number;
-} | null = null;
-
-export function resetBudgetCacheForTests(): void {
-  isolateUsageCache = null;
-}
-
-export function recordTokensInMemoryCache(tokensDelta: number, now = new Date()): void {
-  if (!Number.isFinite(tokensDelta) || tokensDelta <= 0) return;
-  const dayKey = now.toISOString().slice(0, 10);
-  if (isolateUsageCache && isolateUsageCache.dayKey === dayKey) {
-    isolateUsageCache.totalTokens += Math.floor(tokensDelta);
-  } else {
-    isolateUsageCache = {
-      dayKey,
-      totalTokens: Math.floor(tokensDelta),
-      expiresAt: Date.now() + BUDGET_CACHE_TTL_MS
-    };
-  }
-}
-
-function parsePositiveBudget(raw: string | number | undefined, fallback: number): number {
-  if (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) {
-    return Math.floor(raw);
-  }
-  if (typeof raw === 'string' && raw.trim()) {
-    const parsed = Number(raw.trim());
-    if (Number.isFinite(parsed) && parsed > 0) {
-      return Math.floor(parsed);
-    }
-  }
-  return fallback;
-}
-
-export async function getDailyTokenUsage(env: BudgetEnv | undefined, now = new Date()): Promise<number> {
-  const dayKey = now.toISOString().slice(0, 10);
-  const nowMs = Date.now();
-
-  if (isolateUsageCache && isolateUsageCache.dayKey === dayKey && nowMs < isolateUsageCache.expiresAt) {
-    return isolateUsageCache.totalTokens;
-  }
-
-  if (!env?.QUESTIONS) {
-    return isolateUsageCache?.dayKey === dayKey ? isolateUsageCache.totalTokens : 0;
-  }
-
-  const dayStartIso = `${dayKey}T00:00:00.000Z`;
-  try {
-    const row = await env.QUESTIONS.prepare(
-      'SELECT COALESCE(SUM(prompt_tokens + output_tokens + thinking_tokens), 0) AS total_tokens FROM questions WHERE asked_at >= ?'
-    )
-      .bind(dayStartIso)
-      .first<{ total_tokens?: number | string }>();
-
-    const total = Number(row?.total_tokens ?? 0);
-    const totalTokens = Number.isFinite(total) && total >= 0 ? Math.floor(total) : 0;
-
-    isolateUsageCache = {
-      dayKey,
-      totalTokens,
-      expiresAt: nowMs + BUDGET_CACHE_TTL_MS
-    };
-    return totalTokens;
-  } catch {
-    return isolateUsageCache?.dayKey === dayKey ? isolateUsageCache.totalTokens : 0;
-  }
-}
-
-export type CircuitBreakerDecision =
-  | {
-      status: 'ok';
-      effectiveReasoning: Reasoning;
-      totalTokens: number;
-    }
-  | {
-      status: 'soft_downgraded';
-      effectiveReasoning: 'fast';
-      totalTokens: number;
-      notice: string;
-    }
-  | {
-      status: 'hard_exceeded';
-      effectiveReasoning: 'fast';
-      totalTokens: number;
-      reply: string;
-    };
-
-export const HARD_BUDGET_UNAVAILABLE_REPLY =
-  'A cota diária do assistente foi atingida hoje. Você ainda pode explorar **Experiência**, **Projetos** e **Estudos** pelo menu lateral ou baixar o CV completo.';
-
-export const SOFT_BUDGET_DOWNGRADE_NOTICE =
-  'Modo Rápido ativado automaticamente para manter o assistente disponível dentro da cota diária.';
-
-export async function evaluateBudgetCircuitBreaker(
-  env: BudgetEnv | undefined,
-  requestedReasoning: Reasoning,
-  now = new Date()
-): Promise<CircuitBreakerDecision> {
-  const softBudget = parsePositiveBudget(env?.DAILY_SOFT_BUDGET, DEFAULT_DAILY_SOFT_BUDGET);
-  const hardBudget = Math.max(
-    softBudget,
-    parsePositiveBudget(env?.DAILY_HARD_BUDGET, DEFAULT_DAILY_HARD_BUDGET)
-  );
-
-  const totalTokens = await getDailyTokenUsage(env, now);
-
-  if (totalTokens >= hardBudget) {
-    return {
-      status: 'hard_exceeded',
-      effectiveReasoning: 'fast',
-      totalTokens,
-      reply: HARD_BUDGET_UNAVAILABLE_REPLY
-    };
-  }
-
-  if (totalTokens >= softBudget && requestedReasoning !== 'fast') {
-    return {
-      status: 'soft_downgraded',
-      effectiveReasoning: 'fast',
-      totalTokens,
-      notice: SOFT_BUDGET_DOWNGRADE_NOTICE
-    };
-  }
-
-  return {
-    status: 'ok',
-    effectiveReasoning: requestedReasoning,
-    totalTokens
-  };
 }
 
 export function createUpstreamAbortSignal(

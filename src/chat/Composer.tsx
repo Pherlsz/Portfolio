@@ -425,8 +425,6 @@ export default function Composer({
           </div>
         </div>
       </div>
-
-      <p className="mt-2.5 text-center text-micro text-muted">{t('chat.privacyNotice')}</p>
     </div>
   );
 }

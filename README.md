@@ -23,7 +23,7 @@ Os dados do portfólio vivem fora do código de UI e são validados com `zod` no
 ## Backend, Reasoning e Curadoria (Cloudflare Worker)
 
 - **Streaming SSE (`POST /api/chat`):** emite `delta`, `cards` (referências tipadas resolvidas no servidor contra o catálogo real), `actions`, `notice`, `retract` (substitui a resposta caso algum marcador interno do prompt vaze), `error` e `done`.
-- **Perfis de raciocínio (`REASONING_PROFILES`):** configuráveis via variável de ambiente JSON no Worker, com limites máximos rígidos em código (`fast <= 450`, `default <= 600`, `high <= 900` tokens de saída) e disjuntor de orçamento diário.
+- **Perfis de raciocínio (`REASONING_PROFILES`):** configuráveis via variável de ambiente JSON no Worker, com limites máximos rígidos em código (`fast <= 450`, `default <= 600`, `high <= 900` tokens de saída). O ritmo é por IP (`CHAT_LIMIT` e `CHAT_HIGH_LIMIT`).
 - **Skills no servidor:** `/vaga` e `/resumo` usam templates no servidor; o cliente nunca injeta prompt de sistema.
 - **Curadoria semanal (D1 + Cron):** perguntas anônimas (sem IP e com retenção de 30 dias em D1, migração em `migrations/0001_questions.sql`) alimentam um job semanal (`scheduled` no Worker) que gera sugestões em destaque e tentativas de quebra em `GET /api/suggestions`, com suporte a override manual (`suggestions:pinned`).
 - **Endpoints para máquinas e recrutadores:** `/llms.txt`, `/cv.json` (JSON Resume), `/cv.md`, `/cv/Pedro-Henrique-Lopes-CV.docx` (gerado por `scripts/cv-docx.mjs`), `/sitemap.xml`, `/robots.txt` e `POST /api/contact`.

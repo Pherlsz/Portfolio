@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from 'react';
-
-export type Reasoning = 'fast' | 'default' | 'high';
+import type { Reasoning } from '../utils/chat';
 
 interface ReasoningSelectProps {
   value: Reasoning;

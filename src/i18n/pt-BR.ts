@@ -1,6 +1,4 @@
 export const ptBR = {
-  'brand.name': 'pherls.dev',
-  'brand.subtitle': 'Pedro Henrique Lopes',
   'nav.newChat': 'Novo chat',
   'nav.sections': 'Seções',
   'nav.history': 'Histórico',
@@ -18,23 +16,13 @@ export const ptBR = {
   'theme.dark': 'Tema escuro',
   'theme.toggle': 'Alternar tema',
 
-  'chat.greeting': 'Por onde começamos?',
   'chat.placeholder': 'Pergunte algo ou cole uma vaga...',
   'chat.send': 'Enviar',
   'chat.stop': 'Parar',
   'chat.deleteThread': 'Apagar conversa',
   'chat.featuredHeading': 'Perguntas em destaque',
   'chat.breakersHeading': 'Tenta quebrar',
-  'chat.privacyNotice': 'Perguntas anônimas podem ir para a curadoria semanal.',
   'chat.unavailable': 'Assistente indisponível. Explore as seções ou baixe o CV.',
-
-  'reasoning.label': 'Raciocínio',
-  'reasoning.fast': 'Rápido',
-  'reasoning.fastDesc': 'Direto ao ponto.',
-  'reasoning.default': 'Padrão',
-  'reasoning.defaultDesc': 'Rápido e equilibrado.',
-  'reasoning.high': 'Profundo',
-  'reasoning.highDesc': 'Análise detalhada para vagas e código.',
 
   'skills.vaga': '/vaga',
   'skills.vagaDesc': 'Analisa aderência a uma vaga',
@@ -45,10 +33,8 @@ export const ptBR = {
   'projects.askCta': 'Perguntar no chat',
   'projects.openRepo': 'Repositório',
   'projects.openLive': 'Abrir',
-  'projects.openDecisions': 'Diário de decisões',
   'projects.archivedVersion': 'Versão arquivada',
 
-  'experience.title': 'Experiência',
   'experience.askCta': 'Perguntar sobre a trajetória',
   'experience.previewPdf': 'Visualizar PDF',
   'experience.downloadPdf': 'PDF',
@@ -59,14 +45,11 @@ export const ptBR = {
   'experience.languages': 'Idiomas',
   'experience.skills': 'Stack técnica',
 
-  'studies.title': 'Estudos',
   'studies.tabStudies': 'Estudos',
   'studies.tabCertificates': 'Certificados',
   'studies.askCta': 'Perguntar sobre este estudo',
   'studies.backToList': 'Voltar para estudos',
   'studies.verifyCredential': 'Verificar credencial',
-  'studies.issuedAt': 'Emitido em',
-  'studies.expiresAt': 'Validade',
   'studies.noExpiry': 'Sem expiração',
 
   'articles.title': 'Artigos',
@@ -93,13 +76,7 @@ export const ptBR = {
 } as const;
 
 export type LocaleKey = keyof typeof ptBR;
-export type LocaleDictionary = Record<LocaleKey, string>;
 
-export function t(key: LocaleKey, vars?: Record<string, string | number>): string {
-  let value: string = ptBR[key];
-  if (!vars) return value;
-  for (const [name, replacement] of Object.entries(vars)) {
-    value = value.replaceAll(`{${name}}`, String(replacement));
-  }
-  return value;
+export function t(key: LocaleKey): string {
+  return ptBR[key];
 }

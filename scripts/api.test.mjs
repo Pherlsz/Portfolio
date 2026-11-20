@@ -10,7 +10,6 @@ import { shouldShowIntro } from '../src/shell/introPolicy.ts';
 import { buildSystemPrompt, buildUserPrompt, isSafeReply } from '../src/server/assistant.ts';
 import {
   MODEL_TURN_CHAR_LIMIT,
-  resetBudgetCacheForTests,
   suggestionCacheKey,
   trimHistoryToBudget
 } from '../src/server/budget.ts';
@@ -37,7 +36,6 @@ const originalFetch = globalThis.fetch;
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
-  resetBudgetCacheForTests();
 });
 
 function post(path, body, extraHeaders = {}) {
@@ -450,54 +448,27 @@ test('budget: trimHistoryToBudget corta turnos longos do modelo, respeita charBu
   assert.deepEqual(modelOnly, []);
 });
 
-test('chat SSE: circuit breaker D1 faz downgrade para fast no soft budget e bloqueia sem chamar Gemini no hard budget', async () => {
-  // Soft budget: >= 1000 and < 2000 -> downgrades high to fast with notice
-  resetBudgetCacheForTests();
-  const softCalls = mockGeminiSse(['Resposta em modo rápido.']);
-  const softRes = await handlePortfolioRequest(
+test('chat SSE: total diário no D1 não bloqueia nem troca o modo pedido', async () => {
+  const calls = mockGeminiSse(['Resposta no modo pedido.']);
+  const response = await handlePortfolioRequest(
     post('/api/chat', { message: 'Explique a arquitetura', history: [], reasoning: 'high' }),
     {
       GEMINI_API_KEY: 'test-key',
-      QUESTIONS: createMockD1({ dailyTotalTokens: 1500 }),
-      DAILY_SOFT_BUDGET: 1000,
-      DAILY_HARD_BUDGET: 2000
+      QUESTIONS: createMockD1({ dailyTotalTokens: 9_000_000 })
     }
   );
-  assert.equal(softRes?.status, 200);
-  const softEvents = await parseSseResponse(softRes);
-  const notice = softEvents.find((e) => e.event === 'notice');
-  assert.ok(notice, 'expected soft downgrade notice');
-  assert.match(notice.data.text, /Modo Rápido/);
-  assert.equal(softCalls.length, 1);
-  assert.equal(softCalls[0].body.generationConfig.maxOutputTokens, HARD_CAPS.fast.maxOutputTokens);
-  assert.deepEqual(softCalls[0].body.generationConfig.thinkingConfig, { thinkingLevel: 'minimal' });
-
-  // Hard budget: >= 2000 -> blocks with 0 Gemini calls
-  resetBudgetCacheForTests();
-  let hardFetchCalled = false;
-  globalThis.fetch = async () => {
-    hardFetchCalled = true;
-    throw new Error('Gemini must not be called when hard budget is exceeded');
-  };
-
-  const hardRes = await handlePortfolioRequest(
-    post('/api/chat', { message: 'Qual a stack?', history: [], reasoning: 'fast' }),
-    {
-      GEMINI_API_KEY: 'test-key',
-      QUESTIONS: createMockD1({ dailyTotalTokens: 2500 }),
-      DAILY_SOFT_BUDGET: 1000,
-      DAILY_HARD_BUDGET: 2000
-    }
+  assert.equal(response?.status, 200);
+  const events = await parseSseResponse(response);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].body.generationConfig.maxOutputTokens, HARD_CAPS.high.maxOutputTokens);
+  assert.equal(
+    events.some((event) => event.event === 'notice'),
+    false
   );
-  assert.equal(hardRes?.status, 200);
-  const hardEvents = await parseSseResponse(hardRes);
-  assert.equal(hardFetchCalled, false);
-  assert.ok(hardEvents.some((e) => e.event === 'notice'));
   assert.match(
-    hardEvents.filter((e) => e.event === 'delta').map((e) => e.data.text).join(''),
-    /cota diária/i
+    events.filter((event) => event.event === 'delta').map((event) => event.data.text).join(''),
+    /Resposta no modo pedido/
   );
-  assert.equal(hardEvents.at(-1)?.event, 'done');
 });
 
 test('chat SSE: cache de sugestão no KV retorna resposta com 0 chamadas ao Gemini', async () => {
@@ -544,6 +515,8 @@ test('assistant: system prompt permanece compacto (<= 2000 tokens estimados) e r
     estimatedTokens <= 2000,
     `system prompt too large: ${estimatedTokens} estimated tokens (${prompt.length} chars)`
   );
+  assert.match(prompt, /Não os escreva na resposta/);
+  assert.equal(prompt.includes('Destaques na Atlas'), false);
   assert.ok(prompt.includes(DEFAULT_PORTFOLIO_DATA.profile.name));
   for (const exp of DEFAULT_PORTFOLIO_DATA.experiences) {
     assert.ok(prompt.includes(exp.company), `missing experience ${exp.company}`);
@@ -936,7 +909,6 @@ test('documentos: /llms.txt, /robots.txt, /sitemap.xml, /cv.md e /cv.json respon
   assert.equal(cvJson.basics.name, DEFAULT_PORTFOLIO_DATA.profile.name);
   assert.equal(cvJson.basics.email, DEFAULT_PORTFOLIO_DATA.profile.email);
   assert.ok(Array.isArray(cvJson.work) && cvJson.work.length > 0);
-  assert.ok(Array.isArray(cvJson.projects) && cvJson.projects.length > 0);
   assert.ok(Array.isArray(cvJson.education) && cvJson.education.length > 0);
   assert.ok(Array.isArray(cvJson.certificates) && cvJson.certificates.length > 0);
   assert.ok(Array.isArray(cvJson.skills) && cvJson.skills.length > 0);
