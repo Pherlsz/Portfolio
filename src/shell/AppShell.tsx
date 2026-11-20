@@ -137,7 +137,7 @@ export function AppShell({ children, onStartContact }: AppShellProps) {
               className="scroll-progress-bar h-full w-full bg-accent opacity-0"
             />
           </div>
-          <div className="vt-sheet relative z-10 flex min-h-full flex-1 flex-col">{children}</div>
+          <div className="vt-sheet relative z-10 flex min-h-full w-full min-w-0 flex-1 flex-col">{children}</div>
         </main>
       </div>
     </div>

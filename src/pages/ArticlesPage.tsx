@@ -4,22 +4,11 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link, useRoute } from 'wouter';
 import { PageHeader } from '../components/PageHeader';
+import { proseTableComponents, safeMarkdownUrl } from '../components/proseMarkdown';
 import { ARTICLES, findArticleBySlug, type ContentDocument } from '../content/collections';
 import { t } from '../i18n/pt-BR';
 
 const StudyRichSegment = lazy(() => import('./StudyModules'));
-
-function safeUrl(url: string): string {
-  try {
-    const parsed = new URL(url, 'https://pherls.dev');
-    if (parsed.protocol === 'https:' || parsed.protocol === 'http:' || parsed.protocol === 'mailto:') {
-      return url;
-    }
-  } catch {
-    // Reject invalid URLs
-  }
-  return '';
-}
 
 function ArticleDetail({
   article,
@@ -65,7 +54,12 @@ function ArticleDetail({
                 key={index}
                 className="max-w-[68ch] space-y-4 leading-[1.75] [&_a]:text-ink [&_a]:underline [&_a]:decoration-border-strong [&_a]:underline-offset-4 hover:[&_a]:decoration-ink [&_blockquote]:border-l-2 [&_blockquote]:border-border-strong [&_blockquote]:pl-4 [&_blockquote]:text-ink-soft [&_code]:rounded-md [&_code]:bg-surface-soft [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-micro [&_code]:text-ink [&_h2]:mt-9 [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-lead [&_h2]:font-bold [&_h2]:tracking-[-0.015em] [&_h2]:text-ink [&_h3]:mt-6 [&_h3]:font-display [&_h3]:text-body [&_h3]:font-semibold [&_h3]:text-ink [&_li::marker]:text-muted [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-5 [&_pre]:overflow-x-auto [&_pre]:rounded-inner [&_pre]:border [&_pre]:border-border-strong [&_pre]:bg-code-bg [&_pre]:p-4 [&_pre]:font-mono [&_pre]:text-micro [&_pre]:text-code-ink [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-code-ink [&_strong]:font-semibold [&_strong]:text-ink [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5"
               >
-                <Markdown remarkPlugins={[remarkGfm]} skipHtml urlTransform={safeUrl}>
+                <Markdown
+                  remarkPlugins={[remarkGfm]}
+                  skipHtml
+                  urlTransform={safeMarkdownUrl}
+                  components={proseTableComponents}
+                >
                   {segment.content}
                 </Markdown>
               </div>

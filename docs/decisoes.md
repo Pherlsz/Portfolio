@@ -35,7 +35,7 @@ O projeto foi conduzido em modo de planejamento antes do código, combinando tr�
 | **Streaming SSE seguro** | `POST /api/chat` faz streaming de `:streamGenerateContent?alt=sse`. A cada chunk, `isSafeReply` inspeciona o texto acumulado; em caso de vazamento do prompt de sistema, emite `event: retract` e encerra o stream. |
 | **Cards inline a custo zero** | `inferContextualCards` cruza pergunta e resposta no servidor contra uma whitelist de IDs reais do catálogo e emite `event: cards`. Zero tokens extras e zero risco de alucinação. |
 | **Orçamento rígido de tokens** | `REASONING_PROFILES` é configurável por variável de ambiente, mas tetos duros no código (`fast <= 450`, `default <= 600`, `high <= 900`, sem thinking dinâmico `-1`) impedem estouro. |
-| **Camadas de contenção de custo** | Janela de histórico por caracteres (`6.000` chars), cache KV das sugestões padrão (0 tokens no 1o turno), rate limit separado para `high` (`CHAT_HIGH_LIMIT`), cancelamento upstream via `request.signal` e disjuntor diário no D1 (soft rebaixa para `fast`; hard pausa). |
+| **Camadas de contenção de custo** | Janela de histórico por caracteres (`6.000` chars), cache KV das sugestões padrão (0 tokens no 1o turno), rate limit por IP (`CHAT_LIMIT`) e limite separado para `high` (`CHAT_HIGH_LIMIT`), cancelamento upstream via `request.signal`. |
 | **Curadoria semanal com privacidade** | Perguntas são registradas no D1 sem IP, com máscara de PII (e-mail, telefone, URL, CPF) e retenção de 30 dias. Um cron semanal (`0 12 * * 1`) usa structured output + validação `zod` + filtro de PII/empresas para atualizar `suggestions:current` no KV. |
 | **Sanitização e headers** | Markdown renderizado com `react-markdown` (`skipHtml`, URLs restritas a `https:`, `http:`, `mailto:`), CSP estrita, `Permissions-Policy`, `COOP`, `X-Frame-Options` e 404 explícito em `/studio*` e `/admin*`. |
 | **SEO sem perder o formato chat** | Plugin Vite valida `content/` com `zod` no `buildStart` e pré-renderiza 15 rotas estáticas em `dist/client/` com `<title>`, `canonical`, OG, JSON-LD e HTML indexável. |
@@ -64,7 +64,8 @@ O projeto foi conduzido em modo de planejamento antes do código, combinando tr�
 |---|---|
 | **Manter a v1 em `/classic` completa** | Substituir na home e arquivar a v1 simplificada em `/v1` elimina manutenção duplicada. |
 | **Seções abrindo "conversa fixa" no chat** | Galerias, currículo e estudos funcionam melhor em páginas dedicadas com CTA para o chat. |
-| **Turnstile no chat desde o início** | Pode travar agentes de recrutadores que navegam no site; rate limit + disjuntor de orçamento cobrem o risco inicial. |
+| **Turnstile no chat desde o início** | Pode travar agentes de recrutadores que navegam no site; o rate limit por IP cobre o risco inicial. |
+| **Cota diária global de tokens** | Somava o uso de todo mundo no dia UTC e, ao estourar, parava o assistente para o visitante seguinte. O limite ficou só por IP. |
 | **pdf.js para o currículo** | Peso desnecessário no bundle; o visualizador PDF nativo em `<iframe>` dentro de `<dialog>` resolve bem. |
 | **Easter eggs complexos (Konami code, tema secreto, 5 cliques)** | Custo de manutenção sem ganho real; ficaram apenas `/v1`, banner no console, 404 com mascote e micro-animação de 1 clique. |
 | **CMS com API em produção** | Abre superfície de ataque para alteração indevida; edição fica 100% local + Git. |

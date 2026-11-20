@@ -177,25 +177,25 @@ export function ExperiencePage({ onAskChat }: { onAskChat: (prompt: string) => v
         </div>
       </PageHeader>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[200px_1fr] lg:items-start lg:gap-8">
+      <div className="mt-6 grid gap-5 sm:mt-8 lg:grid-cols-[200px_1fr] lg:items-start lg:gap-8">
         <aside
           aria-label="Empresas"
-          className="lg:sticky lg:top-8 lg:self-start"
+          className="min-w-0 lg:sticky lg:top-8 lg:self-start"
         >
-          <nav className="flex flex-wrap gap-2 lg:flex-col lg:gap-2">
+          <nav className="grid grid-cols-3 gap-2 lg:flex lg:flex-col lg:gap-2">
             {experiences.map((exp) => {
               const span = experienceSpan(exp);
               return (
                 <a
                   key={exp.id}
                   href={`#exp-${exp.id}`}
-                  className="focus-ring card-inset-interactive group block px-3.5 py-2.5 lg:w-full"
+                  className="focus-ring card-inset-interactive group block min-w-0 px-2.5 py-2 text-center lg:w-full lg:px-3.5 lg:py-2.5 lg:text-left"
                 >
-                  <span className="block truncate font-display text-ui font-bold text-ink group-hover:underline">
+                  <span className="block truncate font-display text-micro font-bold text-ink group-hover:underline sm:text-ui">
                     {exp.company}
                   </span>
-                  <span className="mt-0.5 block font-mono text-micro text-muted tabular-nums">
-                    {formatRange(formatPeriod(span.start, span.end))}
+                  <span className="mt-0.5 block truncate font-mono text-[11px] text-muted tabular-nums lg:text-micro">
+                    {span.start.slice(0, 4)}–{span.end ? span.end.slice(0, 4) : 'atual'}
                   </span>
                 </a>
               );
@@ -203,7 +203,7 @@ export function ExperiencePage({ onAskChat }: { onAskChat: (prompt: string) => v
           </nav>
         </aside>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-5 sm:space-y-6">
           {experiences.map((exp) => {
             const span = experienceSpan(exp);
 
@@ -211,7 +211,7 @@ export function ExperiencePage({ onAskChat }: { onAskChat: (prompt: string) => v
               <article
                 key={exp.id}
                 id={`exp-${exp.id}`}
-                className="surface-card scroll-mt-8 border-t-2 border-t-border-strong p-6 sm:p-7"
+                className="surface-card scroll-mt-16 border-t-2 border-t-border-strong p-5 sm:p-7 lg:scroll-mt-8"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-dashed border-border pb-4">
                   <div>

@@ -5,11 +5,7 @@ import {
   type SuggestionsResponse
 } from '../utils/chat.ts';
 import { isSafeReply } from './assistant.ts';
-import {
-  recordTokensInMemoryCache,
-  type D1DatabaseLike,
-  type KvNamespaceLike
-} from './budget.ts';
+import { type D1DatabaseLike, type KvNamespaceLike } from './budget.ts';
 import { getReasoningProfile, type ReasoningEnv } from './reasoning.ts';
 
 export const QUESTION_TEXT_MAX_LEN = 500;
@@ -62,8 +58,6 @@ export async function logQuestion(
   const outputTokens = Math.max(0, Math.floor(input.outputTokens ?? 0));
   const thinkingTokens = Math.max(0, Math.floor(input.thinkingTokens ?? 0));
   const now = input.askedAt ?? new Date();
-
-  recordTokensInMemoryCache(promptTokens + outputTokens + thinkingTokens, now);
 
   if (!env.QUESTIONS) return;
 

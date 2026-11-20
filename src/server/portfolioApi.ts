@@ -18,6 +18,10 @@ import {
 import {
   buildSystemPrompt,
   buildUserPrompt,
+  chatCopy,
+  obfuscationReply,
+  refusesObfuscatedPayload,
+  replyLanguage,
   ChatRequestSchema,
   ContactRequestSchema,
   isSafeReply,
@@ -26,7 +30,6 @@ import {
 import {
   cacheSuggestionReplyIfEligible,
   createUpstreamAbortSignal,
-  evaluateBudgetCircuitBreaker,
   getCachedSuggestionReply,
   trimHistoryToBudget,
   type D1DatabaseLike,
@@ -73,8 +76,6 @@ export type PortfolioBindings = {
   GEMINI_API_KEY?: string;
   GEMINI_MODELS?: string;
   REASONING_PROFILES?: string;
-  DAILY_SOFT_BUDGET?: string | number;
-  DAILY_HARD_BUDGET?: string | number;
   INBOX?: KvNamespaceLike;
   QUESTIONS?: D1DatabaseLike;
   CHAT_LIMIT?: RateLimiterBinding;
@@ -347,43 +348,43 @@ export function inferContextualActions(userQuery: string, replyText: string): Ch
 
   if (
     visiblePaths.has('/experiencia') &&
-    mentions('experi', 'carreira', 'trabalh', ...companyNames)
+    mentions('experi', 'experience', 'career', 'carreira', 'trabalh', ...companyNames)
   ) {
-    actions.push({ label: 'Ver experiência', type: 'route', value: '/experiencia' });
+    actions.push({ label: chatCopy(userQuery, 'viewExperience'), type: 'route', value: '/experiencia' });
   }
-  if (visiblePaths.has('/projetos') && mentions('projet', 'ferramenta', 'site', ...projectNames)) {
-    actions.push({ label: 'Ver projetos', type: 'route', value: '/projetos' });
+  if (visiblePaths.has('/projetos') && mentions('projet', 'project', 'ferramenta', 'site', 'tool', ...projectNames)) {
+    actions.push({ label: chatCopy(userQuery, 'viewProjects'), type: 'route', value: '/projetos' });
   }
   if (
     visiblePaths.has('/estudos') &&
-    mentions('estudo', 'certifica', ...certCodes, ...STUDIES.map((s) => s.title))
+    mentions('estudo', 'study', 'studies', 'certifica', 'certificate', ...certCodes, ...STUDIES.map((s) => s.title))
   ) {
-    actions.push({ label: 'Ver estudos e certificados', type: 'route', value: '/estudos' });
+    actions.push({ label: chatCopy(userQuery, 'viewStudies'), type: 'route', value: '/estudos' });
   }
   if (
     visiblePaths.has('/artigos') &&
     isSectionVisible('articles') &&
-    mentions('artigo', ...ARTICLES.map((a) => a.title))
+    mentions('artigo', 'article', ...ARTICLES.map((a) => a.title))
   ) {
-    actions.push({ label: 'Ler artigos', type: 'route', value: '/artigos' });
+    actions.push({ label: chatCopy(userQuery, 'readArticles'), type: 'route', value: '/artigos' });
   }
-  if (mentions('curriculo', 'cv', 'contratar', 'recrutador', 'vaga', 'fit')) {
+  if (mentions('curriculo', 'cv', 'resume', 'contratar', 'recrutador', 'recruiter', 'vaga', 'fit')) {
     actions.push({
-      label: 'Baixar CV',
+      label: chatCopy(userQuery, 'downloadCv'),
       type: 'export_cv',
       value: DEFAULT_PORTFOLIO_DATA.profile.cvUrl
     });
   }
-  if (mentions('contato', 'e-mail', 'email', 'mensagem', 'recado', 'falar')) {
-    actions.push({ label: 'Enviar recado', type: 'contact', value: '/contato' });
+  if (mentions('contato', 'contact', 'e-mail', 'email', 'mensagem', 'message', 'recado', 'falar')) {
+    actions.push({ label: chatCopy(userQuery, 'sendNote'), type: 'contact', value: '/contato' });
   }
 
   if (actions.length === 0) {
     if (visiblePaths.has('/experiencia')) {
-      actions.push({ label: 'Ver experiência', type: 'route', value: '/experiencia' });
+      actions.push({ label: chatCopy(userQuery, 'viewExperience'), type: 'route', value: '/experiencia' });
     }
     if (visiblePaths.has('/projetos')) {
-      actions.push({ label: 'Ver projetos', type: 'route', value: '/projetos' });
+      actions.push({ label: chatCopy(userQuery, 'viewProjects'), type: 'route', value: '/projetos' });
     }
   }
 
@@ -403,11 +404,15 @@ function formatSseEvent(event: ChatSseEvent): string {
   return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
 }
 
-const UNAVAILABLE_REPLY =
-  'O assistente está indisponível agora. Você pode explorar **Experiência**, **Projetos** e **Estudos** pelo menu lateral ou baixar o CV completo.';
-
-const SAFE_RETRACT_REPLY =
-  'Posso responder apenas sobre a experiência profissional, projetos, estudos técnicos, formação e contato de Pedro Henrique Lopes.';
+function localizedIssue(rawMessage: string, issue: string): string {
+  if (replyLanguage(rawMessage) !== 'en') return issue;
+  const max = issue.match(/^Use no máximo (\d+) caracteres\.$/);
+  if (max) return `Use at most ${max[1]} characters.`;
+  if (issue === 'Digite uma pergunta.') return 'Type a question.';
+  if (issue === 'Entrada inválida.') return 'Invalid input.';
+  if (issue === 'Turno vazio.') return 'Empty turn.';
+  return issue;
+}
 
 interface StreamGeminiResult {
   ok: boolean;
@@ -633,15 +638,6 @@ async function handleChat(
   }
 
   const ip = clientIp(request);
-  if (!(await allowed(env.CHAT_LIMIT, ip))) {
-    return json(429, {
-      error: 'Muitas perguntas em pouco tempo. Tente de novo em alguns minutos ou fale direto com o Pedro por e-mail.',
-      reply: 'Muitas perguntas em pouco tempo. Tente de novo em alguns minutos ou fale direto com o Pedro por e-mail.',
-      source: 'local',
-      actions: [{ label: 'Baixar CV', type: 'export_cv', value: 'pdf' }]
-    });
-  }
-
   const body = await readJsonBody(request);
   if (!body.ok) {
     return json(body.status, { error: BODY_ERRORS[body.status] });
@@ -649,7 +645,17 @@ async function handleChat(
 
   const parsed = ChatRequestSchema.safeParse(body.value);
   if (!parsed.success) {
-    const issueMsg = parsed.error.issues[0]?.message ?? 'Entrada inválida.';
+    const rawMessage =
+      body.value &&
+      typeof body.value === 'object' &&
+      'message' in body.value &&
+      typeof body.value.message === 'string'
+        ? body.value.message
+        : '';
+    const issueMsg = localizedIssue(
+      rawMessage,
+      parsed.error.issues[0]?.message ?? 'Entrada inválida.'
+    );
     return json(400, {
       error: issueMsg,
       reply: `**${issueMsg}**`,
@@ -659,10 +665,21 @@ async function handleChat(
 
   const { message, history, reasoning, skill, regenerate } = parsed.data;
 
-  if (reasoning === 'high' && !(await allowed(env.CHAT_HIGH_LIMIT, ip))) {
+  if (!(await allowed(env.CHAT_LIMIT, ip))) {
+    const reply = chatCopy(message, 'rateLimit');
     return json(429, {
-      error: 'Limite de consultas no modo Profundo atingido. Tente o modo Padrão ou Rápido.',
-      reply: 'Limite de consultas no modo Profundo atingido. Tente o modo Padrão ou Rápido.',
+      error: reply,
+      reply,
+      source: 'local',
+      actions: [{ label: chatCopy(message, 'downloadCv'), type: 'export_cv', value: 'pdf' }]
+    });
+  }
+
+  if (reasoning === 'high' && !(await allowed(env.CHAT_HIGH_LIMIT, ip))) {
+    const reply = chatCopy(message, 'deepLimit');
+    return json(429, {
+      error: reply,
+      reply,
       source: 'local'
     });
   }
@@ -702,31 +719,20 @@ async function handleChat(
           return;
         }
 
-        const budgetDecision = await evaluateBudgetCircuitBreaker(env, reasoning);
-        if (budgetDecision.status === 'hard_exceeded') {
-          emit({
-            type: 'notice',
-            text: 'Cota diária de demonstração atingida.'
-          });
-          emit({ type: 'delta', text: budgetDecision.reply });
-          const cards = inferContextualCards(message, budgetDecision.reply, skill);
-          if (cards.length > 0) emit({ type: 'cards', cards });
-          const actions = inferContextualActions(message, budgetDecision.reply);
+        if (refusesObfuscatedPayload(message)) {
+          const reply = obfuscationReply(message);
+          emit({ type: 'delta', text: reply });
+          const actions = inferContextualActions(message, reply);
           if (actions.length > 0) emit({ type: 'actions', actions });
           emit({ type: 'done' });
           controller.close();
           return;
         }
 
-        if (budgetDecision.status === 'soft_downgraded') {
-          emit({ type: 'notice', text: budgetDecision.notice });
-        }
-
-        const effectiveReasoning = budgetDecision.effectiveReasoning;
         const apiKey = env.GEMINI_API_KEY?.trim();
 
         if (!apiKey) {
-          emit({ type: 'delta', text: UNAVAILABLE_REPLY });
+          emit({ type: 'delta', text: chatCopy(message, 'unavailable') });
           const actions = inferContextualActions(message, '');
           if (actions.length > 0) emit({ type: 'actions', actions });
           emit({ type: 'done' });
@@ -734,7 +740,7 @@ async function handleChat(
           return;
         }
 
-        const profile = getReasoningProfile(env, effectiveReasoning);
+        const profile = getReasoningProfile(env, reasoning);
         const systemInstruction = buildSystemPrompt(DEFAULT_PORTFOLIO_DATA);
         const userPrompt = buildUserPrompt({ message, history: trimmedHistory, skill });
 
@@ -792,20 +798,20 @@ async function handleChat(
         }
 
         if (finalResult?.streamError) {
-          emit({ type: 'error', reply: UNAVAILABLE_REPLY });
+          emit({ type: 'error', reply: chatCopy(message, 'unavailable') });
           emit({ type: 'done' });
           controller.close();
           return;
         }
 
         if (finalResult?.leaked) {
-          emit({ type: 'retract', reply: SAFE_RETRACT_REPLY });
+          emit({ type: 'retract', reply: chatCopy(message, 'retract') });
           emit({ type: 'done' });
           scheduleBackground(
             ctx,
             logQuestion(env, {
               text: message,
-              reasoning: effectiveReasoning,
+              reasoning,
               leaked: true,
               promptTokens: finalResult.promptTokens,
               outputTokens: finalResult.outputTokens,
@@ -819,10 +825,10 @@ async function handleChat(
         const accumulated = finalResult?.accumulated?.trim() ?? '';
         if (!accumulated || !isSafeReply(accumulated)) {
           if (finalResult?.emittedAnyChunk) {
-            emit({ type: 'retract', reply: SAFE_RETRACT_REPLY });
+            emit({ type: 'retract', reply: chatCopy(message, 'retract') });
             emit({ type: 'done' });
           } else {
-            emit({ type: 'delta', text: UNAVAILABLE_REPLY });
+            emit({ type: 'delta', text: chatCopy(message, 'unavailable') });
             const actions = inferContextualActions(message, '');
             if (actions.length > 0) emit({ type: 'actions', actions });
             emit({ type: 'done' });
@@ -862,11 +868,11 @@ async function handleChat(
               trimmedHistory,
               skill,
               accumulated,
-              effectiveReasoning
+              reasoning
             ),
             logQuestion(env, {
               text: message,
-              reasoning: effectiveReasoning,
+              reasoning,
               leaked: false,
               promptTokens: estimatedPromptTokens,
               outputTokens: estimatedOutputTokens,
@@ -878,7 +884,7 @@ async function handleChat(
         controller.close();
       } catch {
         try {
-          emit({ type: 'error', reply: UNAVAILABLE_REPLY });
+          emit({ type: 'error', reply: chatCopy(message, 'unavailable') });
           emit({ type: 'done' });
         } catch {
           // Ignore enqueue on closed stream

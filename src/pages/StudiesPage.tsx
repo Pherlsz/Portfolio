@@ -13,6 +13,7 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link, useRoute } from 'wouter';
 import { PageHeader } from '../components/PageHeader';
+import { proseTableComponents, safeMarkdownUrl } from '../components/proseMarkdown';
 import {
   STUDIES,
   findStudyBySlug,
@@ -22,18 +23,6 @@ import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { t } from '../i18n/pt-BR';
 
 const StudyRichSegment = lazy(() => import('./StudyModules'));
-
-function safeUrl(url: string): string {
-  try {
-    const parsed = new URL(url, 'https://pherls.dev');
-    if (parsed.protocol === 'https:' || parsed.protocol === 'http:' || parsed.protocol === 'mailto:') {
-      return url;
-    }
-  } catch {
-    // Reject invalid URLs
-  }
-  return '';
-}
 
 function StudyDetail({
   study,
@@ -47,7 +36,7 @@ function StudyDetail({
   }, [study.title]);
 
   return (
-    <article className="mx-auto max-w-6xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
+    <article className="mx-auto w-full min-w-0 max-w-6xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
       <Link href="/estudos" className="focus-ring pill-button">
         <ArrowLeft className="size-4" aria-hidden="true" />
         <span>{t('studies.backToList')}</span>
@@ -104,7 +93,12 @@ function StudyDetail({
                 key={index}
                 className="max-w-[68ch] space-y-4 leading-relaxed [&_code]:rounded [&_code]:bg-surface-soft [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-micro [&_code]:text-ink [&_h2]:mt-8 [&_h2]:font-display [&_h2]:text-lead [&_h2]:font-bold [&_h2]:tracking-tight [&_h2]:text-ink [&_ol]:list-decimal [&_ol]:space-y-1.5 [&_ol]:pl-5 [&_strong]:font-semibold [&_strong]:text-ink [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5"
               >
-                <Markdown remarkPlugins={[remarkGfm]} skipHtml urlTransform={safeUrl}>
+                <Markdown
+                  remarkPlugins={[remarkGfm]}
+                  skipHtml
+                  urlTransform={safeMarkdownUrl}
+                  components={proseTableComponents}
+                >
                   {segment.content}
                 </Markdown>
               </div>

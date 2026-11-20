@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
-import { Check, Copy } from 'lucide-react';
 
 const EASE_OUT_CSS = 'cubic-bezier(0.23, 1, 0.32, 1)';
 const easeOutQuint = (t: number) => 1 - (1 - t) ** 5;
@@ -185,59 +184,5 @@ export function SectionHeading({
         </h2>
       </header>
     </Reveal>
-  );
-}
-
-async function copyEmailToClipboard(email: string) {
-  try {
-    await navigator.clipboard.writeText(email);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export function CopyEmailButton({
-  email,
-  label,
-  className = ''
-}: {
-  email: string;
-  label?: string;
-  className?: string;
-}) {
-  const [copied, setCopied] = useState(false);
-  const timer = useRef<number | undefined>(undefined);
-
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-
-  const copy = async () => {
-    const ok = await copyEmailToClipboard(email);
-    if (!ok) {
-      window.location.href = `mailto:${email}`;
-      return;
-    }
-    setCopied(true);
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={copy}
-      aria-label={copied ? 'E-mail copiado' : `Copiar ${email}`}
-      className={['inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap', className].filter(Boolean).join(' ')}
-    >
-      {copied ? (
-        <Check className="size-4 shrink-0" aria-hidden="true" />
-      ) : (
-        <Copy className="size-4 shrink-0" aria-hidden="true" />
-      )}
-      {label ? <span>{copied ? 'Copiado' : label}</span> : <span translate="no">{email}</span>}
-      <span className="sr-only" aria-live="polite">
-        {copied ? 'E-mail copiado' : ''}
-      </span>
-    </button>
   );
 }

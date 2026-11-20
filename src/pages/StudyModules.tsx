@@ -215,7 +215,7 @@ function InteractiveCanvasBlock({ data }: { data: CanvasBlockData }) {
     : [];
 
   return (
-    <div className="surface-card my-7 overflow-hidden rounded-card">
+    <div className="surface-card my-7 w-full min-w-0 max-w-full overflow-hidden rounded-card">
       <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-border bg-surface-soft px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <Move className="size-4 shrink-0 text-muted" aria-hidden="true" />
@@ -510,7 +510,7 @@ function CodePreviewBlock({ data }: { data: CodePreviewBlockData }) {
   };
 
   return (
-    <div className="surface-card my-7 overflow-hidden rounded-card">
+    <div className="surface-card my-7 w-full min-w-0 max-w-full overflow-hidden rounded-card">
       <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-border bg-surface-soft px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <Code2 className="size-4 shrink-0 text-muted" aria-hidden="true" />
@@ -615,7 +615,7 @@ function SpecTabsBlock({ data }: { data: SpecTabsBlockData }) {
   };
 
   return (
-    <div className="surface-card my-7 overflow-hidden rounded-card">
+    <div className="surface-card my-7 w-full min-w-0 max-w-full overflow-hidden rounded-card">
       <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-border bg-surface-soft px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <Layers className="size-4 shrink-0 text-muted" aria-hidden="true" />

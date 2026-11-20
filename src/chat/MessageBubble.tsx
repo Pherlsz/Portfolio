@@ -9,25 +9,12 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { safeMarkdownUrl } from '../components/proseMarkdown';
 import type { ChatAction } from '../utils/chat';
 import ChatContentCards from './ChatContentCards';
 import { ChatLoader } from './ChatLoader';
 import type { ChatMessage } from './chatStore';
 import Mascot from './Mascot';
-
-function safeUrlTransform(url: string): string {
-  const trimmed = url.trim();
-  if (!trimmed) return '';
-  try {
-    const parsed = new URL(trimmed, 'https://pherls.dev');
-    if (parsed.protocol === 'https:' || parsed.protocol === 'http:' || parsed.protocol === 'mailto:') {
-      return trimmed;
-    }
-    return '';
-  } catch {
-    return '';
-  }
-}
 
 const LazyMarkdown = lazy(async () => {
   const [{ default: ReactMarkdown }, { default: remarkGfm }] = await Promise.all([
@@ -40,10 +27,10 @@ const LazyMarkdown = lazy(async () => {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         skipHtml
-        urlTransform={safeUrlTransform}
+        urlTransform={safeMarkdownUrl}
         components={{
           a: ({ href, children }) => {
-            const safeHref = href ? safeUrlTransform(href) : '';
+            const safeHref = href ? safeMarkdownUrl(href) : '';
             if (!safeHref) {
               return <span className="text-ink-soft">{children}</span>;
             }

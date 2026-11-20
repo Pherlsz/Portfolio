@@ -19,24 +19,6 @@ const FILTERS: { id: FilterKind; label: string }[] = [
   { id: 'portfolio', label: 'Portfólio' }
 ];
 
-const PROJECT_MONOGRAMS: Record<string, string> = {
-  'gymkhana-database': 'GD',
-  'gymkhana-core': 'GC',
-  'portfolio-v2': 'PC',
-  'portfolio-v1': 'PE'
-};
-
-function getProjectMonogram(project: ProjectItem): string {
-  if (PROJECT_MONOGRAMS[project.id]) {
-    return PROJECT_MONOGRAMS[project.id];
-  }
-  return project.name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase() ?? '')
-    .join('');
-}
-
 function ProjectPreview({
   project,
   variant = 'tile',
@@ -122,48 +104,6 @@ function ProjectPreview({
         <div className="flex items-center justify-between gap-2 font-mono text-micro text-muted">
           <span className="truncate">github.com/Pherlsz/Gymkhana-Core</span>
           <span className="shrink-0">{project.language ?? 'Go'}</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (project.id === 'portfolio-v2') {
-    return (
-      <div className="ambient-glow relative flex aspect-[16/10] w-full flex-col justify-between overflow-hidden rounded-inner border border-border bg-surface-soft p-5 sm:p-6">
-        <div className="flex items-center justify-between gap-2 font-mono text-micro text-muted">
-          <span>Portfólio Conversacional</span>
-          <span>SSE · Cards tipados</span>
-        </div>
-
-        <div className="my-auto space-y-2.5">
-          <div className="ml-auto max-w-[78%] rounded-inner rounded-br-control border border-border bg-surface px-3.5 py-2 text-micro font-medium text-ink shadow-card">
-            O que ele fez na Atlas?
-          </div>
-
-          <div className="max-w-[88%] space-y-2">
-            <div className="rounded-inner border border-border bg-surface px-3.5 py-2.5 shadow-card">
-              <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-micro font-semibold text-ink">
-                  Atlas Governance · 30+ componentes
-                </span>
-                <span className="shrink-0 rounded-pill bg-accent-soft px-2 py-0.5 font-mono text-micro text-ink">
-                  card
-                </span>
-              </div>
-              {isDetail ? (
-                <p className="mt-1 text-micro text-ink-soft">
-                  Cards resolvidos no servidor contra content/ sem tokens extras.
-                </p>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-2 rounded-pill border border-border-strong bg-surface px-3.5 py-1.5 shadow-card">
-          <span className="font-mono text-micro text-muted">/vaga Frontend Pleno</span>
-          <span className="rounded-pill bg-accent px-2.5 py-0.5 font-mono text-micro font-semibold text-on-accent">
-            Enviar
-          </span>
         </div>
       </div>
     );
@@ -263,7 +203,7 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
     }
 
     return (
-      <section className="mx-auto max-w-6xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
+      <section className="mx-auto w-full min-w-0 max-w-6xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
         <Link href="/projetos" className="focus-ring pill-button">
           <ArrowLeft className="size-4" aria-hidden="true" />
           <span>Todos os projetos</span>
@@ -353,10 +293,6 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
   const countByFilter = (kind: FilterKind) =>
     kind === 'all' ? projects.length : projects.filter((item) => item.kind === kind).length;
 
-  const showSpotlight = filter === 'all' && filtered.length > 0;
-  const spotlightProject = showSpotlight ? filtered[0] : null;
-  const gridProjects = showSpotlight ? filtered.slice(1) : filtered;
-
   return (
     <section className="mx-auto w-full max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
       <PageHeader
@@ -397,158 +333,98 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
         }
       />
 
-      <div className="mt-8 grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-3">
-        {spotlightProject ? (
+      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+        {filtered.map((project, index) => (
           <article
-            key={spotlightProject.id}
-            className="card-editorial group grid min-w-0 items-center gap-6 p-5 sm:p-6 md:col-span-2 lg:grid-cols-[1.25fr_1fr] xl:col-span-3"
+            key={project.id}
+            className="card-editorial group flex min-w-0 flex-col justify-between gap-5 p-4 sm:p-5"
           >
-            <Link
-              href={`/projetos/${spotlightProject.id}`}
-              aria-label={`Abrir detalhes de ${spotlightProject.name}`}
-              data-cursor="abrir"
-              className="focus-ring relative block rounded-inner"
-            >
-              <ProjectPreview project={spotlightProject} variant="tile" priority />
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute right-3 bottom-3 z-10 inline-flex items-center gap-1 rounded-pill border border-border-strong bg-surface/95 px-3 py-1 font-mono text-micro font-medium text-ink opacity-0 shadow-card backdrop-blur-xs transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
-              >
-                <span>Ver ficha</span>
-                <ArrowUpRight className="size-3.5" aria-hidden="true" />
-              </span>
-            </Link>
-
-            <div className="flex flex-col justify-between space-y-4 px-1">
-              <div>
-                <p className="font-mono text-micro uppercase tracking-[0.06em] text-muted">
-                  {spotlightProject.kicker}
-                </p>
-
-                <h2 className="mt-2 font-display text-title font-bold tracking-[-0.02em] text-ink sm:text-[1.75rem]">
-                  <Link
-                    href={`/projetos/${spotlightProject.id}`}
-                    data-cursor="abrir"
-                    className="focus-ring rounded-control hover:underline"
-                  >
-                    {spotlightProject.name}
-                  </Link>
-                </h2>
-
-                <p className="mt-2.5 text-body leading-relaxed text-ink-soft">
-                  {spotlightProject.tagline}
-                </p>
-
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {spotlightProject.stack.slice(0, 4).map((tech) => (
-                    <span
-                      key={tech}
-                      className="rounded-pill border border-border bg-surface-soft px-3 py-1 font-mono text-micro text-ink-soft"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2.5 border-t border-border pt-4">
-                <Link
-                  href={`/projetos/${spotlightProject.id}`}
-                  data-cursor="abrir"
-                  className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
-                >
-                  <span>Abrir detalhes</span>
-                  <ArrowUpRight className="size-4" aria-hidden="true" />
-                </Link>
-                <button
-                  type="button"
-                  data-cursor="perguntar"
-                  onClick={() =>
-                    onAskChat(
-                      spotlightProject.chatPrompt ??
-                        `Me explica os detalhes técnicos de ${spotlightProject.name}.`
-                    )
-                  }
-                  className="focus-ring pill-button min-h-10 px-4"
-                >
-                  <MessageSquare className="size-4 text-muted" aria-hidden="true" />
-                  <span>Perguntar</span>
-                </button>
-              </div>
-            </div>
-          </article>
-        ) : null}
-
-        {gridProjects.map((project, index) => (
-            <article key={project.id} className="group min-w-0 space-y-3.5">
+            <div className="flex flex-col gap-4">
               <Link
                 href={`/projetos/${project.id}`}
                 aria-label={`Abrir detalhes de ${project.name}`}
                 data-cursor="abrir"
-                className="focus-ring card-editorial relative block p-3"
+                className="focus-ring relative block rounded-inner"
               >
-                <ProjectPreview
-                  project={project}
-                  variant="tile"
-                  priority={!showSpotlight && index === 0}
-                />
+                <ProjectPreview project={project} variant="tile" priority={index === 0} />
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute right-5 bottom-5 z-10 inline-flex items-center gap-1 rounded-pill border border-border-strong bg-surface/95 px-2.5 py-1 font-mono text-micro font-medium text-ink opacity-0 shadow-card backdrop-blur-xs transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
+                  className="pointer-events-none absolute right-3 bottom-3 z-10 inline-flex items-center gap-1 rounded-pill border border-border-strong bg-surface/95 px-2.5 py-1 font-mono text-micro font-medium text-ink opacity-0 shadow-card backdrop-blur-xs transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
                 >
                   <span>Ver ficha</span>
                   <ArrowUpRight className="size-3.5" aria-hidden="true" />
                 </span>
               </Link>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <span
-                    aria-hidden="true"
-                    className="flex size-9 shrink-0 items-center justify-center rounded-control border border-border bg-surface font-mono text-micro font-bold text-ink"
-                  >
-                    {getProjectMonogram(project)}
-                  </span>
-                  <div className="min-w-0">
-                    <Link
-                      href={`/projetos/${project.id}`}
-                      data-cursor="abrir"
-                      className="focus-ring block truncate rounded-control font-display text-body font-bold tracking-tight text-ink hover:underline"
-                    >
-                      {project.name}
-                    </Link>
-                    <p className="truncate text-ui text-muted">{project.tagline}</p>
-                  </div>
-                </div>
+              <div className="px-1">
+                <p className="font-mono text-micro uppercase tracking-[0.06em] text-muted">
+                  {project.kicker}
+                </p>
 
-                <div className="flex shrink-0 items-center gap-1.5">
-                  {project.href === '/v1' && project.href ? (
-                    <Link
-                      href={project.href}
-                      aria-label="Abrir Portfólio Editorial"
-                      data-cursor="abrir"
-                      className="focus-ring inline-flex min-h-8 items-center gap-1 rounded-pill border border-border bg-surface px-3 py-1 text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-border-strong hover:text-ink"
-                    >
-                      <span>Visitar</span>
-                      <ArrowUpRight className="size-3.5" aria-hidden="true" />
-                    </Link>
-                  ) : null}
-                  <button
-                    type="button"
-                    data-cursor="perguntar"
-                    onClick={() =>
-                      onAskChat(
-                        project.chatPrompt ?? `Me explica os detalhes técnicos de ${project.name}.`
-                      )
-                    }
-                    className="focus-ring inline-flex min-h-8 items-center gap-1.5 rounded-pill border border-border bg-surface px-3 py-1 text-micro font-medium text-ink transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover"
+                <h2 className="mt-1.5 font-display text-lead font-bold tracking-[-0.02em] text-ink sm:text-title">
+                  <Link
+                    href={`/projetos/${project.id}`}
+                    data-cursor="abrir"
+                    className="focus-ring rounded-control hover:underline"
                   >
-                    <MessageSquare className="size-3.5 text-muted" aria-hidden="true" />
-                    <span>Perguntar</span>
-                  </button>
+                    {project.name}
+                  </Link>
+                </h2>
+
+                <p className="mt-2 line-clamp-3 text-ui leading-relaxed text-ink-soft sm:text-body">
+                  {project.tagline}
+                </p>
+
+                <div className="mt-3.5 flex flex-wrap gap-1.5">
+                  {project.stack.slice(0, 4).map((tech) => (
+                    <span
+                      key={tech}
+                      className="rounded-pill border border-border bg-surface-soft px-2.5 py-0.5 font-mono text-micro text-ink-soft"
+                    >
+                      {tech}
+                    </span>
+                  ))}
                 </div>
               </div>
-            </article>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 border-t border-border px-1 pt-4">
+              <Link
+                href={`/projetos/${project.id}`}
+                data-cursor="abrir"
+                className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-pill bg-accent px-4 py-1.5 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
+              >
+                <span>Abrir detalhes</span>
+                <ArrowUpRight className="size-4" aria-hidden="true" />
+              </Link>
+
+              <button
+                type="button"
+                data-cursor="perguntar"
+                onClick={() =>
+                  onAskChat(
+                    project.chatPrompt ?? `Me explica os detalhes técnicos de ${project.name}.`
+                  )
+                }
+                className="focus-ring pill-button min-h-9 px-3.5"
+              >
+                <MessageSquare className="size-3.5 text-muted" aria-hidden="true" />
+                <span>Perguntar</span>
+              </button>
+
+              {project.href === '/v1' ? (
+                <Link
+                  href={project.href}
+                  aria-label="Abrir Portfólio Editorial"
+                  data-cursor="abrir"
+                  className="focus-ring pill-button min-h-9 px-3.5"
+                >
+                  <span>Visitar</span>
+                  <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                </Link>
+              ) : null}
+            </div>
+          </article>
         ))}
       </div>
     </section>

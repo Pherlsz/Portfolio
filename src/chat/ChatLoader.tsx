@@ -1,4 +1,5 @@
-import Mascot, { type Reasoning } from './Mascot';
+import type { Reasoning } from '../utils/chat';
+import Mascot from './Mascot';
 
 export function ChatLoader({
   reasoning,
