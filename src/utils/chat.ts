@@ -54,16 +54,6 @@ export const DEFAULT_SUGGESTIONS = {
   ]
 } as const;
 
-// Backwards-compatible exports for legacy v1 modules until cleanup
-export type ChatSource = 'ai' | 'local';
-
-export interface ChatResponse {
-  reply: string;
-  source: ChatSource;
-  actions?: ChatAction[];
-  error?: string;
-}
-
 export const SUGGESTED_QUESTIONS = [
   'Resumo rápido para recrutador',
   'Qual a stack principal?',

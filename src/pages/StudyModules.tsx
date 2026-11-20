@@ -240,7 +240,6 @@ function InteractiveCanvasBlock({ data }: { data: CanvasBlockData }) {
         </div>
       </div>
 
-      {/* Desktop spatial canvas */}
       <div className="hidden p-4 md:block">
         <div className="dot-canvas overflow-x-auto rounded-inner border border-border bg-canvas select-none">
           <div
@@ -381,7 +380,6 @@ function InteractiveCanvasBlock({ data }: { data: CanvasBlockData }) {
         </div>
       </div>
 
-      {/* Mobile vertical flow */}
       <div className="p-3 md:hidden">
         <div className="rounded-inner border border-border bg-canvas p-3">
           {nodes.map((node, idx) => {

@@ -15,23 +15,18 @@ interface MascotSpec {
   status: string;
 }
 
-/* Rendered box is 48px on the long edge; width/height keep each sticker's intrinsic ratio (zero CLS). */
 const MASCOTS: Record<Reasoning, MascotSpec> = {
   fast: { name: 'Tomada', src: '/stickers/tomada.webp', width: 48, height: 44, status: 'Respondendo...' },
   default: { name: 'Morcega', src: '/stickers/morcega.webp', width: 44, height: 48, status: 'Pensando...' },
   high: { name: 'Banguela', src: '/stickers/banguela.webp', width: 48, height: 44, status: 'Pensando com calma' },
 };
 
-/**
- * Working indicator shown only while the assistant is thinking or streaming.
- * The caller mounts it conditionally. The image is decorative; the polite status text carries the meaning.
- */
 export default function Mascot({ reasoning, statusText }: MascotProps) {
   const mascot = MASCOTS[reasoning] ?? MASCOTS.default;
   const text = statusText?.trim() || mascot.status;
   const hopRef = useRef<HTMLSpanElement>(null);
 
-  // Fill the live region after mount so screen readers announce it (regions populated at mount are often skipped).
+  // Populate live region after mount so screen readers announce it.
   const [announced, setAnnounced] = useState('');
   useEffect(() => {
     const id = window.setTimeout(() => setAnnounced(text), 60);
@@ -42,7 +37,7 @@ export default function Mascot({ reasoning, statusText }: MascotProps) {
     const el = hopRef.current;
     if (!el) return;
     el.classList.remove('mascot-hop');
-    void el.offsetWidth; // restart the animation on rapid clicks
+    void el.offsetWidth; // Force reflow to restart animation on rapid clicks
     el.classList.add('mascot-hop');
   };
 

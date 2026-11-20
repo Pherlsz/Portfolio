@@ -175,7 +175,6 @@ export function Sidebar({
     }
   };
 
-  /* ---------- Minimized 1-click icon rail (desktop) ---------- */
   if (collapsed && !isMobileDrawer) {
     return (
       <aside
@@ -282,7 +281,6 @@ export function Sidebar({
     );
   }
 
-  /* ---------- Expanded flush sidebar (integrated with site background) ---------- */
   return (
     <aside
       aria-label="Navegação principal"

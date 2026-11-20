@@ -190,12 +190,7 @@ async function readJsonBody(request: Request): Promise<JsonBody> {
 
 const BODY_ERRORS = { 400: 'JSON inválido.', 413: 'Pedido grande demais.' } as const;
 
-const KNOWN_STUDY_SLUGS = new Set<string>([
-  ...STUDIES.map((s) => s.slug),
-  'virtualizacao-listagens-react',
-  'portfolio-v2-arquitetura-ia'
-]);
-
+const KNOWN_STUDY_SLUGS = new Set<string>(STUDIES.map((s) => s.slug));
 const KNOWN_ARTICLE_SLUGS = new Set<string>(ARTICLES.map((a) => a.slug));
 
 const VALID_PROJECT_IDS = new Set<string>(DEFAULT_PORTFOLIO_DATA.projects.map((p) => p.id));
@@ -238,95 +233,88 @@ export function inferContextualCards(
   const candidates: ChatCardRef[] = [];
 
   const mentions = (...terms: string[]) =>
-    terms.some((term) => combinedFolded.includes(foldText(term)));
+    terms.some((term) => term.length > 0 && combinedFolded.includes(foldText(term)));
   const queryMentions = (...terms: string[]) =>
-    terms.some((term) => queryFolded.includes(foldText(term)));
+    terms.some((term) => term.length > 0 && queryFolded.includes(foldText(term)));
 
-  if (skill === 'vaga' || skill === 'resumo') {
-    candidates.push({ kind: 'experience', id: 'atlas' });
-  }
-
-  // Specific Experiences
-  if (mentions('atlas', 'governanca', 'atlas sign', 'atlas plg')) {
-    candidates.push({ kind: 'experience', id: 'atlas' });
-  }
-  if (mentions('nelogica', 'noc', 'grafana', 'zabbix', 'kibana', 'mttr')) {
-    candidates.push({ kind: 'experience', id: 'nelogica' });
-  }
-  if (mentions('lebes', 'lojas lebes', 'erp', 'crm')) {
-    candidates.push({ kind: 'experience', id: 'lebes' });
+  const primaryExperience = DEFAULT_PORTFOLIO_DATA.experiences[0];
+  if ((skill === 'vaga' || skill === 'resumo') && primaryExperience) {
+    candidates.push({ kind: 'experience', id: primaryExperience.id });
   }
 
-  // Specific Projects
-  if (mentions('gymkhana database', 'gymkhana-database', 'planilha')) {
-    candidates.push({ kind: 'project', id: 'gymkhana-database' });
-  }
-  if (
-    mentions(
-      'gymkhana core',
-      'gymkhana-core',
-      'civiltime',
-      'portablejson',
-      'fingerprint',
-      'biblioteca em go'
-    )
-  ) {
-    candidates.push({ kind: 'project', id: 'gymkhana-core' });
-  }
-  if (
-    mentions(
-      'pherls.dev v2',
-      'portfolio v2',
-      'portfolio-v2',
-      'portfolio conversacional',
-      'edicao atual',
-      'segunda versao'
-    )
-  ) {
-    candidates.push({ kind: 'project', id: 'portfolio-v2' });
-  }
-  if (
-    queryMentions(
-      'pherls.dev v1',
-      'portfolio v1',
-      'portfolio editorial',
-      '/v1',
-      'primeira versao',
-      'primeira edicao',
-      'adesivos'
-    )
-  ) {
-    candidates.push({ kind: 'v1' });
+  for (const exp of DEFAULT_PORTFOLIO_DATA.experiences) {
+    const companyWords = exp.company.split(/\s+/).filter((w) => w.length >= 4);
+    if (mentions(exp.company, exp.id, ...companyWords)) {
+      candidates.push({ kind: 'experience', id: exp.id });
+    }
   }
 
-  // Generic projects query fallback
+  for (const proj of DEFAULT_PORTFOLIO_DATA.projects) {
+    if (proj.href === '/v1' || proj.id === 'portfolio-v1') {
+      if (
+        queryMentions(
+          proj.name,
+          proj.id,
+          '/v1',
+          'primeira versao',
+          'primeira edicao',
+          'adesivos'
+        )
+      ) {
+        candidates.push({ kind: 'v1' });
+      }
+      continue;
+    }
+
+    const moduleTerms = (proj.modules ?? [])
+      .map((m) => m.name)
+      .filter((name) => name.length >= 6);
+    if (mentions(proj.name, proj.id, ...moduleTerms)) {
+      candidates.push({ kind: 'project', id: proj.id });
+    }
+  }
+
   if (
     queryMentions('projeto', 'projetos', 'github', 'repositorio') &&
     !candidates.some((c) => c.kind === 'project')
   ) {
-    candidates.push(
-      { kind: 'project', id: 'gymkhana-database' },
-      { kind: 'project', id: 'gymkhana-core' }
-    );
+    for (const proj of DEFAULT_PORTFOLIO_DATA.projects
+      .filter((p) => p.href !== '/v1')
+      .slice(0, 2)) {
+      candidates.push({ kind: 'project', id: proj.id });
+    }
   }
 
-  // Specific Studies & Articles
-  if (mentions('tanstack virtual', 'virtualizacao', '5.000+ registros', '5000 registros', 'layout thrashing')) {
-    candidates.push({ kind: 'study', id: 'virtualizacao-listagens-react' });
-  }
-  if (mentions('streaming sse', 'evento retract', 'curadoria semanal', 'arquitetura do assistente')) {
-    candidates.push({ kind: 'study', id: 'portfolio-v2-arquitetura-ia' });
-  }
-
-  // Certificates
-  if (mentions('az-900', 'azure fundamentals', 'credly', 'certificado', 'certificacao', 'certificacoes')) {
-    candidates.push({ kind: 'certificate', id: 'azure-fundamentals' });
-  }
-  if (mentions('igti', 'bootcamp')) {
-    candidates.push({ kind: 'certificate', id: 'igti-azure-bootcamp' });
+  for (const study of STUDIES) {
+    const tagTerms = study.tags.filter((tag) => tag.length >= 5);
+    if (mentions(study.title, study.slug, ...tagTerms)) {
+      candidates.push({ kind: 'study', id: study.slug });
+    }
   }
 
-  // Contact
+  for (const article of ARTICLES) {
+    const tagTerms = article.tags.filter((tag) => tag.length >= 5);
+    if (mentions(article.title, article.slug, ...tagTerms)) {
+      candidates.push({ kind: 'article', id: article.slug });
+    }
+  }
+
+  for (const cert of DEFAULT_PORTFOLIO_DATA.certificates) {
+    if (mentions(cert.title, cert.code, cert.slug)) {
+      candidates.push({ kind: 'certificate', id: cert.slug });
+    }
+  }
+  if (
+    mentions('certificado', 'certificados', 'certificacao', 'certificacoes', 'credly') &&
+    !candidates.some((c) => c.kind === 'certificate') &&
+    DEFAULT_PORTFOLIO_DATA.certificates[0]
+  ) {
+    candidates.push({
+      kind: 'certificate',
+      id: DEFAULT_PORTFOLIO_DATA.certificates[0].slug
+    });
+  }
+
   if (queryMentions('contato', 'enviar mensagem', 'mandar recado', 'falar com', 'contratar')) {
     candidates.push({ kind: 'contact' });
   }
@@ -350,27 +338,32 @@ export function inferContextualActions(userQuery: string, replyText: string): Ch
   const combined = foldText(`${userQuery} ${replyText}`);
   const actions: ChatAction[] = [];
   const visiblePaths = new Set(visibleSections().map((section) => section.path));
-  const mentions = (...terms: string[]) => terms.some((term) => combined.includes(foldText(term)));
+  const mentions = (...terms: string[]) =>
+    terms.some((term) => term.length > 0 && combined.includes(foldText(term)));
+
+  const companyNames = DEFAULT_PORTFOLIO_DATA.experiences.map((e) => e.company);
+  const projectNames = DEFAULT_PORTFOLIO_DATA.projects.map((p) => p.name);
+  const certCodes = DEFAULT_PORTFOLIO_DATA.certificates.map((c) => c.code);
 
   if (
     visiblePaths.has('/experiencia') &&
-    mentions('experi', 'carreira', 'trabalh', 'atlas', 'nelogica', 'lebes')
+    mentions('experi', 'carreira', 'trabalh', ...companyNames)
   ) {
     actions.push({ label: 'Ver experiência', type: 'route', value: '/experiencia' });
   }
-  if (visiblePaths.has('/projetos') && mentions('projet', 'ferramenta', 'site', 'gymkhana')) {
+  if (visiblePaths.has('/projetos') && mentions('projet', 'ferramenta', 'site', ...projectNames)) {
     actions.push({ label: 'Ver projetos', type: 'route', value: '/projetos' });
   }
   if (
     visiblePaths.has('/estudos') &&
-    mentions('estudo', 'certifica', 'az-900', 'azure', 'virtualiza', 'arquitetura')
+    mentions('estudo', 'certifica', ...certCodes, ...STUDIES.map((s) => s.title))
   ) {
     actions.push({ label: 'Ver estudos e certificados', type: 'route', value: '/estudos' });
   }
   if (
     visiblePaths.has('/artigos') &&
     isSectionVisible('articles') &&
-    mentions('artigo', 'design system', 'wcag', 'acessibilidade')
+    mentions('artigo', ...ARTICLES.map((a) => a.title))
   ) {
     actions.push({ label: 'Ler artigos', type: 'route', value: '/artigos' });
   }
@@ -684,7 +677,6 @@ async function handleChat(
       };
 
       try {
-        // 1. Check first-turn KV suggestion cache (0 tokens), bypassed on explicit regenerate
         const cachedReply = regenerate
           ? null
           : await getCachedSuggestionReply(env, message, trimmedHistory, skill, reasoning);
@@ -710,7 +702,6 @@ async function handleChat(
           return;
         }
 
-        // 2. Check daily D1 circuit breaker
         const budgetDecision = await evaluateBudgetCircuitBreaker(env, reasoning);
         if (budgetDecision.status === 'hard_exceeded') {
           emit({

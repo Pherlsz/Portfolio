@@ -73,7 +73,6 @@ export function AppShell({ children, onStartContact }: AppShellProps) {
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-bg text-ink lg:py-2 lg:pr-2">
-      {/* Desktop flush sidebar integrated into the outer background; minimizes to a 1-click icon rail */}
       <div
         className={`vt-sidebar hidden h-full shrink-0 overflow-hidden transition-[width] duration-200 ease-out lg:block motion-reduce:transition-none ${
           collapsed ? 'w-[64px]' : 'w-[248px]'
@@ -86,7 +85,6 @@ export function AppShell({ children, onStartContact }: AppShellProps) {
         />
       </div>
 
-      {/* Floating mobile drawer trigger (no top header bar) */}
       <button
         type="button"
         onClick={() => setMobileOpen(true)}
@@ -96,7 +94,6 @@ export function AppShell({ children, onStartContact }: AppShellProps) {
         <Menu className="size-4" aria-hidden="true" />
       </button>
 
-      {/* Mobile navigation drawer using native <dialog> */}
       <dialog
         ref={drawerRef}
         onClose={() => setMobileOpen(false)}
@@ -114,7 +111,6 @@ export function AppShell({ children, onStartContact }: AppShellProps) {
         />
       </dialog>
 
-      {/* Main elevated rounded canvas sheet */}
       <a
         href="#conteudo"
         className="focus-ring sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-pill focus:bg-accent focus:px-4 focus:py-2 focus:text-ui focus:font-semibold focus:text-on-accent focus:shadow-pop"
