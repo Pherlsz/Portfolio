@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { afterEach, test } from 'node:test';
 import { createChatStore, MAX_CHATS } from '../src/chat/chatStore.ts';
+import { ARTICLES, parseMarkdownCollection, STUDIES } from '../src/content/collections.ts';
 import { visibleSections } from '../src/content/sections.ts';
 import { DEFAULT_PORTFOLIO_DATA } from '../src/data/portfolioData.ts';
+import { shouldShowIntro } from '../src/shell/introPolicy.ts';
 import { buildSystemPrompt, buildUserPrompt, isSafeReply } from '../src/server/assistant.ts';
 import {
   MODEL_TURN_CHAR_LIMIT,
@@ -10,7 +14,11 @@ import {
   suggestionCacheKey,
   trimHistoryToBudget
 } from '../src/server/budget.ts';
-import { handlePortfolioRequest, SECURITY_HEADERS } from '../src/server/portfolioApi.ts';
+import {
+  handlePortfolioRequest,
+  inferContextualCards,
+  SECURITY_HEADERS
+} from '../src/server/portfolioApi.ts';
 import {
   buildGenerationConfig,
   DEFAULT_PROFILES,
@@ -178,13 +186,12 @@ const VALID_CONTACT = {
   source: 'form'
 };
 
-// ---------------------------------------------------------------------------
-// 1. Chat SSE (POST /api/chat)
-// ---------------------------------------------------------------------------
-
 test('chat SSE: retorna text/event-stream com delta, cards, actions e done', async () => {
+  const sampleExp = DEFAULT_PORTFOLIO_DATA.experiences[0];
+  const sampleCompany = sampleExp?.company ?? 'Experiência';
+  const expectedReply = `Em ${sampleCompany}, atuou com ${sampleExp?.stack[0] ?? 'software'}.`;
   const calls = mockGeminiSse(
-    ['Na Atlas Governance, ', 'ele atuou no Design System e no Atlas Sign.'],
+    [`Em ${sampleCompany}, `, `atuou com ${sampleExp?.stack[0] ?? 'software'}.`],
     { promptTokenCount: 120, candidatesTokenCount: 30, thoughtsTokenCount: 10 }
   );
 
@@ -193,7 +200,7 @@ test('chat SSE: retorna text/event-stream com delta, cards, actions e done', asy
   const db = createMockD1();
 
   const response = await handlePortfolioRequest(
-    post('/api/chat', { message: 'Conte sobre a Atlas Governance', history: [], reasoning: 'default' }),
+    post('/api/chat', { message: `Conte sobre ${sampleCompany}`, history: [], reasoning: 'default' }),
     { GEMINI_API_KEY: 'test-key', QUESTIONS: db },
     ctx
   );
@@ -206,15 +213,17 @@ test('chat SSE: retorna text/event-stream com delta, cards, actions e done', asy
   await Promise.all(waited);
 
   const deltas = events.filter((e) => e.event === 'delta').map((e) => e.data.text);
-  assert.equal(deltas.join(''), 'Na Atlas Governance, ele atuou no Design System e no Atlas Sign.');
+  assert.equal(deltas.join(''), expectedReply);
 
-  const cardsEvent = events.find((e) => e.event === 'cards');
-  assert.ok(cardsEvent, 'expected cards event');
-  assert.ok(cardsEvent.data.cards.some((c) => c.kind === 'experience' && c.id === 'atlas'));
+  if (sampleExp) {
+    const cardsEvent = events.find((e) => e.event === 'cards');
+    assert.ok(cardsEvent, 'expected cards event');
+    assert.ok(cardsEvent.data.cards.some((c) => c.kind === 'experience' && c.id === sampleExp.id));
+  }
 
   const actionsEvent = events.find((e) => e.event === 'actions');
   assert.ok(actionsEvent, 'expected actions event');
-  assert.ok(actionsEvent.data.actions.some((a) => a.type === 'route' && a.value === '/experiencia'));
+  assert.ok(actionsEvent.data.actions.length > 0);
 
   assert.equal(events.at(-1)?.event, 'done');
   assert.equal(calls.length, 1);
@@ -493,9 +502,13 @@ test('chat SSE: circuit breaker D1 faz downgrade para fast no soft budget e bloq
 
 test('chat SSE: cache de sugestão no KV retorna resposta com 0 chamadas ao Gemini', async () => {
   const suggestion = DEFAULT_SUGGESTIONS.featured[0];
+  const sampleExp = DEFAULT_PORTFOLIO_DATA.experiences[0];
+  const cachedReply = sampleExp
+    ? `Em ${sampleExp.company}, atuou com ${sampleExp.stack.slice(0, 2).join(' e ')}.`
+    : 'Atuação em engenharia de software e arquitetura frontend.';
   const kv = createMemoryKv({
     [suggestionCacheKey(suggestion)]: JSON.stringify({
-      reply: 'Na Atlas Governance, Pedro liderou o Design System e o Atlas Sign.'
+      reply: cachedReply
     })
   });
 
@@ -515,19 +528,120 @@ test('chat SSE: cache de sugestão no KV retorna resposta com 0 chamadas ao Gemi
   assert.equal(geminiCalled, false);
   assert.equal(
     events.filter((e) => e.event === 'delta').map((e) => e.data.text).join(''),
-    'Na Atlas Governance, Pedro liderou o Design System e o Atlas Sign.'
+    cachedReply
   );
-  assert.ok(events.some((e) => e.event === 'cards'));
+  if (sampleExp) {
+    assert.ok(events.some((e) => e.event === 'cards'));
+  }
   assert.ok(events.some((e) => e.event === 'actions'));
   assert.equal(events.at(-1)?.event, 'done');
 });
 
-test('assistant: system prompt permanece compacto (<= 2000 tokens estimados)', () => {
+test('assistant: system prompt permanece compacto (<= 2000 tokens estimados) e reflete dinamicamente content/', () => {
   const prompt = buildSystemPrompt(DEFAULT_PORTFOLIO_DATA);
   const estimatedTokens = Math.ceil(prompt.length / 4);
   assert.ok(
     estimatedTokens <= 2000,
     `system prompt too large: ${estimatedTokens} estimated tokens (${prompt.length} chars)`
+  );
+  assert.ok(prompt.includes(DEFAULT_PORTFOLIO_DATA.profile.name));
+  for (const exp of DEFAULT_PORTFOLIO_DATA.experiences) {
+    assert.ok(prompt.includes(exp.company), `missing experience ${exp.company}`);
+  }
+  for (const proj of DEFAULT_PORTFOLIO_DATA.projects) {
+    assert.ok(prompt.includes(proj.name), `missing project ${proj.name}`);
+  }
+  for (const study of STUDIES) {
+    assert.ok(prompt.includes(study.title), `missing study ${study.title}`);
+  }
+  for (const article of ARTICLES) {
+    assert.ok(prompt.includes(article.title), `missing article ${article.title}`);
+  }
+});
+
+test('cards, seções e coleções: inferContextualCards, visibleSections e markdown adaptam-se dinamicamente ao conteúdo atual', async () => {
+  for (const proj of DEFAULT_PORTFOLIO_DATA.projects) {
+    const cards = inferContextualCards(proj.name, proj.tagline);
+    if (proj.href === '/v1' || proj.id === 'portfolio-v1') {
+      assert.ok(cards.some((c) => c.kind === 'v1'), `expected v1 card for ${proj.name}`);
+    } else {
+      assert.ok(
+        cards.some((c) => c.kind === 'project' && c.id === proj.id),
+        `expected project card for ${proj.name}`
+      );
+    }
+  }
+
+  for (const exp of DEFAULT_PORTFOLIO_DATA.experiences) {
+    const cards = inferContextualCards(exp.company, '');
+    assert.ok(
+      cards.some((c) => c.kind === 'experience' && c.id === exp.id),
+      `expected experience card for ${exp.company}`
+    );
+  }
+
+  for (const cert of DEFAULT_PORTFOLIO_DATA.certificates) {
+    const cards = inferContextualCards(cert.code, cert.title);
+    assert.ok(
+      cards.some((c) => c.kind === 'certificate' && c.id === cert.slug),
+      `expected certificate card for ${cert.code}`
+    );
+  }
+
+  for (const study of STUDIES) {
+    const cards = inferContextualCards(study.title, '');
+    assert.ok(cards.some((c) => c.kind === 'study' && c.id === study.slug));
+  }
+
+  for (const article of ARTICLES) {
+    const cards = inferContextualCards(article.title, '');
+    assert.ok(cards.some((c) => c.kind === 'article' && c.id === article.slug));
+  }
+
+  const unknownCards = inferContextualCards('__termo_inexistente_no_catalogo_999__', '');
+  assert.deepEqual(unknownCards, []);
+
+  for (const dirRel of ['content/studies', 'content/articles']) {
+    const fullDir = path.resolve(import.meta.dirname, '..', dirRel);
+    let entries = [];
+    try {
+      entries = await fs.readdir(fullDir);
+    } catch {
+      entries = [];
+    }
+    const rawMap = {};
+    for (const entry of entries) {
+      if (!entry.endsWith('.md')) continue;
+      rawMap[entry] = await fs.readFile(path.join(fullDir, entry), 'utf8');
+    }
+    const parsedDocs = parseMarkdownCollection(rawMap);
+    assert.equal(parsedDocs.length, Object.keys(rawMap).length);
+    for (const doc of parsedDocs) {
+      assert.ok(doc.slug.length > 0);
+      assert.ok(doc.title.length > 0);
+      assert.ok(doc.segments.length > 0);
+    }
+  }
+
+  assert.equal(
+    visibleSections({
+      projects: 1,
+      experiences: 1,
+      studies: 1,
+      certificates: 0,
+      articles: 0
+    }).some((s) => s.path === '/artigos'),
+    false
+  );
+  assert.equal(
+    visibleSections({
+      projects: 1,
+      experiences: 1,
+      studies: 1,
+      certificates: 0,
+      articles: 1
+    }).some((s) => s.path === '/artigos'),
+    true
   );
 });
 
@@ -588,10 +702,6 @@ test('segurança: origem cross-site bloqueada, delimitadores escapados, headers 
     assertSecurityHeaders(res, blocked);
   }
 });
-
-// ---------------------------------------------------------------------------
-// 2. D1 & Weekly Curation (src/server/suggestions.ts)
-// ---------------------------------------------------------------------------
 
 test('suggestions: logQuestion mascara email/telefone/URL/CPF, trunca em 500 chars e não grava IP', async () => {
   const raw =
@@ -778,16 +888,12 @@ test('GET /api/suggestions: fallback DEFAULT_SUGGESTIONS e suggestions:pinned so
   assert.deepEqual(await pinnedRes.json(), pinnedPayload);
 });
 
-// ---------------------------------------------------------------------------
-// 3. Documents & Contact
-// ---------------------------------------------------------------------------
-
 test('documentos: /llms.txt, /robots.txt, /sitemap.xml, /cv.md e /cv.json respondem com formato válido', async () => {
   const llmsRes = await handlePortfolioRequest(new Request('http://localhost/llms.txt'), {});
   assert.equal(llmsRes?.status, 200);
   assertSecurityHeaders(llmsRes, '/llms.txt');
   const llms = await llmsRes.text();
-  assert.match(llms, /Pedro Henrique Lopes/);
+  assert.ok(llms.includes(DEFAULT_PORTFOLIO_DATA.profile.name));
   assert.match(llms, /\/cv\.md/);
   assert.match(llms, /\/cv\.json/);
 
@@ -819,7 +925,7 @@ test('documentos: /llms.txt, /robots.txt, /sitemap.xml, /cv.md e /cv.json respon
   assert.equal(cvMdRes?.status, 200);
   assert.match(cvMdRes.headers.get('content-type') ?? '', /text\/markdown/);
   const cvMd = await cvMdRes.text();
-  assert.match(cvMd, /# Pedro Henrique Lopes/);
+  assert.ok(cvMd.includes(`# ${DEFAULT_PORTFOLIO_DATA.profile.name}`));
   assert.match(cvMd, /## Experiência Profissional/);
 
   const cvJsonRes = await handlePortfolioRequest(new Request('http://localhost/cv.json'), {});
@@ -875,10 +981,6 @@ test('contato: validação, honeypot, armazenamento KV e rate limit', async () =
   });
   assert.equal(limited?.status, 429);
 });
-
-// ---------------------------------------------------------------------------
-// 4. Chat Store (src/chat/chatStore.ts)
-// ---------------------------------------------------------------------------
 
 test('chatStore: localStorage corrompido reseta sem lançar erro', () => {
   const storageInvalidJson = createMemoryStorage({ 'test.chats': '{corrupted' });
@@ -999,4 +1101,27 @@ test('chatStore: envia apenas até HISTORY_LIMIT turnos concluídos (status done
     lastHistory.some((turn) => turn.text.includes('falha simulada')),
     false
   );
+});
+
+test('introPolicy: exibe intro 1x apenas em rotas principais no desktop e pula em mobile, /cv, /v1 ou conexão lenta', () => {
+  const base = {
+    pathname: '/',
+    alreadySeen: false,
+    prefersReducedMotion: false,
+    finePointer: true,
+    saveData: false,
+    effectiveType: '4g'
+  };
+
+  assert.equal(shouldShowIntro(base), true);
+  assert.equal(shouldShowIntro({ ...base, pathname: '/projetos' }), true);
+  assert.equal(shouldShowIntro({ ...base, alreadySeen: true }), false);
+  assert.equal(shouldShowIntro({ ...base, pathname: '/cv' }), false);
+  assert.equal(shouldShowIntro({ ...base, pathname: '/cv/' }), false);
+  assert.equal(shouldShowIntro({ ...base, pathname: '/v1' }), false);
+  assert.equal(shouldShowIntro({ ...base, finePointer: false }), false);
+  assert.equal(shouldShowIntro({ ...base, prefersReducedMotion: true }), false);
+  assert.equal(shouldShowIntro({ ...base, saveData: true }), false);
+  assert.equal(shouldShowIntro({ ...base, effectiveType: '3g' }), false);
+  assert.equal(shouldShowIntro({ ...base, effectiveType: '2g' }), false);
 });

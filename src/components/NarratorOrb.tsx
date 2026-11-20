@@ -206,7 +206,6 @@ export function NarratorOrb() {
           }`}
         >
           {(variant === 'default' || variant === 'action') && (
-            /* High-contrast geometric arrow: exact (0,0) tip, white outer halo + charcoal stroke + lime/dark core */
             <svg
               width="22"
               height="22"
@@ -214,14 +213,12 @@ export function NarratorOrb() {
               fill="none"
               className="-translate-x-[2px] -translate-y-[2px] drop-shadow-[0_1.5px_2.5px_rgba(0,0,0,0.3)]"
             >
-              {/* Outer light halo for guaranteed contrast on dark surfaces */}
               <path
                 d="M2.5 2L17.8 9.8L11 11.8L8.6 18.8L2.5 2Z"
                 stroke="#ffffff"
                 strokeWidth="3.2"
                 strokeLinejoin="round"
               />
-              {/* Main shape */}
               <path
                 d="M2.5 2L17.8 9.8L11 11.8L8.6 18.8L2.5 2Z"
                 fill={variant === 'action' ? 'var(--lime)' : '#141513'}
@@ -233,7 +230,6 @@ export function NarratorOrb() {
           )}
 
           {variant === 'pointer' && (
-            /* Accessible geometric pointing hand: fingertip sits at (0,0) so underlying icons stay 100% visible */
             <svg
               width="24"
               height="24"
@@ -241,14 +237,12 @@ export function NarratorOrb() {
               fill="none"
               className="-translate-x-[6.5px] -translate-y-[2px] drop-shadow-[0_1.5px_2.5px_rgba(0,0,0,0.28)]"
             >
-              {/* Outer white halo */}
               <path
                 d="M7.5 3.2C7.5 2.4 8.2 1.8 9 1.8C9.8 1.8 10.5 2.4 10.5 3.2V10.2H11.5C12.3 10.2 13 10.8 13 11.6V11.2C13 10.4 13.7 9.8 14.5 9.8C15.3 9.8 16 10.4 16 11.2V11.8C16 11 16.7 10.4 17.5 10.4C18.3 10.4 19 11 19 11.8V15.5C19 18.8 16.4 21.2 13.1 21.2H11.2C8.9 21.2 7.1 19.9 6.1 17.9L3.9 13.7C3.5 13 3.7 12.1 4.4 11.7C5.1 11.3 6 11.6 6.4 12.3L7.5 14V3.2Z"
                 stroke="#ffffff"
                 strokeWidth="3.2"
                 strokeLinejoin="round"
               />
-              {/* Lime fill + crisp charcoal outline */}
               <path
                 d="M7.5 3.2C7.5 2.4 8.2 1.8 9 1.8C9.8 1.8 10.5 2.4 10.5 3.2V10.2H11.5C12.3 10.2 13 10.8 13 11.6V11.2C13 10.4 13.7 9.8 14.5 9.8C15.3 9.8 16 10.4 16 11.2V11.8C16 11 16.7 10.4 17.5 10.4C18.3 10.4 19 11 19 11.8V15.5C19 18.8 16.4 21.2 13.1 21.2H11.2C8.9 21.2 7.1 19.9 6.1 17.9L3.9 13.7C3.5 13 3.7 12.1 4.4 11.7C5.1 11.3 6 11.6 6.4 12.3L7.5 14V3.2Z"
                 fill="var(--lime)"
@@ -260,7 +254,6 @@ export function NarratorOrb() {
           )}
 
           {variant === 'text' && (
-            /* High-contrast dual-halo I-beam for inputs & textareas */
             <svg
               width="16"
               height="24"
@@ -284,7 +277,6 @@ export function NarratorOrb() {
           )}
 
           {variant === 'grab' && (
-            /* Dual-contrast 4-way move crosshair for draggable canvas nodes */
             <svg
               width="22"
               height="22"
@@ -310,7 +302,6 @@ export function NarratorOrb() {
           )}
 
           {variant === 'action' && (
-            /* Offset contextual pill below-right (flips left near right edge), never covering the icon/element */
             <div
               className={`absolute top-5 flex items-center gap-1.5 rounded-pill border border-white/25 bg-[#141513] px-2.5 py-1 text-[#f4f4f0] shadow-float ${
                 flipLeft ? 'right-3' : 'left-4'

@@ -1,47 +1,61 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { INTRO_SESSION_KEY, shouldShowIntro } from './introPolicy';
 
 type CurtainPhase = 'idle' | 'entering' | 'exiting';
 
-const SESSION_KEY = 'pherls:intro-seen';
 const COUNT_DURATION_MS = 560;
-const EXIT_DURATION_MS = 360;
+const EXIT_DURATION_MS = 400;
 
 interface NetworkInformationLike {
   saveData?: boolean;
   effectiveType?: string;
 }
 
-function shouldSkipIntro(): boolean {
+function canPlayIntroInBrowser(): boolean {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-    return true;
+    return false;
   }
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    return true;
+
+  let alreadySeen = false;
+  try {
+    alreadySeen = window.sessionStorage.getItem(INTRO_SESSION_KEY) === '1';
+  } catch {
+    alreadySeen = false;
   }
-  if (!window.matchMedia('(pointer: fine)').matches) {
-    return true;
-  }
+
   const connection = (navigator as Navigator & { connection?: NetworkInformationLike }).connection;
-  if (connection?.saveData) {
-    return true;
-  }
-  if (
-    connection?.effectiveType === 'slow-2g' ||
-    connection?.effectiveType === '2g' ||
-    connection?.effectiveType === '3g'
-  ) {
-    return true;
-  }
-  return false;
+
+  return shouldShowIntro({
+    pathname: window.location.pathname,
+    alreadySeen,
+    prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    finePointer: window.matchMedia('(pointer: fine)').matches,
+    saveData: Boolean(connection?.saveData),
+    effectiveType: connection?.effectiveType
+  });
 }
 
 export function IntroCurtain() {
-  const [phase, setPhase] = useState<CurtainPhase>('idle');
+  const [phase, setPhase] = useState<CurtainPhase>(() =>
+    canPlayIntroInBrowser() ? 'entering' : 'idle'
+  );
   const [progress, setProgress] = useState(0);
 
   const rafRef = useRef<number | null>(null);
   const exitTimerRef = useRef<number | null>(null);
-  const phaseRef = useRef<CurtainPhase>('idle');
+  const phaseRef = useRef<CurtainPhase>(phase);
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.remove('intro-pending');
+  }, []);
+
+  const markSeen = useCallback(() => {
+    try {
+      window.sessionStorage.setItem(INTRO_SESSION_KEY, '1');
+    } catch {
+      // Ignore storage write failures in restricted environments.
+    }
+  }, []);
 
   const clearTimers = useCallback(() => {
     if (rafRef.current !== null) {
@@ -56,6 +70,7 @@ export function IntroCurtain() {
 
   const beginExit = useCallback(() => {
     if (phaseRef.current !== 'entering') return;
+    markSeen();
     clearTimers();
     phaseRef.current = 'exiting';
     setPhase('exiting');
@@ -64,29 +79,21 @@ export function IntroCurtain() {
       phaseRef.current = 'idle';
       setPhase('idle');
     }, EXIT_DURATION_MS);
-  }, [clearTimers]);
+  }, [clearTimers, markSeen]);
 
-  const startIntro = useCallback(() => {
-    if (shouldSkipIntro()) {
-      clearTimers();
-      phaseRef.current = 'idle';
-      setPhase('idle');
-      return;
-    }
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (phaseRef.current !== 'entering') return clearTimers;
 
-    clearTimers();
-    phaseRef.current = 'entering';
-    setProgress(0);
-    setPhase('entering');
-
+    markSeen();
     const startTime = performance.now();
 
     const tick = (now: number) => {
       if (phaseRef.current !== 'entering') return;
-      const elapsed = now - startTime;
-      const linear = Math.min(1, elapsed / COUNT_DURATION_MS);
+      const elapsed = Math.max(0, now - startTime);
+      const linear = Math.min(1, Math.max(0, elapsed / COUNT_DURATION_MS));
       const eased = 1 - Math.pow(1 - linear, 2.2);
-      const nextValue = Math.min(100, Math.round(eased * 100));
+      const nextValue = Math.min(100, Math.max(0, Math.round(eased * 100)));
       setProgress(nextValue);
 
       if (linear < 1) {
@@ -98,29 +105,9 @@ export function IntroCurtain() {
     };
 
     rafRef.current = window.requestAnimationFrame(tick);
-  }, [beginExit, clearTimers]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    let alreadySeen = false;
-    try {
-      alreadySeen = window.sessionStorage.getItem(SESSION_KEY) === '1';
-    } catch {
-      alreadySeen = false;
-    }
-
-    if (!alreadySeen && !shouldSkipIntro()) {
-      try {
-        window.sessionStorage.setItem(SESSION_KEY, '1');
-      } catch {
-        // Ignore storage write failures in restricted environments.
-      }
-      startIntro();
-    }
 
     return clearTimers;
-  }, [clearTimers, startIntro]);
+  }, [beginExit, clearTimers, markSeen]);
 
   useEffect(() => {
     if (phase === 'idle') return;

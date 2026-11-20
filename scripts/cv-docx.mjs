@@ -149,7 +149,7 @@ for (const exp of data.experiences) {
 }
 
 children.push(sectionHeading('Projetos principais'));
-for (const project of data.projects.filter((p) => p.kind !== 'portfolio-version')) {
+for (const project of data.projects.filter((p) => p.featured)) {
   children.push(
     new Paragraph({
       spacing: { before: 100, after: 40 },

@@ -1,13 +1,45 @@
+# Dependencies
 node_modules/
-build/
+
+# Build, cache and test outputs
 dist/
+build/
 coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
-.dev.vars
+.vite/
+*.tsbuildinfo
+
+# Cloudflare / Wrangler local state and generated types
 .wrangler/
+.dev.vars
+.dev.vars.*
 worker-configuration.d.ts
-design/refs/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs, reports and temp files
+*.log
+npm-debug.log*
+lighthouse-*.json
+lighthouse-*.html
+*.tmp
+tmp/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+desktop.ini
 .vscode/
+.idea/
+*.swp
+*~
+
+# Local design references and agent configs
+design/refs/
+.claude/
+.cursor/
+.gemini/

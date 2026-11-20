@@ -1,16 +1,4 @@
-/*
- * pherls.dev v2 motion. Only transform and opacity are animated.
- * Every animation is disabled under prefers-reduced-motion.
- */
-
-/* ---------- Mascot idle rhythms (one per reasoning level) ---------- */
-
-/* Structure (see src/chat/Mascot.tsx):
- * .mascot[data-mascot] > .mascot-hop-layer > .mascot-idle > img
- *                      > .mascot-shadow
- * Hop and idle live on separate elements so their transforms never fight.
- */
-
+/* Separate layers so hop and idle transforms never conflict. */
 .mascot-idle {
   display: block;
   transform-origin: 50% 90%;
@@ -38,7 +26,6 @@ html.dark .mascot-shadow {
   background: radial-gradient(closest-side, rgb(0 0 0 / 0.85), transparent);
 }
 
-/* Tomada (fast): short electric micro pulse with a tiny twitch, then rests. */
 .mascot[data-mascot="fast"] .mascot-idle {
   animation: mascot-zap 1.15s var(--ease-out) infinite;
 }
@@ -81,7 +68,6 @@ html.dark .mascot-shadow {
   }
 }
 
-/* Morcega (default): unhurried float with a gentle sway. */
 .mascot[data-mascot="default"] .mascot-idle {
   animation: mascot-float 2.8s var(--ease-in-out) infinite;
 }
@@ -112,7 +98,6 @@ html.dark .mascot-shadow {
   }
 }
 
-/* Banguela (high): slow, deep hover breathe. Rises, inhales, holds, settles. */
 .mascot[data-mascot="high"] .mascot-idle {
   animation: mascot-breathe 3.8s var(--ease-in-out) infinite;
 }
@@ -150,8 +135,6 @@ html.dark .mascot-shadow {
   }
 }
 
-/* ---------- One-click hop ---------- */
-
 .mascot-hop {
   animation: mascot-hop 420ms var(--ease-spring);
 }
@@ -174,8 +157,6 @@ html.dark .mascot-shadow {
   }
 }
 
-/* ---------- Message and status entrances ---------- */
-
 .message-in {
   animation: message-in 260ms var(--ease-out) both;
 }
@@ -191,7 +172,6 @@ html.dark .mascot-shadow {
   }
 }
 
-/* Mascot status row mount, and status text swaps (remount with a new key). */
 .status-in {
   animation: status-in 220ms var(--ease-out) both;
 }
@@ -207,7 +187,6 @@ html.dark .mascot-shadow {
   }
 }
 
-/* Popovers that open upward from the composer. */
 .popover-in {
   transform-origin: 0% 100%;
   animation: popover-in 180ms var(--ease-out) both;
@@ -223,8 +202,6 @@ html.dark .mascot-shadow {
     transform: translateY(0) scale(1);
   }
 }
-
-/* ---------- Editorial Art Direction motion (opted in via no-preference) ---------- */
 
 .word-reveal {
   display: inline-block;
@@ -256,14 +233,12 @@ html.dark .mascot-shadow {
   }
 }
 
-/* Pointer-reactive living emblem in sidebar */
 .living-emblem {
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0) rotate(var(--rot, 0deg));
   transition: transform 220ms var(--ease-out);
   will-change: transform;
 }
 
-/* Same-document View Transitions */
 .vt-sidebar {
   view-transition-name: sidebar-rail;
 }

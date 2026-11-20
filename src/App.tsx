@@ -3,12 +3,11 @@ import { Route, Switch, useLocation } from 'wouter';
 import { chatStore } from './chat/chatStore';
 import ChatView from './chat/ChatView';
 import { EditorialLoader } from './components/EditorialLoader';
+import { DEFAULT_PORTFOLIO_DATA } from './data/portfolioData';
 import { printConsoleBanner } from './easter/consoleBanner';
 import { AppShell } from './shell/AppShell';
+import { IntroCurtain } from './shell/IntroCurtain';
 
-const IntroCurtain = lazy(() =>
-  import('./shell/IntroCurtain').then((mod) => ({ default: mod.IntroCurtain }))
-);
 const NarratorOrb = lazy(() =>
   import('./components/NarratorOrb').then((mod) => ({ default: mod.NarratorOrb }))
 );
@@ -38,7 +37,7 @@ const CvDocument = lazy(() =>
 );
 
 export default function App() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isFinePointer, setIsFinePointer] = useState(false);
 
   useEffect(() => {
@@ -51,6 +50,45 @@ export default function App() {
       setIsFinePointer(true);
     }
   }, []);
+
+  useEffect(() => {
+    const normalized =
+      location.length > 1 && location.endsWith('/') ? location.slice(0, -1) : location;
+
+    if (
+      normalized === '/cv' ||
+      normalized.startsWith('/cv/') ||
+      normalized === '/v1' ||
+      normalized.startsWith('/v1/')
+    ) {
+      return;
+    }
+
+    const { name, jobTitle } = DEFAULT_PORTFOLIO_DATA.profile;
+    const baseTitle = `${name} · ${jobTitle}`;
+
+    if (normalized === '/' || normalized.startsWith('/c/')) {
+      document.title = baseTitle;
+    } else if (normalized === '/projetos') {
+      document.title = `Projetos · ${name}`;
+    } else if (normalized.startsWith('/projetos/')) {
+      const slug = normalized.slice('/projetos/'.length);
+      const project = DEFAULT_PORTFOLIO_DATA.projects.find((item) => item.id === slug);
+      document.title = project ? `${project.name} · Projetos · ${name}` : `Projetos · ${name}`;
+    } else if (normalized === '/experiencia') {
+      document.title = `Experiência e Currículo · ${name}`;
+    } else if (normalized === '/estudos/certificados') {
+      document.title = `Certificados · ${name}`;
+    } else if (normalized === '/estudos' || normalized.startsWith('/estudos/')) {
+      document.title = `Estudos · ${name}`;
+    } else if (normalized === '/artigos' || normalized.startsWith('/artigos/')) {
+      document.title = `Artigos · ${name}`;
+    } else if (normalized === '/ai') {
+      document.title = `AI / Arquivos · ${name}`;
+    } else {
+      document.title = `Página não encontrada · ${name}`;
+    }
+  }, [location]);
 
   const handleAskChat = useCallback(
     (prompt: string) => {
@@ -70,9 +108,9 @@ export default function App() {
 
   return (
     <>
+      <IntroCurtain />
       {isFinePointer ? (
         <Suspense fallback={null}>
-          <IntroCurtain />
           <NarratorOrb />
         </Suspense>
       ) : null}

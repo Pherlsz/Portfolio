@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,35 +16,12 @@ import { PageHeader } from '../components/PageHeader';
 import {
   STUDIES,
   findStudyBySlug,
-  type ContentDocument,
-  type RichBlockKind
+  type ContentDocument
 } from '../content/collections';
 import { DEFAULT_PORTFOLIO_DATA } from '../data/portfolioData';
 import { t } from '../i18n/pt-BR';
 
 const StudyRichSegment = lazy(() => import('./StudyModules'));
-
-const BLOCK_LABELS: Record<RichBlockKind, string> = {
-  canvas: 'Canvas',
-  'code-preview': 'Código + Preview',
-  'spec-tabs': 'Spec'
-};
-
-const BLUEPRINT_TAGS: Record<RichBlockKind, string> = {
-  canvas: '[CANVAS]',
-  'code-preview': '[CÓDIGO]',
-  'spec-tabs': '[SPEC]'
-};
-
-function primaryKindLabel(study: ContentDocument): string {
-  const firstBlock = study.richBlocks[0];
-  return firstBlock ? BLOCK_LABELS[firstBlock] : study.category;
-}
-
-function blueprintCornerTag(study: ContentDocument): string {
-  const firstBlock = study.richBlocks[0];
-  return firstBlock ? BLUEPRINT_TAGS[firstBlock] : '[NOTA]';
-}
 
 function safeUrl(url: string): string {
   try {
@@ -65,6 +42,10 @@ function StudyDetail({
   study: ContentDocument;
   onAskChat: (prompt: string) => void;
 }) {
+  useEffect(() => {
+    document.title = `${study.title} · Estudos · Pedro Henrique Lopes`;
+  }, [study.title]);
+
   return (
     <article className="mx-auto max-w-6xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
       <Link href="/estudos" className="focus-ring pill-button">
@@ -74,11 +55,9 @@ function StudyDetail({
 
       <header className="mt-6">
         <div className="flex flex-wrap items-center gap-2 font-mono text-micro text-muted tabular-nums">
-          <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-medium text-ink">
-            {primaryKindLabel(study)}
+          <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-sans font-medium text-ink">
+            {study.category}
           </span>
-          <span>{study.category}</span>
-          <span aria-hidden="true">·</span>
           <span>{study.publishedAt}</span>
           <span aria-hidden="true">·</span>
           <span className="inline-flex items-center gap-1">
@@ -156,9 +135,18 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
 
   if (isDetail && detailParams?.slug && detailParams.slug !== 'certificados') {
     const study = findStudyBySlug(detailParams.slug);
-    if (study) {
-      return <StudyDetail study={study} onAskChat={onAskChat} />;
+    if (!study) {
+      return (
+        <section className="mx-auto max-w-4xl px-5 pt-16 pb-12 sm:px-8 lg:py-12">
+          <Link href="/estudos" className="focus-ring pill-button">
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            <span>{t('studies.backToList')}</span>
+          </Link>
+          <p className="mt-6 text-body text-ink-soft">Estudo não encontrado.</p>
+        </section>
+      );
     }
+    return <StudyDetail study={study} onAskChat={onAskChat} />;
   }
 
   const certificates = DEFAULT_PORTFOLIO_DATA.certificates;
@@ -215,37 +203,26 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
       />
 
       {!isCertTab ? (
-        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div
+          className={`mt-8 grid gap-6 md:grid-cols-2 ${STUDIES.length > 2 ? 'xl:grid-cols-3' : ''}`}
+        >
           {STUDIES.map((study) => (
             <article
               key={study.slug}
               className="card-editorial flex flex-col justify-between p-5 sm:p-6"
             >
               <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {study.richBlocks.length > 0 ? (
-                    study.richBlocks.map((block, index) => (
-                      <span
-                        key={block}
-                        className={`rounded-pill px-2.5 py-0.5 font-mono text-micro font-medium ${
-                          index === 0
-                            ? 'bg-accent-soft text-ink'
-                            : 'border border-border bg-surface-soft text-muted'
-                        }`}
-                      >
-                        {BLOCK_LABELS[block]}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-mono text-micro font-medium text-ink">
-                      {study.category}
-                    </span>
-                  )}
+                <div className="flex flex-wrap items-center gap-2 font-mono text-micro text-muted tabular-nums">
+                  <span className="rounded-pill bg-accent-soft px-2.5 py-0.5 font-sans text-micro font-medium text-ink">
+                    {study.category}
+                  </span>
+                  <span>{study.publishedAt}</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="size-3.5" aria-hidden="true" />
+                    <span>{study.readingTime}</span>
+                  </span>
                 </div>
-
-                <p className="mt-2.5 font-mono text-micro text-muted tabular-nums">
-                  {study.publishedAt} · {study.readingTime}
-                </p>
 
                 <Link
                   href={`/estudos/${study.slug}`}
@@ -264,7 +241,7 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
                       key={tag}
                       className="rounded-pill border border-border bg-surface-soft px-2.5 py-0.5 font-mono text-micro text-muted"
                     >
-                      #{tag}
+                      {tag}
                     </span>
                   ))}
                 </div>
@@ -324,7 +301,7 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
                       </span>
                     </div>
                   ) : (
-                    <div className="dot-canvas relative flex h-40 w-full items-center justify-center border-b border-border bg-surface-soft px-5">
+                    <div className="relative flex h-40 w-full items-center justify-center border-b border-border bg-surface-soft px-5">
                       <span className="absolute top-3.5 right-3.5 rounded-pill border border-border bg-surface px-2.5 py-1 font-mono text-micro font-semibold text-ink tabular-nums">
                         {cert.code}
                       </span>

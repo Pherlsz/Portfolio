@@ -52,7 +52,6 @@ function SignalBars({ level }: { level: number }) {
   );
 }
 
-/** Compact reasoning level picker for the composer. Opens a small popover with a 3-step slider. */
 export default function ReasoningSelect({ value, onChange, disabled = false }: ReasoningSelectProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -71,7 +70,6 @@ export default function ReasoningSelect({ value, onChange, disabled = false }: R
     if (restoreFocus) triggerRef.current?.focus();
   }, []);
 
-  // Never leave the popover open over a disabled control (e.g. while streaming).
   useEffect(() => {
     if (disabled) setOpen(false);
   }, [disabled]);

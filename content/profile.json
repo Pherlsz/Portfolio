@@ -20,7 +20,7 @@
     "about": [
       "Comecei trabalhando com suporte técnico e monitoramento de sistemas críticos (NOC). Acompanhar ambientes de produção de perto me deu uma boa base para investigar incidentes, ler logs e achar a causa raiz antes de mexer no código.",
       "Na transição para engenharia de software, evoluí do estágio a Software Engineer ao longo de mais de quatro anos atuando principalmente com React, Next.js e TypeScript, criando componentes de Design System, melhorando a performance de telas pesadas, construindo interfaces para recursos de IA e dando manutenção em serviços em C#/.NET Core.",
-      "Me adapto rápido a projetos em andamento e gosto de pegar problemas em que preciso aprender algo novo. Meu foco é frontend, mas também escrevo backend e APIs em .NET e Go quando faz sentido para o time."
+      "Me adapto rápido a projetos em andamento e gosto de pegar problemas em que preciso aprender algo novo. Meu foco é frontend, mas também escrevo backend e APIs em .NET e Python quando faz sentido para o time."
     ]
   },
   "skills": [
@@ -45,7 +45,7 @@
     },
     {
       "name": "Backend e IA",
-      "featured": [".NET", "Go"],
+      "featured": [".NET", "Python"],
       "items": ["C#", "APIs REST", "Interfaces para IA (LLMs)", "SQL"]
     },
     {

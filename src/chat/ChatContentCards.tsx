@@ -237,11 +237,11 @@ export default function ChatContentCards({ cards }: ChatContentCardsProps) {
             onClick={() => setLocation('/v1')}
             className="group card-editorial focus-ring w-full overflow-hidden text-left"
           >
-            <div className="dot-canvas flex items-center justify-between gap-3 border-b border-border bg-surface-soft px-4 py-3">
+            <div className="flex items-center justify-between gap-3 border-b border-border bg-surface-soft px-4 py-3">
               <div className="flex items-center gap-2">
                 <span className="-rotate-2 inline-flex items-center gap-1.5 rounded-pill bg-lime px-2.5 py-0.5 font-mono text-micro font-semibold text-on-lime">
                   <History className="size-3" aria-hidden="true" />
-                  <span>v1 · 2025</span>
+                  <span>Arquivo · 2025</span>
                 </span>
                 <span className="rotate-1 rounded-pill border border-border bg-surface px-2.5 py-0.5 font-mono text-micro text-ink-soft">
                   /v1
@@ -254,7 +254,7 @@ export default function ChatContentCards({ cards }: ChatContentCardsProps) {
             </div>
             <div className="p-4">
               <p className="font-display text-lead font-bold tracking-tight text-ink">
-                {v1?.name ?? 'pherls.dev v1 (2025)'}
+                {v1?.name ?? 'Portfólio Editorial'}
               </p>
               <p className="mt-1.5 text-ui leading-relaxed text-ink-soft">
                 {v1?.tagline ??

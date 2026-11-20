@@ -45,8 +45,10 @@
       .initial-title{margin:0 0 2rem;max-width:18ch;text-align:center;font-size:clamp(2rem,6vw,3.35rem);font-weight:800;line-height:1.03;letter-spacing:-.035em}
       .initial-composer{width:100%;max-width:44rem;height:7rem;border-radius:1.5rem;border:1px solid rgba(20,21,19,.12);background-color:#fbfbf9}
       html.dark .initial-composer{border-color:rgba(244,244,240,.12);background-color:#141513}
+      html.intro-pending,html.intro-pending body{background-color:#141513;overflow:hidden}
+      html.intro-pending .initial-shell{visibility:hidden}
     </style>
-    <noscript><style>.seo-only{position:static!important;width:auto!important;height:auto!important;margin:0!important;overflow:visible!important;clip-path:none!important;white-space:normal!important}</style></noscript>
+    <noscript><style>.seo-only{position:static!important;width:auto!important;height:auto!important;margin:0!important;overflow:visible!important;clip-path:none!important;white-space:normal!important}html.intro-pending .initial-shell{visibility:visible!important}</style></noscript>
     <script>
       (() => {
         let dark = matchMedia('(prefers-color-scheme: dark)').matches;
@@ -57,6 +59,24 @@
         document.documentElement.classList.toggle('dark', dark);
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', dark ? '#0c0d0c' : '#ecebe6');
+
+        try {
+          const path = location.pathname;
+          const seen = sessionStorage.getItem('pherls:intro-seen') === '1';
+          const conn = navigator.connection;
+          const slow = conn && (conn.saveData || conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g' || conn.effectiveType === '3g');
+          const excluded = path === '/cv' || path.startsWith('/cv/') || path === '/v1' || path.startsWith('/v1/');
+          const showIntro =
+            !seen &&
+            !excluded &&
+            !slow &&
+            matchMedia('(pointer: fine)').matches &&
+            !matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (showIntro) {
+            document.documentElement.classList.add('intro-pending');
+            setTimeout(() => document.documentElement.classList.remove('intro-pending'), 2500);
+          }
+        } catch {}
       })();
     </script>
     <link rel="stylesheet" href="/src/index.css" />

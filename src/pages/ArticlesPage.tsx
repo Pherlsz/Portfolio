@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Clock, MessageSquare } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -28,6 +28,10 @@ function ArticleDetail({
   article: ContentDocument;
   onAskChat: (prompt: string) => void;
 }) {
+  useEffect(() => {
+    document.title = `${article.title} · Artigos · Pedro Henrique Lopes`;
+  }, [article.title]);
+
   return (
     <article className="mx-auto max-w-5xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
       <Link href="/artigos" className="focus-ring pill-button">
@@ -112,64 +116,93 @@ export function ArticlesPage({ onAskChat }: { onAskChat: (prompt: string) => voi
 
   if (isDetail && params?.slug) {
     const article = findArticleBySlug(params.slug);
-    if (article) {
-      return <ArticleDetail article={article} onAskChat={onAskChat} />;
+    if (!article) {
+      return (
+        <section className="mx-auto max-w-4xl px-5 pt-16 pb-12 sm:px-8 lg:py-12">
+          <Link href="/artigos" className="focus-ring pill-button">
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            <span>{t('articles.backToList')}</span>
+          </Link>
+          <p className="mt-6 text-body text-ink-soft">Artigo não encontrado.</p>
+        </section>
+      );
     }
+    return <ArticleDetail article={article} onAskChat={onAskChat} />;
   }
 
   return (
     <section className="mx-auto w-full max-w-[90rem] px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
       <PageHeader title={t('articles.title')} />
 
-      <div className="mt-8 space-y-5">
-        {ARTICLES.map((article) => (
-          <article key={article.slug}>
-            <Link
-              href={`/artigos/${article.slug}`}
-              data-cursor="ler"
-              className="focus-ring card-editorial group grid gap-5 p-6 sm:p-7 lg:grid-cols-[1fr_auto] lg:items-baseline"
-            >
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2.5 font-mono text-micro text-muted tabular-nums">
-                  <span className="rounded-pill bg-surface-soft px-2.5 py-0.5 font-sans text-micro font-medium text-ink-soft">
-                    {article.category}
-                  </span>
-                  <span>{article.publishedAt}</span>
-                  <span aria-hidden="true">·</span>
-                  <span className="inline-flex items-center gap-1">
-                    <Clock className="size-3.5" aria-hidden="true" />
-                    {article.readingTime}
-                  </span>
-                </div>
-
-                <h2 className="mt-2.5 font-display text-title font-bold tracking-[-0.02em] text-ink group-hover:underline">
-                  {article.title}
-                </h2>
-                <p className="mt-2 max-w-[65ch] text-body text-ink-soft">{article.summary}</p>
-
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {article.tags.slice(0, 4).map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-pill bg-surface-soft px-2.5 py-0.5 font-mono text-micro text-muted"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap font-mono text-ui font-semibold text-ink lg:self-center">
-                <span>Ler</span>
-                <ArrowRight
-                  className="size-4 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-                  aria-hidden="true"
-                />
-              </span>
+      {ARTICLES.length === 0 ? (
+        <div className="surface-card mt-8 max-w-xl rounded-card p-6 sm:p-7">
+          <p className="font-display text-lead font-bold tracking-tight text-ink">
+            Nenhum artigo publicado no momento.
+          </p>
+          <p className="mt-2 text-ui leading-relaxed text-ink-soft">
+            Os materiais técnicos aprofundados estão reunidos na seção de estudos ou podem ser explorados pelo chat.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2.5">
+            <Link href="/estudos" className="focus-ring pill-button">
+              <span>Ver estudos</span>
+              <ArrowRight className="size-3.5" aria-hidden="true" />
             </Link>
-          </article>
-        ))}
-      </div>
+            <Link href="/" className="focus-ring pill-button">
+              <span>Ir para o chat</span>
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-8 space-y-5">
+          {ARTICLES.map((article) => (
+            <article key={article.slug}>
+              <Link
+                href={`/artigos/${article.slug}`}
+                data-cursor="ler"
+                className="focus-ring card-editorial group grid gap-5 p-6 sm:p-7 lg:grid-cols-[1fr_auto] lg:items-baseline"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2.5 font-mono text-micro text-muted tabular-nums">
+                    <span className="rounded-pill bg-surface-soft px-2.5 py-0.5 font-sans text-micro font-medium text-ink-soft">
+                      {article.category}
+                    </span>
+                    <span>{article.publishedAt}</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="size-3.5" aria-hidden="true" />
+                      {article.readingTime}
+                    </span>
+                  </div>
+
+                  <h2 className="mt-2.5 font-display text-title font-bold tracking-[-0.02em] text-ink group-hover:underline">
+                    {article.title}
+                  </h2>
+                  <p className="mt-2 max-w-[65ch] text-body text-ink-soft">{article.summary}</p>
+
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {article.tags.slice(0, 4).map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-pill bg-surface-soft px-2.5 py-0.5 font-mono text-micro text-muted"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap font-mono text-ui font-semibold text-ink lg:self-center">
+                  <span>Ler</span>
+                  <ArrowRight
+                    className="size-4 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+                    aria-hidden="true"
+                  />
+                </span>
+              </Link>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

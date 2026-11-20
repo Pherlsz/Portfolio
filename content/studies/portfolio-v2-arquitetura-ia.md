@@ -1,6 +1,6 @@
 ---
 slug: portfolio-v2-arquitetura-ia
-title: Arquitetura do assistente e streaming seguro no pherls.dev v2
+title: Arquitetura do assistente e streaming seguro no Portfólio Conversacional
 summary: Como o portfólio combina streaming SSE, cards ricos sem tokens extras, evento retract contra vazamento de prompt e curadoria semanal automatizada.
 publishedAt: 2026-11-18
 readingTime: 5 min
@@ -18,15 +18,47 @@ Em vez de pedir ao modelo que gere JSON complexo para renderizar cards visuais (
 {
   "title": "Pipeline SSE no Cloudflare Worker",
   "nodes": [
-    { "id": "client", "label": "Composer + Reasoning", "detail": "Fast / Default / High + skills /vaga e /resumo", "x": 30, "y": 95 },
-    { "id": "guard", "label": "Validação + Rate Limit", "detail": "Zod, origem permitida e janela por IP", "x": 240, "y": 95 },
-    { "id": "llm", "label": "Gemini Stream", "detail": "Delta em tempo real com filtro de segurança", "x": 450, "y": 40 },
-    { "id": "catalog", "label": "Resolver de Cards", "detail": "Referências tipadas contra content/ (0 tokens)", "x": 450, "y": 155 }
+    {
+      "id": "client",
+      "tag": "Cliente",
+      "label": "Composer + Raciocínio",
+      "summary": "Fast, Padrão ou Profundo e skills",
+      "detail": "Envia o histórico recortado, o nível de raciocínio escolhido e comandos /vaga ou /resumo via POST /api/chat.",
+      "x": 28,
+      "y": 110
+    },
+    {
+      "id": "guard",
+      "tag": "Borda",
+      "label": "Validação + Rate Limit",
+      "summary": "Zod, origem, cache KV e cota D1",
+      "detail": "Valida o payload com Zod, verifica a origem permitida, aplica rate limit por IP e consulta cache KV e orçamento diário no D1.",
+      "x": 318,
+      "y": 110
+    },
+    {
+      "id": "llm",
+      "tag": "Stream",
+      "label": "Gemini + Filtro",
+      "summary": "Deltas SSE com proteção de prompt",
+      "detail": "Consome streamGenerateContent em tempo real e inspeciona cada trecho acumulado contra vazamento; se detectar risco, emite retract.",
+      "x": 608,
+      "y": 28
+    },
+    {
+      "id": "catalog",
+      "tag": "Catálogo",
+      "label": "Resolver de Cards",
+      "summary": "Cards e ações tipadas (0 tokens)",
+      "detail": "Cruza a conversa com os arquivos de content/ no servidor para anexar cards verificados de projetos, experiências e estudos sem gastar tokens do modelo.",
+      "x": 608,
+      "y": 192
+    }
   ],
   "edges": [
-    { "from": "client", "to": "guard" },
-    { "from": "guard", "to": "llm" },
-    { "from": "llm", "to": "catalog" }
+    { "from": "client", "to": "guard", "label": "POST" },
+    { "from": "guard", "to": "llm", "label": "stream" },
+    { "from": "llm", "to": "catalog", "label": "SSE" }
   ]
 }
 :::
@@ -63,4 +95,4 @@ Durante o streaming, cada bloco passa por verificação. Se algum padrão intern
 
 ## Diário aberto de decisões
 
-Todas as decisões de produto, design e engenharia tomadas durante a construção da v2 estão registradas em `docs/decisoes.md`, incluindo alternativas descartadas e trade-offs de custo e acessibilidade.
+Todas as decisões de produto, design e engenharia tomadas durante a construção desta edição estão registradas em `docs/decisoes.md`, incluindo alternativas descartadas e trade-offs de custo e acessibilidade.

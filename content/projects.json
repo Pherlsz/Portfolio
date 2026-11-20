@@ -15,7 +15,7 @@
   {
     "id": "gymkhana-core",
     "name": "Gymkhana Core",
-    "kicker": "Biblioteca Go",
+    "kicker": "Biblioteca",
     "kind": "library",
     "featured": true,
     "tagline": "Biblioteca em Go para padronização de dados, extração de texto de documentos e integração com modelos de IA.",
@@ -53,29 +53,29 @@
   },
   {
     "id": "portfolio-v2",
-    "name": "pherls.dev v2",
-    "kicker": "Estudo de caso",
-    "kind": "case-study",
+    "name": "Portfólio Conversacional",
+    "kicker": "pherls.dev · Atual",
+    "kind": "portfolio",
     "featured": true,
-    "tagline": "Portfólio conversacional com streaming SSE, cards ricos sem custo extra de tokens, curadoria semanal por IA e registro aberto de decisões de arquitetura.",
+    "tagline": "Interface conversacional do pherls.dev com streaming SSE, cards ricos sem custo extra de tokens, curadoria semanal por IA e registro aberto de decisões de arquitetura.",
     "href": "/estudos/portfolio-v2-arquitetura-ia",
     "decisionsDoc": "docs/decisoes.md",
     "access": "public",
     "stack": ["React", "TypeScript", "Vite", "Tailwind CSS", "Cloudflare Workers", "Gemini API"],
     "image": "/projects/portfolio-v2.webp",
-    "chatPrompt": "Como o pherls.dev v2 foi planejado e construído?"
+    "chatPrompt": "Como o Portfólio Conversacional foi planejado e construído?"
   },
   {
     "id": "portfolio-v1",
-    "name": "pherls.dev v1 (2025)",
-    "kicker": "Versão arquivada",
-    "kind": "portfolio-version",
+    "name": "Portfólio Editorial",
+    "kicker": "pherls.dev · Arquivo 2025",
+    "kind": "portfolio",
     "featured": false,
-    "tagline": "Primeira versão do portfólio em formato editorial de página única, preservada de forma simplificada com a tampa interativa de adesivos holográficos.",
+    "tagline": "Primeira edição do pherls.dev em formato editorial de página única, preservada com a tampa interativa de adesivos holográficos.",
     "href": "/v1",
     "access": "public",
     "stack": ["React", "TypeScript", "Vite", "Tailwind CSS", "Canvas"],
     "image": "/projects/portfolio-v1.webp",
-    "chatPrompt": "O que mudou entre o pherls.dev v1 e a v2?"
+    "chatPrompt": "O que mudou entre o Portfólio Editorial (2025) e o Portfólio Conversacional?"
   }
 ]

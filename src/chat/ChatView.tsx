@@ -18,8 +18,10 @@ export default function ChatView({ chatId }: ChatViewProps) {
   const state = useChatStore();
   const [location, setLocation] = useLocation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const messagesWrapperRef = useRef<HTMLDivElement>(null);
   const bottomAnchorRef = useRef<HTMLDivElement>(null);
   const prevMessageCountRef = useRef(0);
+  const stickToBottomRef = useRef(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   const getScrollParent = useCallback((): HTMLElement | null => {
@@ -62,6 +64,7 @@ export default function ChatView({ chatId }: ChatViewProps) {
   useEffect(() => {
     if (messages.length === 0) {
       prevMessageCountRef.current = 0;
+      stickToBottomRef.current = true;
       setShowScrollButton(false);
       return;
     }
@@ -70,6 +73,8 @@ export default function ChatView({ chatId }: ChatViewProps) {
     prevMessageCountRef.current = messages.length;
 
     if (addedNewMessages) {
+      stickToBottomRef.current = true;
+      setShowScrollButton(false);
       requestAnimationFrame(() => {
         scrollToBottom('smooth');
       });
@@ -79,7 +84,7 @@ export default function ChatView({ chatId }: ChatViewProps) {
     const scroller = getScrollParent();
     if (!scroller) return;
     const distanceFromBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight;
-    if (distanceFromBottom < 260) {
+    if (stickToBottomRef.current || distanceFromBottom < 260) {
       scrollToBottom('auto');
     }
   }, [
@@ -97,20 +102,38 @@ export default function ChatView({ chatId }: ChatViewProps) {
       const scroller = getScrollParent();
       if (!scroller) return;
       const distanceFromBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight;
-      setShowScrollButton(distanceFromBottom > 220);
+      if (distanceFromBottom > 220) {
+        stickToBottomRef.current = false;
+        setShowScrollButton(true);
+      } else {
+        stickToBottomRef.current = true;
+        setShowScrollButton(false);
+      }
     };
 
     const inner = scrollContainerRef.current;
     const main = document.getElementById('conteudo');
     inner?.addEventListener('scroll', handleScroll, { passive: true });
     main?.addEventListener('scroll', handleScroll, { passive: true });
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && messagesWrapperRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        if (stickToBottomRef.current) {
+          scrollToBottom('auto');
+        }
+      });
+      resizeObserver.observe(messagesWrapperRef.current);
+    }
+
     handleScroll();
 
     return () => {
       inner?.removeEventListener('scroll', handleScroll);
       main?.removeEventListener('scroll', handleScroll);
+      resizeObserver?.disconnect();
     };
-  }, [messages.length, getScrollParent]);
+  }, [messages.length, getScrollParent, scrollToBottom]);
 
   const handleReasoningChange = useCallback(
     (next: Reasoning) => {
@@ -225,7 +248,7 @@ export default function ChatView({ chatId }: ChatViewProps) {
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto scroll-pb-44 px-4 pt-16 pb-6 sm:px-8 lg:pt-10"
       >
-        <div className="mx-auto flex w-full max-w-[44rem] flex-col gap-6">
+        <div ref={messagesWrapperRef} className="mx-auto flex w-full max-w-[44rem] flex-col gap-6">
           <Suspense fallback={null}>
             {messages.map((message, index) => {
               const isOlder = index < olderCutoff;
@@ -266,7 +289,11 @@ export default function ChatView({ chatId }: ChatViewProps) {
             <div className="pointer-events-none absolute -top-11 right-0 left-0 flex justify-center">
               <button
                 type="button"
-                onClick={() => scrollToBottom('smooth')}
+                onClick={() => {
+                  stickToBottomRef.current = true;
+                  setShowScrollButton(false);
+                  scrollToBottom('smooth');
+                }}
                 aria-label="Ir para a mensagem mais recente"
                 className="focus-ring pointer-events-auto inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-pill border border-border-strong bg-surface px-3 py-1 font-mono text-micro text-ink shadow-float transition-colors duration-150 hover:bg-surface-hover"
               >
