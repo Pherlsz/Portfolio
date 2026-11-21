@@ -46,7 +46,7 @@ function InlineContactCard({ prefill }: { prefill?: string }) {
 
     if (cleanName.length < CONTACT_LIMITS.name.min) {
       setStatus('error');
-      setFeedback('Informe seu nome para enviar o recado.');
+      setFeedback('Informe seu nome.');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
@@ -56,7 +56,7 @@ function InlineContactCard({ prefill }: { prefill?: string }) {
     }
     if (cleanMessage.length < CONTACT_LIMITS.message.min) {
       setStatus('error');
-      setFeedback(`Escreva pelo menos ${CONTACT_LIMITS.message.min} caracteres na mensagem.`);
+      setFeedback(`Mínimo de ${CONTACT_LIMITS.message.min} caracteres.`);
       return;
     }
 
@@ -107,7 +107,7 @@ function InlineContactCard({ prefill }: { prefill?: string }) {
           <div className="min-w-0">
             <p className="text-body font-semibold text-ink">{t('contact.sent')}</p>
             <p className="mt-1 text-ui text-ink-soft">
-              O Pedro responde no e-mail informado assim que possível.
+              Resposta no e-mail informado.
             </p>
           </div>
         </div>
@@ -134,7 +134,7 @@ function InlineContactCard({ prefill }: { prefill?: string }) {
         </a>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid items-start gap-3 sm:grid-cols-2">
         <div>
           <label htmlFor={`${idPrefix}-name`} className="block text-ui font-medium text-ink-soft">
             {t('contact.name')}
@@ -147,7 +147,7 @@ function InlineContactCard({ prefill }: { prefill?: string }) {
             value={name}
             onChange={(e) => setName(e.currentTarget.value)}
             placeholder="Seu nome"
-            className="focus-ring mt-1.5 w-full rounded-control border border-border bg-canvas px-3 py-2 text-ui text-ink placeholder:text-muted transition-colors duration-150 focus:border-accent"
+            className="focus-ring mt-1.5 min-h-[42px] w-full rounded-control border border-border-strong bg-surface px-3 py-2 text-ui text-ink placeholder:text-muted transition-colors duration-150 focus:border-accent"
           />
         </div>
         <div>
@@ -162,7 +162,7 @@ function InlineContactCard({ prefill }: { prefill?: string }) {
             value={email}
             onChange={(e) => setEmail(e.currentTarget.value)}
             placeholder="voce@empresa.com"
-            className="focus-ring mt-1.5 w-full rounded-control border border-border bg-canvas px-3 py-2 text-ui text-ink placeholder:text-muted transition-colors duration-150 focus:border-accent"
+            className="focus-ring mt-1.5 min-h-[42px] w-full rounded-control border border-border-strong bg-surface px-3 py-2 text-ui text-ink placeholder:text-muted transition-colors duration-150 focus:border-accent"
           />
         </div>
       </div>
@@ -178,8 +178,8 @@ function InlineContactCard({ prefill }: { prefill?: string }) {
           maxLength={CONTACT_LIMITS.message.max}
           value={message}
           onChange={(e) => setMessage(e.currentTarget.value)}
-          placeholder="Escreva sua mensagem ou detalhes da oportunidade..."
-          className="focus-ring mt-1.5 w-full resize-y rounded-control border border-border bg-canvas px-3 py-2 text-ui text-ink placeholder:text-muted transition-colors duration-150 focus:border-accent"
+          placeholder="Sua mensagem..."
+          className="focus-ring mt-1.5 w-full resize-y rounded-control border border-border-strong bg-surface px-3 py-2 text-ui text-ink placeholder:text-muted transition-colors duration-150 focus:border-accent"
         />
       </div>
 
@@ -258,7 +258,7 @@ export default function ChatContentCards({ cards }: ChatContentCardsProps) {
               </p>
               <p className="mt-1.5 text-ui leading-relaxed text-ink-soft">
                 {v1?.tagline ??
-                  'Primeira versão do portfólio em formato editorial de página única, preservada com a tampa interativa de adesivos.'}
+                  'Primeira versão em página única com tampa de adesivos.'}
               </p>
             </div>
           </button>

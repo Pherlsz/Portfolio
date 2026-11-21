@@ -232,7 +232,7 @@ function InteractiveCanvasBlock({ data }: { data: CanvasBlockData }) {
             type="button"
             disabled={!isDirty}
             onClick={() => setNodes(data.nodes.map((node) => ({ ...node })))}
-            className="focus-ring pill-button hidden min-h-8 bg-surface px-3 py-1 font-mono text-micro md:inline-flex"
+            className="focus-ring pill-button hidden min-h-8 appearance-none bg-surface px-3 py-1 font-mono text-micro md:inline-flex"
           >
             <RotateCcw className="size-3.5" aria-hidden="true" />
             <span>Resetar</span>
@@ -320,7 +320,7 @@ function InteractiveCanvasBlock({ data }: { data: CanvasBlockData }) {
                   key={`${edge.from}-${edge.to}-label-${idx}`}
                   aria-hidden="true"
                   style={{ left: geom.mx, top: geom.my }}
-                  className={`pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-pill border px-2 py-0.5 font-mono text-micro font-medium transition-colors duration-150 ${
+                  className={`pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-pill border px-2 py-0.5 font-mono text-micro font-medium ${
                     isEdgeActive
                       ? 'border-accent bg-surface text-ink'
                       : 'border-border bg-canvas text-muted'
@@ -349,7 +349,7 @@ function InteractiveCanvasBlock({ data }: { data: CanvasBlockData }) {
                   onPointerUp={onPointerUp}
                   onPointerCancel={onPointerUp}
                   style={{ transform: `translate(${node.x}px, ${node.y}px)` }}
-                  className={`focus-ring absolute top-0 left-0 w-56 cursor-grab rounded-inner border bg-surface px-3.5 py-3 text-left shadow-card transition-colors duration-150 active:cursor-grabbing ${
+                  className={`focus-ring absolute top-0 left-0 w-56 cursor-grab appearance-none rounded-inner border bg-surface px-3.5 py-3 text-left shadow-card active:cursor-grabbing ${
                     isSelected
                       ? 'border-accent ring-1 ring-accent'
                       : 'border-border hover:border-border-strong'
@@ -399,7 +399,7 @@ function InteractiveCanvasBlock({ data }: { data: CanvasBlockData }) {
                   type="button"
                   aria-pressed={isSelected}
                   onClick={() => setSelectedId(node.id)}
-                  className={`focus-ring w-full rounded-inner border bg-surface px-3.5 py-3 text-left shadow-card transition-colors duration-150 ${
+                  className={`focus-ring w-full appearance-none rounded-inner border bg-surface px-3.5 py-3 text-left shadow-card ${
                     isSelected
                       ? 'border-accent ring-1 ring-accent'
                       : 'border-border hover:border-border-strong'
@@ -523,7 +523,7 @@ function CodePreviewBlock({ data }: { data: CodePreviewBlockData }) {
           <button
             type="button"
             onClick={copyCode}
-            className="focus-ring inline-flex min-h-8 items-center gap-1.5 rounded-pill border border-border bg-surface px-3 py-1 font-mono text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-border-strong hover:text-ink"
+            className="focus-ring inline-flex min-h-8 cursor-pointer appearance-none items-center gap-1.5 rounded-pill border border-border bg-surface px-3 py-1 font-mono text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-border-strong hover:text-ink"
           >
             {copied ? (
               <>
@@ -540,7 +540,7 @@ function CodePreviewBlock({ data }: { data: CodePreviewBlockData }) {
         </div>
       </div>
 
-      <div className="grid gap-3 p-3 sm:p-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+      <div className="grid items-start gap-3 p-3 sm:p-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         <pre className="overflow-x-auto rounded-inner border border-border bg-code-bg p-4 font-mono text-micro leading-relaxed text-code-ink">
           <code>{data.code}</code>
         </pre>
@@ -637,7 +637,7 @@ function SpecTabsBlock({ data }: { data: SpecTabsBlockData }) {
                   type="button"
                   aria-selected={selected}
                   onClick={() => setActiveId(tab.id)}
-                  className={`focus-ring min-h-8 rounded-pill px-3 py-1 font-mono text-micro font-medium transition-colors duration-150 ${
+                  className={`focus-ring min-h-8 cursor-pointer appearance-none rounded-pill px-3 py-1 font-mono text-micro font-medium transition-colors duration-150 ${
                     selected ? 'bg-accent text-on-accent' : 'text-muted hover:text-ink'
                   }`}
                 >
@@ -650,7 +650,7 @@ function SpecTabsBlock({ data }: { data: SpecTabsBlockData }) {
           <button
             type="button"
             onClick={copyContent}
-            className="focus-ring inline-flex min-h-8 items-center gap-1.5 rounded-pill border border-border bg-surface px-3 py-1 font-mono text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-border-strong hover:text-ink"
+            className="focus-ring inline-flex min-h-8 cursor-pointer appearance-none items-center gap-1.5 rounded-pill border border-border bg-surface px-3 py-1 font-mono text-micro font-medium text-ink-soft transition-colors duration-150 hover:border-border-strong hover:text-ink"
           >
             {copied ? (
               <>

@@ -67,11 +67,11 @@ export const ptBR = {
   'contact.message': 'Mensagem',
   'contact.submit': 'Enviar recado',
   'contact.sending': 'Enviando...',
-  'contact.sent': 'Recado enviado com sucesso.',
+  'contact.sent': 'Recado enviado.',
   'contact.error': 'Não foi possível enviar o recado agora.',
 
   'notFound.title': 'Página não encontrada',
-  'notFound.description': 'Rota não encontrada. Volte ao chat ou explore as seções.',
+  'notFound.description': 'Rota não encontrada.',
   'notFound.backHome': 'Voltar para o chat'
 } as const;
 

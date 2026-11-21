@@ -33,7 +33,11 @@ function StudyDetail({
 }) {
   useEffect(() => {
     document.title = `${study.title} · Estudos · Pedro Henrique Lopes`;
-  }, [study.title]);
+    document
+      .querySelector('[data-scroll-container="main"]')
+      ?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo(0, 0);
+  }, [study.slug, study.title]);
 
   return (
     <article className="mx-auto w-full min-w-0 max-w-6xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
@@ -77,7 +81,7 @@ function StudyDetail({
           <button
             type="button"
             onClick={() => onAskChat(`Me explica os pontos principais do estudo "${study.title}".`)}
-            className="focus-ring inline-flex min-h-9 items-center gap-2 rounded-pill bg-accent px-4 py-1.5 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
+            className="focus-ring inline-flex min-h-9 cursor-pointer appearance-none items-center gap-2 rounded-pill bg-accent px-4 py-1.5 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
           >
             <MessageSquare className="size-3.5" aria-hidden="true" />
             <span>{t('studies.askCta')}</span>
@@ -245,7 +249,7 @@ export function StudiesPage({ onAskChat }: { onAskChat: (prompt: string) => void
                     type="button"
                     data-cursor="perguntar"
                     onClick={() => onAskChat(`Resuma o estudo "${study.title}".`)}
-                    className="focus-ring inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-pill px-2.5 py-1 text-micro font-medium text-muted transition-colors duration-150 hover:bg-surface-soft hover:text-ink"
+                    className="focus-ring inline-flex min-h-8 cursor-pointer appearance-none items-center gap-1.5 rounded-pill px-2.5 py-1 text-micro font-medium text-muted transition-colors duration-150 hover:bg-surface-soft hover:text-ink"
                   >
                     <MessageSquare className="size-3.5" aria-hidden="true" />
                     <span>Perguntar</span>

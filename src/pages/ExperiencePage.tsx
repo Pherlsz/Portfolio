@@ -68,7 +68,7 @@ function PdfViewerDialog({ open, onClose }: { open: boolean; onClose: () => void
               type="button"
               onClick={onClose}
               aria-label="Fechar visualizador de PDF"
-              className="focus-ring inline-flex size-9 items-center justify-center rounded-pill border border-border bg-surface-soft text-ink-soft transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover hover:text-ink"
+              className="focus-ring inline-flex size-9 appearance-none items-center justify-center rounded-pill border border-border bg-surface-soft text-ink-soft transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover hover:text-ink"
             >
               <X className="size-4" aria-hidden="true" />
             </button>
@@ -112,7 +112,7 @@ export function ExperiencePage({ onAskChat }: { onAskChat: (prompt: string) => v
             onClick={() =>
               onAskChat('Faça um resumo objetivo da experiência profissional do Pedro.')
             }
-            className="focus-ring inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
+            className="focus-ring inline-flex min-h-10 shrink-0 cursor-pointer appearance-none items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
           >
             <MessageSquare className="size-4" aria-hidden="true" />
             <span>{t('experience.askCta')}</span>
@@ -130,7 +130,7 @@ export function ExperiencePage({ onAskChat }: { onAskChat: (prompt: string) => v
           <button
             type="button"
             onClick={() => setPdfOpen(true)}
-            className="focus-ring pill-button border-border-strong bg-surface"
+            className="focus-ring pill-button appearance-none border-border-strong bg-surface"
           >
             <Eye className="size-3.5" aria-hidden="true" />
             <span>{t('experience.previewPdf')}</span>
@@ -194,8 +194,8 @@ export function ExperiencePage({ onAskChat }: { onAskChat: (prompt: string) => v
                   <span className="block truncate font-display text-micro font-bold text-ink group-hover:underline sm:text-ui">
                     {exp.company}
                   </span>
-                  <span className="mt-0.5 block truncate font-mono text-[11px] text-muted tabular-nums lg:text-micro">
-                    {span.start.slice(0, 4)}–{span.end ? span.end.slice(0, 4) : 'atual'}
+                  <span className="mt-0.5 block truncate font-mono text-micro text-muted tabular-nums">
+                    {span.start.slice(0, 4)} a {span.end ? span.end.slice(0, 4) : 'atual'}
                   </span>
                 </a>
               );
@@ -269,7 +269,7 @@ export function ExperiencePage({ onAskChat }: { onAskChat: (prompt: string) => v
         </div>
       </div>
 
-      <div className="mt-8 grid gap-5 md:grid-cols-2">
+      <div className="mt-8 grid items-start gap-5 md:grid-cols-2">
         <div className="surface-card p-6">
           <h2 className="font-display text-lead font-bold tracking-[-0.015em] text-ink">
             {t('experience.skills')}

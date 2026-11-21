@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -186,6 +186,14 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
   const [matchDetail, params] = useRoute('/projetos/:slug');
   const [filter, setFilter] = useState<FilterKind>('all');
 
+  useEffect(() => {
+    if (!matchDetail) return;
+    document
+      .querySelector('[data-scroll-container="main"]')
+      ?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo(0, 0);
+  }, [matchDetail, params?.slug]);
+
   const projects = DEFAULT_PORTFOLIO_DATA.projects;
 
   if (matchDetail && params?.slug) {
@@ -231,7 +239,7 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
                 project.chatPrompt ?? `Me conta mais detalhes sobre o projeto ${project.name}.`
               )
             }
-            className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
+            className="focus-ring inline-flex min-h-10 cursor-pointer appearance-none items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
           >
             <MessageSquare className="size-4" aria-hidden="true" />
             <span>{t('projects.askCta')}</span>
@@ -275,7 +283,7 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
         {project.modules && project.modules.length > 0 ? (
           <div className="mt-9">
             <h2 className="font-display text-lead font-bold tracking-tight text-ink">Módulos</h2>
-            <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
+            <div className="mt-3.5 grid items-start gap-3.5 sm:grid-cols-2">
               {project.modules.map((mod) => (
                 <div key={mod.name} className="surface-card rounded-card p-5">
                   <p className="font-mono text-ui font-semibold text-ink">{mod.name}</p>
@@ -301,7 +309,7 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
           <div
             role="group"
             aria-label="Filtrar projetos"
-            className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-card border border-border bg-surface p-1 shadow-card sm:rounded-pill"
+            className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-pill border border-border bg-surface p-1 shadow-card"
           >
             {FILTERS.map((item) => {
               const active = filter === item.id;
@@ -312,7 +320,7 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
                   type="button"
                   aria-pressed={active}
                   onClick={() => setFilter(item.id)}
-                  className={`focus-ring inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-pill px-3.5 py-1.5 text-ui font-medium transition-colors duration-150 ${
+                  className={`focus-ring inline-flex min-h-9 cursor-pointer appearance-none items-center gap-2 rounded-pill px-3.5 py-1.5 text-ui font-medium transition-colors duration-150 ${
                     active
                       ? 'bg-accent text-on-accent'
                       : 'text-muted hover:bg-surface-soft hover:text-ink'
@@ -406,7 +414,7 @@ export function ProjectsPage({ onAskChat }: { onAskChat: (prompt: string) => voi
                     project.chatPrompt ?? `Me explica os detalhes técnicos de ${project.name}.`
                   )
                 }
-                className="focus-ring pill-button min-h-9 px-3.5"
+                className="focus-ring pill-button min-h-9 appearance-none px-3.5"
               >
                 <MessageSquare className="size-3.5 text-muted" aria-hidden="true" />
                 <span>Perguntar</span>

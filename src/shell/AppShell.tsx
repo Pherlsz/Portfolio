@@ -38,6 +38,11 @@ export function AppShell({ children, onStartContact }: AppShellProps) {
   }, [mobileOpen]);
 
   useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo(0, 0);
+  }, [location]);
+
+  useEffect(() => {
     const el = mainRef.current;
     const bar = progressBarRef.current;
     if (!el || !bar) return;
@@ -89,7 +94,7 @@ export function AppShell({ children, onStartContact }: AppShellProps) {
         type="button"
         onClick={() => setMobileOpen(true)}
         aria-label={t('nav.expandSidebar')}
-        className="focus-ring fixed top-3.5 left-3.5 z-30 inline-flex size-10 cursor-pointer items-center justify-center rounded-pill border border-border-strong bg-surface text-ink shadow-card transition-colors duration-150 hover:bg-surface-hover lg:hidden"
+        className="focus-ring fixed top-3.5 left-3.5 z-30 inline-flex size-10 cursor-pointer appearance-none items-center justify-center rounded-pill border border-border-strong bg-surface text-ink shadow-card transition-colors duration-150 hover:bg-surface-hover lg:hidden"
       >
         <Menu className="size-4" aria-hidden="true" />
       </button>
@@ -125,6 +130,7 @@ export function AppShell({ children, onStartContact }: AppShellProps) {
         <main
           ref={mainRef}
           id="conteudo"
+          data-scroll-container="main"
           tabIndex={-1}
           className="relative z-10 flex h-full w-full flex-col overflow-y-auto bg-transparent [scrollbar-gutter:stable]"
         >

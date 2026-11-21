@@ -66,7 +66,7 @@ export const CV_DATA: CvData = {
     {
       company: 'Atlas Governance',
       role: 'Software Engineer',
-      period: 'Novembro 2021 – Julho 2026',
+      period: 'Novembro 2021 a Julho 2026',
       startDate: '2021-11',
       endDate: '2026-07',
       highlights: [
@@ -82,7 +82,7 @@ export const CV_DATA: CvData = {
     {
       company: 'Atlas Governance',
       role: 'Software Engineering Intern',
-      period: 'Março 2021 – Novembro 2021',
+      period: 'Março 2021 a Novembro 2021',
       startDate: '2021-03',
       endDate: '2021-11',
       highlights: [
@@ -97,7 +97,7 @@ export const CV_DATA: CvData = {
       course: 'Tecnólogo em Análise e Desenvolvimento de Sistemas',
       institution: 'Estácio',
       studyType: 'Tecnólogo',
-      period: 'Agosto 2022 – Dezembro 2024',
+      period: 'Agosto 2022 a Dezembro 2024',
       startDate: '2022-08',
       endDate: '2024-12'
     }

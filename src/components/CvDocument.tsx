@@ -102,7 +102,7 @@ export function CvDocument({ embedded = false }: { embedded?: boolean } = {}) {
           {CV_DATA.experience.map((exp) => (
             <article key={`${exp.company}-${exp.role}`} className="break-inside-avoid">
               <h3 className="text-[10.5pt] font-bold text-ink">
-                {exp.company} — {exp.role}
+                {exp.company} · {exp.role}
               </h3>
               <p className="text-[9.5pt] italic text-muted">{exp.period}</p>
               <ul className="mt-1.5 list-disc space-y-1 pl-5">
@@ -144,7 +144,7 @@ export function CvDocument({ embedded = false }: { embedded?: boolean } = {}) {
         <ul className="list-disc space-y-1 pl-5">
           {CV_DATA.certifications.map((cert) => (
             <li key={cert.name}>
-              {cert.name} — {cert.issuer} ({cert.year})
+              {cert.name} · {cert.issuer} ({cert.year})
             </li>
           ))}
         </ul>

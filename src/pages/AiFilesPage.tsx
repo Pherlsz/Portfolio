@@ -19,7 +19,7 @@ const ENDPOINTS: EndpointDoc[] = [
     path: '/llms.txt',
     method: 'GET',
     format: 'text/plain',
-    description: 'Resumo estruturado do perfil, experiência, projetos e rotas para agentes de IA.',
+    description: 'Resumo do perfil, experiência, projetos e rotas.',
     previewable: true
   },
   {
@@ -27,7 +27,7 @@ const ENDPOINTS: EndpointDoc[] = [
     path: '/cv.json',
     method: 'GET',
     format: 'application/json',
-    description: 'Currículo completo no padrão JSON Resume gerado da mesma fonte de dados.',
+    description: 'Currículo no formato JSON Resume.',
     previewable: true
   },
   {
@@ -35,7 +35,7 @@ const ENDPOINTS: EndpointDoc[] = [
     path: '/cv.md',
     method: 'GET',
     format: 'text/markdown',
-    description: 'Currículo em Markdown limpo pronto para leitura por modelos e ferramentas.',
+    description: 'Currículo em Markdown.',
     previewable: true
   },
   {
@@ -43,7 +43,7 @@ const ENDPOINTS: EndpointDoc[] = [
     path: '/sitemap.xml',
     method: 'GET',
     format: 'application/xml',
-    description: 'Mapa dinâmico de rotas públicas com conteúdo ativo.',
+    description: 'Mapa de rotas públicas ativas.',
     previewable: true
   },
   {
@@ -51,7 +51,7 @@ const ENDPOINTS: EndpointDoc[] = [
     path: '/robots.txt',
     method: 'GET',
     format: 'text/plain',
-    description: 'Regras de rastreamento para buscadores e agentes automatizados.',
+    description: 'Regras de rastreamento para buscadores.',
     previewable: true
   },
   {
@@ -68,7 +68,7 @@ const CONTACT_EXAMPLE = JSON.stringify(
   {
     name: 'Recrutador ou agente',
     email: 'contato@empresa.com',
-    message: 'Resumo da oportunidade ou recado enviado pelo remetente.',
+    message: 'Descrição da vaga ou mensagem.',
     source: 'agent'
   },
   null,
@@ -159,7 +159,7 @@ export function AiFilesPage() {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActiveId(endpoint.id)}
-                className={`focus-ring inline-flex min-h-9 min-w-0 cursor-pointer items-center justify-center gap-1.5 rounded-control border px-3 py-1.5 font-mono text-micro font-semibold transition-colors duration-150 ${
+                className={`focus-ring inline-flex min-h-9 min-w-0 cursor-pointer appearance-none items-center justify-center gap-1.5 rounded-control border px-3 py-1.5 font-mono text-micro font-semibold transition-colors duration-150 ${
                   isActive
                     ? 'border-transparent bg-accent text-on-accent'
                     : 'border-border bg-surface text-ink-soft hover:border-border-strong hover:text-ink'

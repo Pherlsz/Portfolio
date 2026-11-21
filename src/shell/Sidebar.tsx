@@ -227,7 +227,7 @@ export function Sidebar({
             onClick={handleNewChat}
             title={t('nav.newChat')}
             aria-label={t('nav.newChat')}
-            className="focus-ring inline-flex size-9 cursor-pointer items-center justify-center rounded-control border border-border bg-surface text-ink transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover"
+            className="focus-ring inline-flex size-9 cursor-pointer appearance-none items-center justify-center rounded-control border border-border-strong bg-surface text-ink transition-colors duration-150 hover:bg-surface-hover"
           >
             <Plus className="size-4" aria-hidden="true" />
           </button>
@@ -344,13 +344,13 @@ export function Sidebar({
         <button
           type="button"
           onClick={handleNewChat}
-          className="focus-ring flex min-h-9 w-full cursor-pointer items-center justify-between gap-2 rounded-control border border-border bg-surface px-3 py-1.5 text-ui font-medium text-ink transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover"
+          className="focus-ring flex min-h-9 w-full cursor-pointer appearance-none items-center justify-between gap-2 rounded-control border border-border-strong bg-surface px-3 py-1.5 text-ui font-medium text-ink transition-colors duration-150 hover:bg-surface-hover"
         >
           <span className="flex items-center gap-2">
             <Plus className="size-4 text-muted" aria-hidden="true" />
             <span>{t('nav.newChat')}</span>
           </span>
-          <kbd className="rounded border border-border bg-surface-soft px-1.5 py-0.5 font-mono text-[10px] leading-none text-muted">
+          <kbd className="rounded border border-border-strong bg-surface-soft px-1.5 py-0.5 font-mono text-xs leading-none text-muted">
             /
           </kbd>
         </button>
@@ -379,7 +379,7 @@ export function Sidebar({
                     {section.id !== 'ai' && section.count > 0 ? (
                       <span
                         aria-hidden="true"
-                        className="rounded-pill border border-border bg-surface-soft px-1.5 py-0.5 font-mono text-[11px] leading-none text-muted tabular-nums"
+                        className="rounded-pill border border-border bg-surface-soft px-2 py-0.5 font-mono text-xs leading-none text-muted tabular-nums"
                       >
                         {section.count}
                       </span>

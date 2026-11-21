@@ -19,7 +19,11 @@ function ArticleDetail({
 }) {
   useEffect(() => {
     document.title = `${article.title} · Artigos · Pedro Henrique Lopes`;
-  }, [article.title]);
+    document
+      .querySelector('[data-scroll-container="main"]')
+      ?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo(0, 0);
+  }, [article.slug, article.title]);
 
   return (
     <article className="mx-auto max-w-5xl px-5 pt-16 pb-10 sm:px-8 lg:px-10 lg:py-10">
@@ -95,7 +99,7 @@ function ArticleDetail({
         <button
           type="button"
           onClick={() => onAskChat(`Quero discutir o artigo "${article.title}".`)}
-          className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
+          className="focus-ring inline-flex min-h-10 cursor-pointer appearance-none items-center gap-2 rounded-pill bg-accent px-4 py-2 text-ui font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
         >
           <MessageSquare className="size-3.5" aria-hidden="true" />
           <span>{t('articles.askCta')}</span>
@@ -131,10 +135,10 @@ export function ArticlesPage({ onAskChat }: { onAskChat: (prompt: string) => voi
       {ARTICLES.length === 0 ? (
         <div className="surface-card mt-8 max-w-xl rounded-card p-6 sm:p-7">
           <p className="font-display text-lead font-bold tracking-tight text-ink">
-            Nenhum artigo publicado no momento.
+            Nenhum artigo publicado.
           </p>
           <p className="mt-2 text-ui leading-relaxed text-ink-soft">
-            Os materiais técnicos aprofundados estão reunidos na seção de estudos ou podem ser explorados pelo chat.
+            Explore os estudos técnicos ou converse pelo chat.
           </p>
           <div className="mt-5 flex flex-wrap gap-2.5">
             <Link href="/estudos" className="focus-ring pill-button">

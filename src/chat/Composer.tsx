@@ -83,7 +83,7 @@ export default function Composer({
 
   useEffect(() => {
     if (autoFocus) {
-      textareaRef.current?.focus();
+      textareaRef.current?.focus({ preventScroll: true });
     }
   }, [autoFocus]);
 

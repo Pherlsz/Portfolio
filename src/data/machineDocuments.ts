@@ -325,7 +325,7 @@ export function generateCvMarkdown(_data: PortfolioData = DEFAULT_PORTFOLIO_DATA
     '',
     '## Experiência Profissional',
     ...CV_DATA.experience.flatMap((exp) => [
-      `### ${exp.company} — ${exp.role}`,
+      `### ${exp.company} · ${exp.role}`,
       `*${exp.period}*`,
       '',
       ...exp.highlights.map((item) => `- ${item}`),
@@ -340,7 +340,7 @@ export function generateCvMarkdown(_data: PortfolioData = DEFAULT_PORTFOLIO_DATA
     `- **Idiomas:** ${CV_DATA.languages.map((l) => `${l.name} (${l.level})`).join(', ')}.`,
     '',
     '## Certificações',
-    ...CV_DATA.certifications.map((cert) => `- ${cert.name} — ${cert.issuer} (${cert.year})`),
+    ...CV_DATA.certifications.map((cert) => `- ${cert.name} · ${cert.issuer} (${cert.year})`),
     ''
   ].join('\n');
 }

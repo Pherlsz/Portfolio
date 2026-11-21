@@ -3,7 +3,7 @@ export function EditorialLoader({ label = 'Carregando...' }: { label?: string })
     <div
       role="status"
       aria-live="polite"
-      className="flex min-h-[65dvh] w-full flex-col items-center justify-center px-6 py-12"
+      className="flex min-h-[65vh] w-full flex-1 flex-col items-center justify-center px-6 py-12"
     >
       <div className="flex flex-col items-center gap-3.5">
         <div className="mascot relative flex size-14 flex-col items-center justify-end pb-0.5" aria-hidden="true">
